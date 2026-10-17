@@ -121,7 +121,9 @@ export function TutorialOverlay(p) {
     }
   });
   R2.useEffect(function() {
-    if (!step || !active || !snap || entered.current !== k) {
+    // Pas de test « active » ici : une étape doit pouvoir se valider même si la situation a déjà changé
+    // (ex. le premier déploiement livre le contrat : la phase passe en récompense).
+    if (!step || !snap || entered.current !== k) {
       return;
     }
     if (step.done && step.done(c, snap)) {

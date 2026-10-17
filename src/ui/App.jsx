@@ -518,6 +518,7 @@ export function App() {
                 setShowFusion(true);
               }}
               fusionPartner={selected ? findFusionPartner(run.board, selected.slot) : -1}
+              fusionShortcut={!run.tuto}
               onSell={(k) => dispatch({ type: "SELL_MODULE", slot: k })}
               onDeselect={() => setSelectedSlot(null)}
               onBuy={(k) => dispatch({ type: "BUY", index: k })}
@@ -615,6 +616,7 @@ export function App() {
                   setShowFusion(true);
                 }}
                 fusionPartner={selected ? findFusionPartner(run.board, selected.slot) : -1}
+              fusionShortcut={!run.tuto}
                 onSell={(k) => dispatch({ type: "SELL_MODULE", slot: k })}
                 onDeselect={() => setSelectedSlot(null)}
                 onBuy={(k) => dispatch({ type: "BUY", index: k })}
