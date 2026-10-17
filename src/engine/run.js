@@ -138,6 +138,19 @@ export function upgradeCostFor(state, module) {
     : freeUpgradeAvailable(state) ? 0 : upgradeCost(module.level, state.goodies);
 }
 
+// Ce module peut-il progresser maintenant (même règle que l'action UPGRADE) ?
+// Renvoie « choix » (spécialisation de niveau 3 à choisir, gratuite), « amelioration » ou null.
+export function upgradeAvailability(state, module) {
+  if (!module || state.phase !== "build") {
+    return null;
+  }
+  if (!module.fused && module.level === 3 && !module.branch) {
+    return "choix";
+  }
+  const cost = upgradeCostFor(state, module);
+  return cost !== null && state.data >= cost ? "amelioration" : null;
+}
+
 export function freeUpgradeAvailable(state) {
   return hasFreeUpgrade(state.goodies) && !state.freeUpgradeUsed;
 }

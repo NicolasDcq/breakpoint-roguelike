@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { neighbors, diagonals, emptyBoard } from "../src/engine/grid.js";
 import { Rng } from "../src/engine/rng.js";
-import { newRun } from "../src/engine/run.js";
+import { newRun, upgradeAvailability } from "../src/engine/run.js";
 import { runReducer, previewDeploy } from "../src/engine/reducer.js";
 import { TOTAL_CONTRACTS } from "../src/engine/contracts.js";
 import { MODULES } from "../src/engine/modules.js";
@@ -86,4 +86,16 @@ test("profil : une victoire débloque le niveau suivant", () => {
   assert.equal(next.companies.startup.won, 1);
   assert.equal(newLevel, 2);
   assert.deepEqual(parseProfile(JSON.stringify(next)), next);
+});
+
+test("pastille de montée de niveau : mêmes conditions que l'action UPGRADE", () => {
+  const base = { ...newRun(7, 1, false, "startup"), phase: "build", goodies: [], freeUpgradeUsed: false };
+  const mod = (o) => ({ uid: "m1", defId: "server", level: 1, ...o });
+  assert.equal(upgradeAvailability({ ...base, data: 0 }, mod()), null);
+  assert.equal(upgradeAvailability({ ...base, data: 99 }, mod()), "amelioration");
+  assert.equal(upgradeAvailability({ ...base, data: 99 }, mod({ level: 2 })), "amelioration");
+  assert.equal(upgradeAvailability({ ...base, data: 0 }, mod({ level: 3 })), "choix");
+  assert.equal(upgradeAvailability({ ...base, data: 99 }, mod({ level: 3, branch: "A" })), null);
+  assert.equal(upgradeAvailability({ ...base, phase: "reward", data: 99 }, mod()), null);
+  assert.equal(upgradeAvailability({ ...base, data: 99 }, null), null);
 });

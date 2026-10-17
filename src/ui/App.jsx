@@ -26,6 +26,7 @@ import {
   buyableSlots,
   currentContract,
   firstBuyableSlot,
+  upgradeAvailability,
   hasRoomForModule,
   freeUpgradeAvailable,
   goodieOfferPrice,
@@ -73,6 +74,17 @@ function endPhase(e, t) {
   return t
     ? null
     : e.phase === "reward" || e.phase === "victory" || e.phase === "defeat" ? e.phase : null;
+}
+
+// Cases dont le module peut progresser maintenant : case → « amelioration » ou « choix ».
+function upgradableSlots(run) {
+  const out = new Map();
+  run.board.forEach((m, i) => {
+    if (!m || !run.unlocked[i]) return;
+    const kind = upgradeAvailability(run, m);
+    if (kind) out.set(i, kind);
+  });
+  return out;
 }
 
 export function App() {
@@ -589,6 +601,7 @@ export function App() {
               onMove={(k, X) => dispatch({ type: "MOVE_MODULE", from: k, to: X })}
               onUnlock={(k) => dispatch({ type: "UNLOCK", slot: k })}
               crashSlots={Oa}
+              upgradable={upgradableSlots(run)}
             />
           </section>
           {mobile

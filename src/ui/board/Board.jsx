@@ -350,6 +350,34 @@ export function Board(e) {
                               </svg>
                             </span>
                           )}
+                        {!e.locked
+                          && e.upgradable?.has(S)
+                          && findFusionPartner(e.board, S) < 0
+                          && (
+                            <span
+                              className="up-ready up-dot"
+                              title={e.upgradable.get(S) === "choix"
+                                ? "Spécialisation à choisir : touche le module"
+                                : "Amélioration possible : touche le module"}
+                              aria-label={e.upgradable.get(S) === "choix"
+                                ? "Spécialisation à choisir"
+                                : "Amélioration possible"}
+                            >
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="M5 11l7-6 7 6M5 20l7-6 7 6" />
+                              </svg>
+                            </span>
+                          )}
                       </div>
                     </Tooltip>
                   )
