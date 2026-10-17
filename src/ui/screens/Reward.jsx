@@ -238,7 +238,7 @@ function RewardMobile({ state, onChoose, onPick, onSkip, onSellPlugin }) {
 export function RewardModal({ state, onChoose, onPick, onSkip, onSellPlugin }) {
   if (state.rewardChoices.length > 0
     && window.matchMedia
-    && window.matchMedia("(max-width:700px)").matches) {
+    && window.matchMedia("(max-width:1180px)").matches) {
     return (
       <RewardMobile
         state={state}

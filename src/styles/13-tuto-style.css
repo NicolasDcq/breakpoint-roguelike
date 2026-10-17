@@ -238,7 +238,7 @@
   flex: 1;
   font-weight: 600;
 }
-@media (min-width: 701px) {
+@media (min-width: 1181px) {
   .tz-mini {
     left: auto;
     right: 20px;

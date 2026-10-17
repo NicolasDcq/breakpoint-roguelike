@@ -1,6 +1,6 @@
 /* Téléphone : récompense de fin de version sur un écran. */
 
-@media (max-width: 700px) {
+@media (max-width: 1180px) {
   .overlay:has(> .rw-m) {
     padding: 0;
     place-items: stretch;
@@ -193,7 +193,7 @@
     white-space: nowrap;
   }
 }
-@media (max-width: 700px) and (max-height: 700px) {
+@media (max-width: 1180px) and (max-height: 700px) {
   .rw-m .rw-title {
     font-size: 18px;
   }

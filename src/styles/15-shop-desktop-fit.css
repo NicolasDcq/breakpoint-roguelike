@@ -1,6 +1,6 @@
 /* Boutique sur ordinateur : tout tient sur un écran. */
 
-@media (min-width: 701px) {
+@media (min-width: 1181px) {
   .overlay:has(> .shop-modal) {
     place-items: center;
     align-content: center;
@@ -169,7 +169,7 @@
     font-size: 16px;
   }
 }
-@media (min-width: 701px) and (max-height: 760px) {
+@media (min-width: 1181px) and (max-height: 760px) {
   .modal.shop-modal {
     padding: 12px 18px;
     gap: 8px;

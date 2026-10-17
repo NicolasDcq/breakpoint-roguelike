@@ -1,6 +1,6 @@
 /* Téléphone : choix de cartes (récompense de fin de version). */
 
-@media (max-width: 700px) {
+@media (max-width: 1180px) {
   .step-screen:has(.pick-mobile) {
     height: 100vh;
     height: 100dvh;
@@ -161,7 +161,7 @@
     white-space: nowrap;
   }
 }
-@media (max-width: 700px) and (max-height: 700px) {
+@media (max-width: 1180px) and (max-height: 700px) {
   .pick-mobile .joker-text {
     -webkit-line-clamp: 7;
   }

@@ -1,6 +1,6 @@
 /* Glisser-déposer des Plugins équipés (ordinateur). */
 
-@media (min-width: 701px) {
+@media (min-width: 1181px) {
   .rail-slots .joker-dnd {
     position: relative;
     display: grid;

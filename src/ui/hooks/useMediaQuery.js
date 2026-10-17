@@ -22,6 +22,6 @@ export function useMediaQuery(e) {
   return t;
 }
 
-export const MOBILE_QUERY = "(max-width: 700px)";
+export const MOBILE_QUERY = "(max-width: 1180px)";
 
 export const IS_TOUCH = mediaQuery("(hover: none)")?.matches ?? false;

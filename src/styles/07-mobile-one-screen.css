@@ -1,6 +1,6 @@
 /* Téléphone : tout le jeu sur un écran, boutique en plein écran. */
 
-@media (max-width: 700px) {
+@media (max-width: 1180px) {
   body:has(.app.is-mobile) {
     overflow: hidden;
     overscroll-behavior: none;
@@ -329,7 +329,7 @@
     }
   }
 }
-@media (max-width: 700px) and (max-height: 700px) {
+@media (max-width: 1180px) and (max-height: 700px) {
   .app.is-mobile {
     --drawer-h:64px;
   }

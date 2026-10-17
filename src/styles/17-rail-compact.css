@@ -1,6 +1,6 @@
 /* Ordinateur : Plugins équipés en version compacte. */
 
-@media (min-width: 701px) {
+@media (min-width: 1181px) {
   .rail-slots .joker.v-rail {
     height: auto !important;
     min-height: 0;
