@@ -6,8 +6,8 @@ import { loadRun } from "../save/storage.js";
 
 const TUTO_SEED = 424242;
 
-// Objectif de chaque contrat d’entraînement (le même pour A, B et C).
-const TUTO_TARGET = 10;
+// Objectifs des contrats d’entraînement de la version 1 (A, B, C).
+const TUTO_TARGETS = [30, 40, 45];
 
 const TUTO_KEY = "breakpoint.tutoDone";
 
@@ -47,8 +47,7 @@ export function startTutorial() {
     starterChoices: [],
     jokers: [{ uid: "j1", defId: "intern", counter: 0 }],
     contracts: st2.contracts.map(function(c, i) {
-      // Objectif fixe et atteignable : la partie d’entraînement explique, elle ne fait pas grinder.
-      return i < 3 ? { ...c, target: TUTO_TARGET } : c;
+      return i < TUTO_TARGETS.length ? { ...c, target: TUTO_TARGETS[i] } : c;
     }),
     notice: { text: "Partie d’entraînement : rien n’est enregistré.", tone: "info", id: 1 },
   };
