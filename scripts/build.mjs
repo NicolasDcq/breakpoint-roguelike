@@ -49,16 +49,18 @@ let html;
 if (single) {
   const js = result.outputFiles.find((f) => f.path.endsWith(".js")).text;
   const css = result.outputFiles.find((f) => f.path.endsWith(".css"))?.text ?? "";
+  // Fonctions de remplacement : avec une chaîne, String.replace interprète les « $ » du code
+  // (le jeu affiche des « $ » et le JS minifié en contient : $' ou $& casseraient le script).
   html = template
-    .replace("<!--styles-->", `<style>${css}</style>`)
-    .replace("<!--scripts-->", `<script>${js.replace(/<\/script/gi, "<\\/script")}</script>`);
+    .replace("<!--styles-->", () => `<style>${css}</style>`)
+    .replace("<!--scripts-->", () => `<script>${js.replace(/<\/script/gi, "<\\/script")}</script>`);
 } else {
   const outputs = Object.keys(result.metafile.outputs);
   const js = outputs.find((f) => f.endsWith(".js"));
   const css = outputs.find((f) => f.endsWith(".css"));
   html = template
-    .replace("<!--styles-->", css ? `<link rel="stylesheet" href="/assets/${basename(css)}" />` : "")
-    .replace("<!--scripts-->", `<script type="module" src="/assets/${basename(js)}"></script>`);
+    .replace("<!--styles-->", () => (css ? `<link rel="stylesheet" href="/assets/${basename(css)}" />` : ""))
+    .replace("<!--scripts-->", () => `<script type="module" src="/assets/${basename(js)}"></script>`);
 }
 writeFileSync("dist/index.html", html);
 console.log(`Breakpoint ${pkg.version}${commit ? " (" + commit.slice(0, 7) + ")" : ""} → dist/${single ? "index.html (fichier unique)" : ""}`);
