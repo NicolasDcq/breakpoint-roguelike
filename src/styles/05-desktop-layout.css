@@ -121,9 +121,20 @@
     width: 170px;
     margin-left: 14px;
   }
-  .module-modal {
+  /* Fiche d'un module : la fiche (.inspector) est déjà une carte, la fenêtre autour ne dessine rien. */
+  .modal.module-modal {
     width: min(560px, 100%);
     max-height: calc(100vh - 80px);
     overflow-y: auto;
+    padding: 0;
+    background: none;
+    border: none !important;
+    border-radius: var(--r-lg);
+    box-shadow: none;
+  }
+  /* La fiche prend le style « boîte » des fenêtres du jeu. */
+  .modal.module-modal > .inspector {
+    border: 3px solid var(--ink);
+    box-shadow: var(--panel-shadow);
   }
 }
