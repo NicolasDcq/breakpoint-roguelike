@@ -1,0 +1,43 @@
+/* Glisser-déposer des Plugins équipés (ordinateur). */
+
+@media (min-width: 701px) {
+  .rail-slots .joker-dnd {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    align-self: start;
+    cursor: grab;
+  }
+  .rail-slots .joker-dnd[draggable=false] {
+    cursor: default;
+  }
+  .rail-slots .joker-dnd:active {
+    cursor: grabbing;
+  }
+  .rail-slots .joker-dnd.dragging {
+    opacity: .35;
+  }
+  .rail-slots .joker-dnd.drop-before:before,
+  .rail-slots .joker-dnd.drop-after:after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    width: 5px;
+    border-radius: 3px;
+    background: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .rail-slots .joker-dnd.drop-before:before {
+    left: -11px;
+  }
+  .rail-slots .joker-dnd.drop-after:after {
+    right: -11px;
+  }
+  .rail-slots .joker-empty.drop-on {
+    border-color: var(--cyan) !important;
+    background: #3ee6f014;
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "breakpoint",
+  "version": "0.86.0",
+  "description": "Roguelike deckbuilder sur le thème de l'infrastructure informatique, jouable dans le navigateur.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "build:single": "node scripts/build.mjs --single",
+    "test": "node --test \"tests/**/*.test.js\""
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

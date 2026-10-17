@@ -1,0 +1,314 @@
+/* Téléphone : fiche d'un module en écran plein. */
+
+.module-sheet.mm {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  max-height: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(
+      600px 300px at 50% -10%,
+      color-mix(in srgb, var(--acc) 18%, transparent),
+      transparent 70%),
+    var(--night);
+  animation: sheet-up .18s ease-out;
+}
+.mm-head {
+  flex: none;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 10px;
+  background: #10183af5;
+  border-bottom: 3px solid var(--ink);
+}
+.mm-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 3px solid var(--ink);
+  background: color-mix(in srgb, var(--acc) 22%, var(--raised));
+  box-shadow: 0 3px 0 var(--ink);
+}
+.mm-title {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.mm-title h2 {
+  font-size: 21px;
+  line-height: 1.1;
+  color: var(--text);
+}
+.mm-sub {
+  font-size: 12.5px;
+  color: var(--dim);
+}
+.mm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mm-tags:empty {
+  display: none;
+}
+.mm-wallet {
+  align-self: start;
+  font-size: 17px;
+  color: var(--violet);
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 2px solid var(--ink);
+  background: #a585ff1f;
+  white-space: nowrap;
+}
+.mm-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.mm-sec {
+  display: grid;
+  gap: 8px;
+}
+.mm-sec h3 {
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-family: var(--mono,monospace);
+  margin: 4px 0 0;
+}
+.mm-card {
+  display: grid;
+  gap: 4px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+}
+.mm-card.now {
+  border: 3px solid var(--ink);
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--acc) 20%, var(--panel)),
+      var(--panel) 75%);
+  box-shadow: 0 4px 0 var(--ink);
+}
+.mm-card.next {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--acc) 55%, var(--line));
+}
+.mm-card.later {
+  opacity: .85;
+}
+.mm-lv {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--acc);
+}
+.mm-cname {
+  font-family: var(--display);
+  font-size: 16px;
+  line-height: 1.2;
+}
+.mm-ctext {
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
+  margin: 0;
+}
+.mm-card.now .mm-ctext {
+  font-size: 17px;
+}
+.mm-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.mm-two > .mm-card {
+  align-content: start;
+}
+.mm-two .mm-card .mm-ctext {
+  font-size: 13.5px;
+}
+.mm-note {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--dim);
+}
+.mm-ed {
+  margin: 0;
+  font-size: 14px;
+}
+.mm-eff {
+  margin: -2px 0 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 2px dashed #ffb54799;
+  background: #ffb5471a;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.mm-flavor {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--faint);
+  margin: 0;
+}
+.mm-body .prod {
+  margin: 0 !important;
+}
+.mm-foot {
+  flex: none;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: #10183af5;
+  border-top: 3px solid var(--ink);
+}
+.mm-spec {
+  display: grid;
+  gap: 6px;
+}
+.mm-spec-t {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--violet);
+  text-align: center;
+}
+.mm-pick {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  text-align: left;
+  padding: 9px 10px 10px;
+  border-radius: 10px;
+  border: 3px solid var(--ink);
+  background: var(--raised);
+  color: var(--text);
+  box-shadow: 0 3px 0 var(--ink);
+  min-height: 0;
+  transition: transform .12s, box-shadow .12s;
+}
+.mm-pick .mm-cname {
+  font-size: 14.5px;
+}
+.mm-pick .mm-ctext {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #c9d1e6;
+}
+.mm-pick.sel {
+  background:
+    linear-gradient(
+      160deg,
+      #a585ff38,
+      var(--raised) 80%);
+  outline: 3px solid #ffb020;
+  outline-offset: 2px;
+  transform: translateY(-2px);
+}
+.mm-letter {
+  justify-self: start;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid var(--ink);
+  background: var(--violet);
+  color: var(--ink);
+  font-weight: 800;
+  font-family: var(--display);
+}
+.mm-go {
+  min-height: 50px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 10px;
+  border: 3px solid var(--ink) !important;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.mm-alt {
+  min-height: 40px;
+  font-size: 14px;
+}
+.mm-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+.mm-sell {
+  min-height: 44px;
+  padding: 0 14px;
+}
+.mm-back {
+  min-height: 44px;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--cyan);
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.mm-back:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+body:has(.module-sheet.mm) .toast {
+  bottom: auto;
+  top: calc(100px + env(safe-area-inset-top, 0px));
+  z-index: 46;
+}
+body:has(.module-sheet.mm) .app.is-mobile .side > .hint {
+  display: none;
+}
+@media (max-height: 700px) {
+  .mm-head {
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+    padding-bottom: 8px;
+  }
+  .mm-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .mm-title h2 {
+    font-size: 18px;
+  }
+  .mm-card.now .mm-ctext {
+    font-size: 15.5px;
+  }
+  .mm-pick .mm-ctext {
+    font-size: 12.5px;
+  }
+  .mm-go {
+    min-height: 46px;
+  }
+  .mm-back,
+  .mm-sell {
+    min-height: 40px;
+  }
+}
