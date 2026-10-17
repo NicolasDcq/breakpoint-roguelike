@@ -1,6 +1,6 @@
 /* Ordinateur : toutes les cartes Plugin ont la même taille. */
 
-@media (min-width: 701px) {
+@media (min-width: 1181px) {
   .joker,
   .joker.v-rail,
   .joker.v-offer {

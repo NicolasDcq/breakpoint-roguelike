@@ -83,7 +83,7 @@
 .slot.next-unlock:has(.unlock.short):before {
   border-color: #2b3757;
 }
-@media (max-width: 700px) {
+@media (max-width: 1180px) {
   .app.is-mobile .unlock .num {
     display: none;
   }

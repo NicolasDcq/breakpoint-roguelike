@@ -9,7 +9,7 @@
 .pick-box .pack-actions {
   width: min(440px, 100%);
 }
-@media (max-width: 700px) {
+@media (max-width: 1180px) {
   .step-screen:has(.pick-box) {
     min-height: 100vh;
     min-height: 100dvh;

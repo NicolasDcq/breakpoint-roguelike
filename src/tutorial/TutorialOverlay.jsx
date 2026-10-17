@@ -143,7 +143,7 @@ export function TutorialOverlay(p) {
     p.onEnd();
   };
   var defeat = t.phase === "defeat";
-  var mobile = window.innerWidth <= 700;
+  var mobile = window.innerWidth <= 1180;
   if (defeat) {
     return ReactDOM.createPortal(
       <div className="tz-root">

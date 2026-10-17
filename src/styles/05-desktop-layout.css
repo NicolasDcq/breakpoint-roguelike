@@ -1,6 +1,6 @@
 /* Ordinateur : tout le jeu sur un écran. */
 
-@media (min-width: 701px) {
+@media (min-width: 1181px) {
   .app {
     max-width: none;
     height: 100vh;
