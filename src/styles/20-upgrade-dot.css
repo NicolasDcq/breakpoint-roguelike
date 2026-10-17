@@ -1,0 +1,17 @@
+/* Pastille « amélioration possible » : deux chevrons empilés, coin bas-droit de la tuile. */
+.tile > .up-ready.up-dot {
+  position: absolute;
+  inset: auto -8px -8px auto;
+  z-index: 5;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--ink);
+  box-shadow: 0 2px #00000080;
+  pointer-events: none;
+}
