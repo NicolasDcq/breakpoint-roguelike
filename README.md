@@ -2,6 +2,8 @@
 
 Roguelike deckbuilder en français, jouable dans le navigateur (d'abord sur téléphone). Thème infrastructure informatique, inspiré de Balatro avec une identité « carte mère » : on pose des modules sur un plateau 5×5, on les déploie, et on doit atteindre l'objectif de chaque contrat.
 
+**Jouer : https://breakpoint-roguelike.vercel.app/**
+
 ## Démarrer
 
 Il faut Node.js 22 ou plus récent.

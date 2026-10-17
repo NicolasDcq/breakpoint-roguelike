@@ -2,6 +2,9 @@
 
 Complète [premiere-conversation.md](premiere-conversation.md). En cas de contradiction, ce document-ci est le plus récent. Les noms courts de l'ancienne version compilée (`wn`, `RwM`, `PbCalc`…) sont traduits dans [correspondance-des-noms.md](correspondance-des-noms.md).
 
+## Adresse du jeu
+https://breakpoint-roguelike.vercel.app/ (Vercel, publié à chaque push sur `main`). Les sauvegardes des joueurs sont liées à cette adresse : ne plus la changer.
+
 ## Vocabulaire
 Les Jokers s'appellent désormais des **Plugins** (dans le jeu, les maquettes et les docs). Les anciens textes qui disent « Joker » doivent être lus comme « Plugin ». Dans le code, les noms techniques (`jokers`, `joker-*` en CSS) restent tels quels tant qu'ils ne sont pas visibles.
 
