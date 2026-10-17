@@ -26,6 +26,7 @@ import {
   buyableSlots,
   currentContract,
   firstBuyableSlot,
+  hasRoomForModule,
   freeUpgradeAvailable,
   goodieOfferPrice,
   newRun,
@@ -507,6 +508,7 @@ export function App() {
               budget={run.budget}
               shop={run.shop}
               shopClosed={!!findRule(contract, "shopClosed")}
+              noRoom={!hasRoomForModule(run)}
               rerollCost={run.rerollCost}
               jokers={shownJokers}
               last={run.lastExecution}
@@ -605,6 +607,7 @@ export function App() {
                 budget={run.budget}
                 shop={run.shop}
                 shopClosed={!!findRule(contract, "shopClosed")}
+                noRoom={!hasRoomForModule(run)}
                 rerollCost={run.rerollCost}
                 jokers={shownJokers}
                 last={run.lastExecution}

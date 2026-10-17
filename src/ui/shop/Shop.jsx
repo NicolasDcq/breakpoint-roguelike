@@ -4,6 +4,7 @@ import { EDITIONS } from "../../engine/editions.js";
 import { FAMILY_LABELS } from "../../engine/families.js";
 import { MODULES } from "../../engine/modules.js";
 import { PLUGINS } from "../../engine/plugins.js";
+import { NO_ROOM_TEXT } from "../../engine/run.js";
 import { ModuleTip } from "../board/ModuleParts.jsx";
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
@@ -70,7 +71,8 @@ export function Shop(e) {
         taken={e.arrTaken}
         onBuySlot={e.onBuySlot}
       />
-      <div className="shop-modules">
+      <div className={`shop-modules ${e.noRoom ? "no-room" : ""}`}>
+        {e.noRoom && !e.shopClosed && <div className="shop-noroom" role="status">{NO_ROOM_TEXT}</div>}
         {e.shop.map((t, o) => {
           if (t.kind !== "module") {
             return null;
@@ -85,7 +87,7 @@ export function Shop(e) {
             >
               <button
                 className={`offer module-offer accent-${a.accent} ${t.edition ? `has-ed ed-offer-${t.edition}` : ""} ${t.sold ? "sold" : ""}`}
-                disabled={t.sold || e.locked || e.shopClosed}
+                disabled={t.sold || e.locked || e.shopClosed || e.noRoom}
                 onClick={() => e.onBuy(o)}
               >
                 <span className="offer-icon"><ModuleIcon id={t.defId} size={26} /></span>

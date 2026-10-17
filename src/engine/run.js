@@ -278,6 +278,35 @@ export function firstFreeSlot(state) {
   return -1;
 }
 
+// Première case libre du tiroir, ou -1.
+export function firstFreeDrawerSlot(state) {
+  return (state.drawer ?? []).findIndex((m) => !m);
+}
+
+// Un nouveau module (achat, récompense) a-t-il une place : plateau d'abord, sinon tiroir ?
+export function hasRoomForModule(state) {
+  return firstFreeSlot(state) >= 0 || firstFreeDrawerSlot(state) >= 0;
+}
+
+// Pose un nouveau module sur le plateau, sinon dans le tiroir. Modifie state.board ou state.drawer
+// (copiés au préalable par l'appelant). Renvoie « emplacement N », « tiroir » ou null si tout est plein.
+export function placeNewModule(state, module) {
+  let slot = firstFreeSlot(state);
+  if (slot >= 0) {
+    state.board[slot] = module;
+    return `emplacement ${slot + 1}`;
+  }
+  let drawerSlot = firstFreeDrawerSlot(state);
+  if (drawerSlot >= 0) {
+    state.drawer = [...state.drawer];
+    state.drawer[drawerSlot] = module;
+    return "tiroir";
+  }
+  return null;
+}
+
+export const NO_ROOM_TEXT = "Plus de place : vends un module ou ouvre un emplacement.";
+
 export function markPluginSeen(state, defId) {
   if (!state.stats.jokersSeen.includes(defId)) {
     state.stats.jokersSeen = [...state.stats.jokersSeen, defId];

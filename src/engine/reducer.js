@@ -21,7 +21,8 @@ import {
   currentContract,
   deploysLeft,
   enterReward,
-  firstFreeSlot,
+  NO_ROOM_TEXT,
+  placeNewModule,
   freeUpgradeAvailable,
   levelUp,
   markPluginSeen,
@@ -88,22 +89,23 @@ export function runReducer(state, action) {
         stats: { ...state.stats },
       };
       if (a.kind === "module") {
-        let n = firstFreeSlot(r);
-        return n < 0
-          ? withError(state, "Plateau plein : vends un module ou ouvre un emplacement.")
-          : (r.board[n] = {
-            uid: nextUid(r, "m"),
-            defId: a.defId,
-            level: 1,
-            ...a.edition ? { edition: a.edition } : {},
-          },
-            r.budget -= a.price,
-            r.stats.modulesBought += 1,
-            withNotice(
-              r,
-              `${MODULES[a.defId].name}${a.edition ? ` ${EDITIONS[a.edition].name}` : ""} installé en emplacement ${n + 1}.`,
-              "good",
-            ));
+        let place = placeNewModule(r, {
+          uid: nextUid(r, "m"),
+          defId: a.defId,
+          level: 1,
+          ...a.edition ? { edition: a.edition } : {},
+        });
+        if (!place) {
+          return withError(state, NO_ROOM_TEXT);
+        }
+        r.budget -= a.price;
+        r.stats.modulesBought += 1;
+        let name = `${MODULES[a.defId].name}${a.edition ? ` ${EDITIONS[a.edition].name}` : ""}`;
+        return withNotice(
+          r,
+          place === "tiroir" ? `${name} rangé dans le tiroir (plateau plein).` : `${name} installé en ${place}.`,
+          "good",
+        );
       }
       return r.jokers.length >= pluginSlots(r)
         ? withError(state, `Maximum ${pluginSlots(r)} Plugins : vends-en un d’abord.`)
@@ -464,12 +466,13 @@ export function runReducer(state, action) {
           r = `${PLUGINS[o.defId].name} recruté !`;
           break;
         case "module": {
-          let n = firstFreeSlot(a);
-          if (n < 0) {
-            return withError(state, "Plateau plein : vends un module d’abord.");
+          let place = placeNewModule(a, { uid: nextUid(a, "m"), defId: o.defId, level: 1 });
+          if (!place) {
+            return withError(state, NO_ROOM_TEXT);
           }
-          a.board[n] = { uid: nextUid(a, "m"), defId: o.defId, level: 1 };
-          r = `${MODULES[o.defId].name} installé.`;
+          r = place === "tiroir"
+            ? `${MODULES[o.defId].name} rangé dans le tiroir (plateau plein).`
+            : `${MODULES[o.defId].name} installé.`;
           break;
         }
         case "patch": {
