@@ -255,6 +255,7 @@ export function ModuleSheetMobile(e) {
         {pick
           && module.level === 3
           && e.fusionPartner >= 0
+          && e.fusionShortcut !== false
           && (
             <button
               className="primary fuse mm-alt"

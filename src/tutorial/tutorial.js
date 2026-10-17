@@ -6,6 +6,9 @@ import { loadRun } from "../save/storage.js";
 
 const TUTO_SEED = 424242;
 
+// Objectif de chaque contrat d’entraînement (le même pour A, B et C).
+const TUTO_TARGET = 10;
+
 const TUTO_KEY = "breakpoint.tutoDone";
 
 export function isTutorialDone() {
@@ -44,9 +47,8 @@ export function startTutorial() {
     starterChoices: [],
     jokers: [{ uid: "j1", defId: "intern", counter: 0 }],
     contracts: st2.contracts.map(function(c, i) {
-      return i === 0
-        ? { ...c, target: 30 }
-        : i === 1 ? { ...c, target: 40 } : i === 2 ? { ...c, target: 45 } : c;
+      // Objectif fixe et atteignable : la partie d’entraînement explique, elle ne fait pas grinder.
+      return i < 3 ? { ...c, target: TUTO_TARGET } : c;
     }),
     notice: { text: "Partie d’entraînement : rien n’est enregistré.", tone: "info", id: 1 },
   };
@@ -181,10 +183,14 @@ export const TUTO_STEPS = [
       return c.sel != null ? [".module-sheet", ".module-modal"] : [".board"];
     },
     pose: "explique",
-    text: "Touche un module pour ouvrir sa <b>fiche</b> : ce qu’il produit, sa famille, son niveau.",
-    action: "Touche un module du plateau",
-    done: function(c) {
-      return c.sel != null;
+    text: function(c) {
+      return c.sel != null
+        ? "Voilà sa <b>fiche</b> : ce qu’il produit, sa famille, son niveau. Quand tu l’as lue, passe à la suite."
+        : "Touche un module pour ouvrir sa <b>fiche</b> : ce qu’il produit, sa famille, son niveau.";
+    },
+    // Pas de « done » : la fiche reste ouverte jusqu’à ce que le joueur passe à la suite (Suivant).
+    action: function(c) {
+      return c.sel != null ? null : "Touche un module du plateau";
     },
   },
   {
