@@ -61,6 +61,7 @@ import { PluginRail } from "./plugins/PluginRail.jsx";
 import { ScorePanel } from "./score/ScorePanel.jsx";
 import { EndModal } from "./screens/EndModal.jsx";
 import { QuitConfirm } from "./screens/QuitConfirm.jsx";
+import { SellConfirm } from "./plugins/SellConfirm.jsx";
 import { RewardModal } from "./screens/Reward.jsx";
 import { RulesModal } from "./screens/RulesModal.jsx";
 import { TitleScreen } from "./screens/TitleScreen.jsx";
@@ -136,6 +137,7 @@ export function App() {
   let endlessBest = companyRecord.endlessBest;
   let mobile = useMediaQuery(MOBILE_QUERY);
   let [pluginDetail, setPluginDetail] = useState(null);
+  let [sellAsk, setSellAsk] = useState(null);
   let contract = currentContract(run);
   let busy = playback.animating || snapshot !== null;
   let preview = useMemo(() => run.phase === "build" ? previewDeploy(run) : null, [run]);
@@ -348,6 +350,9 @@ export function App() {
     setSelectedSlot(null);
     setShopPop(true);
   };
+  // Vente d'un Plugin : passe d'abord par la confirmation. `after` ferme la fiche éventuelle.
+  let askSell = (uid, after) => setSellAsk({ uid, after });
+  let sellTarget = sellAsk && run.jokers.find((n) => n.uid === sellAsk.uid);
   let ii = () => {
     if (!pluginDetail) {
       return null;
@@ -387,10 +392,7 @@ export function App() {
             <button
               className="ghost danger"
               disabled={busy}
-              onClick={() => {
-                dispatch({ type: "SELL_PLUGIN", uid: tt.uid });
-                k();
-              }}
+              onClick={() => askSell(tt.uid, k)}
             >
               Vendre +
               {pluginSellPrice(tt.defId)}
@@ -549,7 +551,7 @@ export function App() {
           pulse={playback.jokerPulse}
           locked={busy}
           onMove={(k, X) => dispatch({ type: "MOVE_PLUGIN", uid: k, dir: X })}
-          onSell={(k) => dispatch({ type: "SELL_PLUGIN", uid: k })}
+          onSell={askSell}
           compact={mobile}
           onOpen={(k) => setPluginDetail({ uid: k })}
         />
@@ -650,7 +652,7 @@ export function App() {
             onChoose={(k) => dispatch({ type: "CHOOSE_REWARD", index: k })}
             onSkip={() => dispatch({ type: "SKIP_REWARD" })}
             onPick={(k, X) => dispatch({ type: "CHOOSE_REWARD", index: k, pick: X })}
-            onSellPlugin={(k) => dispatch({ type: "SELL_PLUGIN", uid: k })}
+            onSellPlugin={askSell}
           />
         )}
       {canAct
@@ -701,6 +703,18 @@ export function App() {
         )}
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
       {confirmQuit && <QuitConfirm onYes={restart} onNo={() => setConfirmQuit(false)} />}
+      {sellTarget
+        && (
+          <SellConfirm
+            defId={sellTarget.defId}
+            onNo={() => setSellAsk(null)}
+            onYes={() => {
+              dispatch({ type: "SELL_PLUGIN", uid: sellTarget.uid });
+              sellAsk.after?.();
+              setSellAsk(null);
+            }}
+          />
+        )}
     </div>
   );
 }
