@@ -22,6 +22,7 @@ const ctx = await esbuild.context({
     "process.env.NODE_ENV": '"development"',
     __APP_VERSION__: JSON.stringify(pkg.version + "-dev"),
     __APP_COMMIT__: '""',
+    __DEV_TOOLS__: "true",
   },
   outdir: ".dev/assets",
   logLevel: "info",

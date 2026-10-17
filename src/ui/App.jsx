@@ -1,5 +1,6 @@
 // Application : état, sauvegarde, écrans.
 
+import { DEV_TOOLS } from "../config.js";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { sfx } from "../audio/sfx.js";
 import { arrivalKinds } from "../engine/arrivals.js";
@@ -124,7 +125,7 @@ export function App() {
   );
   let [newLevel, setNewLevel] = useState(null);
   let [newCompanies, setNewCompanies] = useState([]);
-  let [devUnlock, setDevUnlock] = useState(() => readNumber(KEY_DEV_UNLOCK) === 1);
+  let [devUnlock, setDevUnlock] = useState(() => DEV_TOOLS && readNumber(KEY_DEV_UNLOCK) === 1);
   let company = run.company ?? "startup";
   let companyRecord = profile.companies[company];
   let maxLevelOf = (k) => devUnlock ? MAX_DIFFICULTY : profile.companies[k].maxLevel;

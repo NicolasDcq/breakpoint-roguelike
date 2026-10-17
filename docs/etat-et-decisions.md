@@ -5,6 +5,10 @@ Complète [premiere-conversation.md](premiere-conversation.md). En cas de contra
 ## Adresse du jeu
 https://breakpoint-roguelike.vercel.app/ (Vercel, publié à chaque push sur `main`). Les sauvegardes des joueurs sont liées à cette adresse : ne plus la changer.
 
+## Bêta (17/10)
+- Numéro de version en pastille ambre flottante à côté du titre du menu (« Bêta 0.86.0 », lu dans `package.json`).
+- **Mode dev** masqué sur la version en ligne. Il reste présent en local (`npm run dev`) et sur les prévisualisations Vercel (branches). Sur la bêta, on peut le forcer en ajoutant `?dev` à l'adresse. Réglages : `src/config.js`.
+
 ## Vocabulaire
 Les Jokers s'appellent désormais des **Plugins** (dans le jeu, les maquettes et les docs). Les anciens textes qui disent « Joker » doivent être lus comme « Plugin ». Dans le code, les noms techniques (`jokers`, `joker-*` en CSS) restent tels quels tant qu'ils ne sont pas visibles.
 

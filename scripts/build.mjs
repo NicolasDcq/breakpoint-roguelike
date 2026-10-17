@@ -25,6 +25,8 @@ export const buildOptions = {
     "process.env.NODE_ENV": '"production"',
     __APP_VERSION__: JSON.stringify(pkg.version),
     __APP_COMMIT__: JSON.stringify(commit.slice(0, 7)),
+    // Vercel : VERCEL_ENV vaut "production" pour la bêta en ligne, "preview" pour les branches.
+    __DEV_TOOLS__: JSON.stringify(process.env.VERCEL_ENV !== "production"),
   },
   logLevel: "warning",
 };

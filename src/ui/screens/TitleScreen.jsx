@@ -1,5 +1,6 @@
 // Écran titre : menu, règles, difficulté, entreprise.
 
+import { APP_VERSION, DEV_TOOLS } from "../../config.js";
 import { useEffect, useState } from "react";
 import { COMPANIES } from "../../engine/companies.js";
 import { DIFFICULTIES, MAX_DIFFICULTY, difficultyInfo } from "../../engine/difficulty.js";
@@ -164,7 +165,10 @@ export function TitleScreen({ choices, onPick, level, maxUnlocked, onLevel, devU
               <b>Load Balancer</b>
             </span>
           </div>
-          <h1 className="logo">BREAKPOINT</h1>
+          <div className="logo-wrap">
+            <h1 className="logo">BREAKPOINT</h1>
+            <span className="version-badge" title="Version du jeu">Bêta {APP_VERSION}</span>
+          </div>
           <p className="tagline">un roguelike de mise en prod</p>
           <p className="pitch">
             Construis ton architecture, fais tourner ton économie, recrute des Plugins improbables et livre 8 versions de 3 contrats de plus en plus absurdes.
@@ -179,6 +183,7 @@ export function TitleScreen({ choices, onPick, level, maxUnlocked, onLevel, devU
               )
               : <TutorialWelcome onStart={c.onTutorial} />)}
           <details className="rules-fold"><summary>Comment jouer</summary><RulesList /></details>
+          {DEV_TOOLS && (
           <label className="dev-toggle">
             <input
               type="checkbox"
@@ -191,6 +196,7 @@ export function TitleScreen({ choices, onPick, level, maxUnlocked, onLevel, devU
               {" : toutes les entreprises, tous les environnements et la Prod infinie débloqués pour tester. Désactivé, seuls ceux que tu as vraiment débloqués restent ouverts."}
             </span>
           </label>
+          )}
         </div>
       </div>
     )
