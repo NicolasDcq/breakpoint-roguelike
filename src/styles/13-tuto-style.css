@@ -58,6 +58,12 @@
 .tz-card.top {
   top: calc(12px + env(safe-area-inset-top, 0px));
 }
+.tz-card.side {
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+}
 .tz-card.mid {
   bottom: calc(92px + env(safe-area-inset-bottom, 0px));
 }

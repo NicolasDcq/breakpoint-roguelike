@@ -228,11 +228,24 @@ export function TutorialOverlay(p) {
     dims = [{ left: 0, top: 0, width: vw, height: vh }];
   }
   var below = hole ? (hole.t + hole.b) / 2 < vh * 0.5 : true;
+  // Zone éclairée presque aussi haute que l'écran (fiche d'un module sur ordinateur) : la bulle ne doit pas
+  // la recouvrir (elle cacherait les boutons à toucher). On la met sur le côté le plus libre, si la place suffit.
+  var side = null;
+  var sideWidth = 0;
+  if (hole && !mobile && !step.hero && !step.float && hole.b - hole.t > vh * 0.6) {
+    var roomLeft = hole.l;
+    var roomRight = vw - hole.r;
+    side = roomRight >= roomLeft ? "right" : "left";
+    sideWidth = Math.min(460, (side === "right" ? roomRight : roomLeft) - 28);
+    if (sideWidth < 260) {
+      side = null;
+    }
+  }
   var pos = step.hero
     ? "hero"
     : step.float
       ? mobile && document.querySelector(".rw-m") ? "mid" : "top"
-      : below ? "bottom" : "top";
+      : side ? "side" : below ? "bottom" : "top";
   var nextBtn = !act
     && (
       <button
@@ -261,7 +274,10 @@ export function TutorialOverlay(p) {
             style={{ left: hole.l, top: hole.t, width: hole.r - hole.l, height: hole.b - hole.t }}
           />
         )}
-      <div className={"tz-card " + pos + (mobile ? " m" : "")}>
+      <div
+        className={"tz-card " + pos + (mobile ? " m" : "")}
+        style={side ? { [side]: 12, width: sideWidth } : undefined}
+      >
         <LoupNiel pose={step.pose || "explique"} big={!!step.hero} />
         <div className="tz-say">
           <div className="tz-head">
