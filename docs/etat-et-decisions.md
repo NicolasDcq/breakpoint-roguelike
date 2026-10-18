@@ -87,6 +87,15 @@ Règles validées par l'utilisateur le 18/10 (maquettes : page « Fusion » du c
   Les hybrides aident un peu, surtout aux niveaux 4 et 8, sans écraser le jeu : pas de paire dominante (le plus fréquent apparaît dans 6 parties sur 144, 40 hybrides différents). Les fusions restent rares (moins d'une par partie) : il faut deux niveaux 3 et 8 ◆. Business reste à 2 % du plateau chez le bot, qui juge sur le score et pas sur l'argent. La prime de synergie (+30 %) n'est pas ajoutée.
 - **Bot avec le coût qui monte** (même série) : 35 % / 12 % / 12 %, 0,40 fusion par partie. Écart dans le bruit de 48 parties : la fusion reste un bonus modeste, plus chère sans devenir inutile.
 
+## Textes des modules en lignes — INTÉGRÉ (18/10, branche `textes-clairs`)
+Demande de l'utilisateur : les fusions n'étaient pas claires (« Sans Data : rien », « lui », deux phrases collées). Maquettes TX1 et TX2, page « Fusion » du canvas.
+- **Une ligne par effet**, dans l'ordre où il se déclenche : pastille (⚡ Compute, × Scale, ◆ Data, $, ↺ réactivation, ×N boost), phrase courte, condition en petit, « Ici : … » calculé sur le plateau (cible ou total réel), et pour un hybride le parent d'où vient la ligne.
+- Règles d'écriture : jamais « rien » ni « lui », on nomme la case ; chiffres à la française (0,5). Vérifié par un test sur les 20 modules × niveaux, spécialisations, 2.0 et les 760 versions d'hybrides.
+- Fiche téléphone : encadré « En ce moment, sur ton plateau » (total réel avec édition et familles, avant Plugins et boosts), affiché seulement s'il apprend quelque chose. Les lignes remplacent les phrases partout : fiches (téléphone et ordinateur), infobulles, atelier de fusion, spécialisations.
+- Code : `src/engine/effectLines.js` (`effectLines`, `hereContext`, `linesText`), composant `src/ui/module/EffectLines.jsx`. Le texte d'un hybride (`moduleView`) est maintenant construit depuis ces lignes.
+- **Un hybride se nourrit lui-même** (question de l'utilisateur sur API + Base) : la partie qui produit de la Data ou des $ passe d'abord, et la partie qui dépense prend dans cette production avant le stock. API REST + Base Volume : +26 Compute et +6 ◆ net, même avec un stock vide. GPU + SaaS : le SaaS paie le GPU. Une API Webhook fusionnée avec une Base est toujours active.
+- Un hybride compte aussi comme chacun de ses deux types (Serveur, API, Microservice, Base…) pour les autres modules, et comme producteur si l'un de ses parents produit (Load Balancer, Cache, File…). Sans effet sur les parties sans hybride (référence des tests inchangée).
+
 ## Premier Plugin (décision du 16/10)
 On **garde le choix** du premier Plugin parmi 3 tirés au hasard (plutôt qu'un Plugin imposé) : on s'adapte au tirage sans subir un départ raté. Si un Plugin est toujours pris, c'est un problème d'équilibre à corriger. Réglages possibles, **non décidés** : seulement des communs au départ ; 3 Plugins d'axes différents (économie, production, réactivations) ; tirage orienté selon l'entreprise.
 

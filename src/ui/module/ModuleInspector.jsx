@@ -14,6 +14,7 @@ import {
 } from "../../engine/moduleView.js";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { FX } from "../fx.jsx";
+import { EffectLines } from "./EffectLines.jsx";
 import { ProductionDetail } from "./Production.jsx";
 
 export function ModuleInspector(e) {
@@ -56,14 +57,18 @@ export function ModuleInspector(e) {
         </div>
         <button className="icon-btn" aria-label="Fermer" onClick={e.onDeselect}>✕</button>
       </div>
+      <section className="insp-now">
+        <b className="insp-now-t">Ce qu’il fait maintenant, à chaque activation</b>
+        <EffectLines module={module} state={{ board: e.board, unlocked: e.unlocked, data: e.data, budget: e.budget }} slot={slot} numbered />
+      </section>
       {r.hybrid && (
         <ol className="levels">
           {r.parents.map((parent) => (
             <li key={parent.defId} className="past branch-row">
               <span className="lvl">Parent</span>
               <span>
-                <b>{`${MODULES[parent.defId].name}${parent.branch ? ` · ${parent.branch} ${parent.branchName}` : ""} : `}</b>
-                {FX(parent.branch ? BRANCHES[parent.defId][parent.branch].text : MODULES[parent.defId].describe(3))}
+                <b>{`${MODULES[parent.defId].name}${parent.branch ? ` · ${parent.branch} ${parent.branchName}` : ""}`}</b>
+                <EffectLines module={{ defId: parent.defId, level: 3, branch: parent.branch }} compact />
               </span>
             </li>
           ))}
@@ -86,7 +91,7 @@ export function ModuleInspector(e) {
               : module.fused || i < module.level ? "past" : ""}
           >
             <span className="lvl">{"Niv. "}{i}</span>
-            <span>{FX(a.describe(i))}</span>
+            <EffectLines module={{ defId: module.defId, level: i }} compact />
           </li>
         ))}
         {module.level === 3 && module.branch && !module.fused
@@ -95,8 +100,7 @@ export function ModuleInspector(e) {
               <span className="lvl">{"Niv. 3 "}{module.branch}</span>
               <span>
                 <b>{BRANCHES[module.defId][module.branch].name}</b>
-                {" : "}
-                {FX(BRANCHES[module.defId][module.branch].text)}
+                <EffectLines module={{ defId: module.defId, level: 3, branch: module.branch }} compact />
               </span>
             </li>
           )
@@ -108,8 +112,7 @@ export function ModuleInspector(e) {
               <span className="lvl">{"Niv. 3 "}{i}</span>
               <span>
                 <b>{BRANCHES[module.defId][i].name}</b>
-                {" : "}
-                {FX(BRANCHES[module.defId][i].text)}
+                <EffectLines module={{ defId: module.defId, level: 3, branch: i }} compact />
               </span>
             </li>
           ))}
@@ -117,9 +120,8 @@ export function ModuleInspector(e) {
           <span className="lvl">{module.fused ? patchVersion(module) : "Fusion"}</span>
           <span>
             <b>{n.name}</b>
-            {" : "}
-            {FX(n.text)}
-            {module.fused && <span className="dim">{" "}{describePatch(module)}</span>}
+            <EffectLines module={{ defId: module.defId, level: 3, fused: true }} compact />
+            {module.fused && <span className="dim">{describePatch(module)}</span>}
           </span>
         </li>
       </ol>}

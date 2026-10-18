@@ -159,3 +159,44 @@ test("fusion : depuis le tiroir, deux modules identiques donnent la 2.0, pas de 
   assert.equal(poor.board[0].defId, "server");
   assert.equal(poor.notice.tone, "error");
 });
+
+test("textes en lignes : tous les modules, niveaux, spécialisations, 2.0 et hybrides", async () => {
+  const { effectLines, hereContext } = await import("../src/engine/effectLines.js");
+  const { hybridPair } = await import("../src/engine/hybrids.js");
+  const ids = Object.keys(MODULES);
+  const state = fusionTable();
+  const all = [];
+  for (const a of ids) {
+    for (const level of [1, 2, 3]) all.push({ defId: a, level });
+    for (const branch of ["A", "B"]) all.push({ defId: a, level: 3, branch });
+    all.push({ defId: a, level: 3, fused: true });
+    for (const b of ids) {
+      if (b === a) continue;
+      const [defId, partnerId] = hybridPair(a, b);
+      for (const x of ["A", "B"]) for (const y of ["A", "B"]) all.push({ defId, partnerId, level: 3, fused: true, branch: x, partnerBranch: y });
+    }
+  }
+  for (const module of all) {
+    const lines = effectLines(module);
+    assert.ok(lines.length > 0);
+    for (const l of lines) {
+      const words = `${l.text} ${l.cond ?? ""}`;
+      assert.ok(!/\brien\b|\blui\b|\d\.\d/.test(words), `${module.defId} : « ${words} »`);
+      l.here?.(hereContext(state, 0));
+    }
+  }
+});
+
+test("hybride : la Base nourrit l'API, le SaaS paie le GPU", () => {
+  const s = newRun(5, 1, false, "startup");
+  const state = { ...s, phase: "build", data: 0, budget: 0, board: s.board.map(() => null) };
+  state.board[0] = { uid: "a", defId: "api", partnerId: "database", level: 3, fused: true, branch: "A", partnerBranch: "A" };
+  state.board[2] = { uid: "b", defId: "gpu", partnerId: "saas", level: 3, fused: true, branch: "A", partnerBranch: "A" };
+  const result = previewDeploy(state);
+  const apiBase = result.events.find((e) => e.t === "activate" && e.slot === 0);
+  const gpuSaas = result.events.find((e) => e.t === "activate" && e.slot === 2);
+  assert.equal(apiBase.out.compute, 26);
+  assert.equal(apiBase.out.data, 6);
+  assert.equal(gpuSaas.out.compute, 70);
+  assert.equal(gpuSaas.out.budget, 3);
+});

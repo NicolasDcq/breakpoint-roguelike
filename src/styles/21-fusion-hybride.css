@@ -494,3 +494,135 @@ button.fu-mini:disabled {
   flex-basis: 100%;
   font-size: 11.5px;
 }
+
+/* Effets en lignes : une ligne par effet. */
+.effect-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+.el-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-top: 2px dashed #26305a;
+}
+.el-row:first-child {
+  border-top: none;
+  padding-top: 2px;
+}
+.el-pill {
+  grid-row: span 4;
+  min-width: 44px;
+  box-sizing: border-box;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  font: 800 13px/22px var(--mono);
+  text-align: center;
+  color: var(--ink);
+  background: #eef2ff;
+  white-space: nowrap;
+}
+.el-c { background: var(--cyan); }
+.el-s { background: #ff5a6e; }
+.el-d { background: var(--violet); }
+.el-b { background: var(--amber); }
+.el-r { background: var(--green); }
+.el-x { background: #eef2ff; }
+.el-g { background: #9aa6d6; }
+.el-text {
+  font-size: 14px;
+  line-height: 1.3;
+}
+.el-cond {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--dim);
+}
+.el-here {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: #c6f03a;
+}
+.el-src {
+  font: 800 10px/1.3 var(--mono);
+  color: var(--dim);
+}
+.el-src i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--acc);
+  vertical-align: -1px;
+}
+.effect-lines.compact .el-row {
+  padding: 3px 0;
+  border-top: none;
+}
+.effect-lines.compact .el-pill {
+  min-width: 36px;
+  font-size: 11px;
+  line-height: 18px;
+  grid-row: auto;
+}
+.effect-lines.compact .el-text {
+  font-size: 12.5px;
+}
+.mm-now {
+  display: grid;
+  gap: 4px;
+  padding: 8px 11px;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: #2a2150;
+  box-shadow: 0 0 0 2px var(--amber);
+}
+.mm-now-k {
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+.mm-now-v {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.mm-now small {
+  font-size: 11px;
+  opacity: .75;
+}
+.insp-now {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .03);
+}
+.insp-now-t {
+  font-size: 13px;
+}
+.levels .effect-lines.compact .el-text {
+  font-size: 12px;
+}
+.tip-body .effect-lines {
+  margin: 4px 0;
+}
+.mm-two .el-row,
+.mm-pick .el-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.mm-two .el-pill,
+.mm-pick .el-pill {
+  grid-row: auto;
+  justify-self: start;
+}

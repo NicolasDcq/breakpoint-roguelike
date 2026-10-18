@@ -15,6 +15,8 @@ import {
   patchVersion,
 } from "../../engine/moduleView.js";
 import { FamilyBand, FamilyChips } from "../fusion/Fusion.jsx";
+import { effectLines } from "../../engine/effectLines.js";
+import { EffectLines } from "./EffectLines.jsx";
 import { FX } from "../fx.jsx";
 import {
   ProductionDetail,
@@ -46,36 +48,38 @@ export function ModuleSheetMobile(e) {
   let short = module.level === 2 && l !== null && e.data < l;
   let B = BRANCHES[module.defId];
   let cur = r.hybrid
-    ? { lv: `Hybride · ${patchVersion(module)}`, name: r.baseName, text: r.text, more: describePatch(module) }
+    ? { lv: `Hybride · ${patchVersion(module)}`, name: r.baseName, more: describePatch(module) }
     : module.fused
-    ? { lv: patchVersion(module), name: n.name, text: n.text, more: describePatch(module) }
+    ? { lv: patchVersion(module), name: n.name, more: describePatch(module) }
     : module.level === 3 && module.branch
-      ? {
-        lv: "Niveau 3 · " + module.branch,
-        name: B[module.branch].name,
-        text: B[module.branch].text,
+      ? { lv: "Niveau 3 · " + module.branch, name: B[module.branch].name }
+      : { lv: "Niveau " + module.level, name: null };
+  let board = { board: e.board, unlocked: e.unlocked, data: e.data, budget: e.budget };
+  // « En ce moment » : ce que le module produit vraiment sur ce plateau (avant les Plugins).
+  let nowText = (() => {
+    if (r.kind === "producer") {
+      let C2 = productionBreakdown(e, module, a);
+      if (C2.ctxDep || !fmtOutput(C2.tot)) {
+        return null;
       }
-      : { lv: "Niveau " + module.level, name: null, text: a.describe(module.level) };
-  let effL = (() => {
-    let el = editionNote(module, 1);
-    if (!el || r.kind !== "producer") {
-      return null;
+      // Rien à apprendre si le total est déjà écrit tel quel dans les lignes.
+      if (fmtOutput(C2.tot) === fmtOutput(C2.base) && !effectLines(module).some((entry) => entry.here)) {
+        return null;
+      }
+      let el = editionNote(module, 1);
+      let raised = C2.familyKeys.filter((entry) => entry.level > 1).map((entry) => `famille ${FAMILY_LABELS[entry.family]} niv. ${entry.level}`);
+      let extra = [el, ...raised].filter(Boolean);
+      return { value: `${fmtOutput(C2.tot)} à chaque activation`, note: extra.length ? `Avec ${extra.join(" et ")}. Avant les Plugins et les boosts.` : "Avant les Plugins et les boosts." };
     }
-    let C2 = productionBreakdown(e, module, a);
-    let raised = C2.familyKeys.filter((entry) => entry.level > 1);
-    let ft2 = raised.map((entry) => ` et la famille ${FAMILY_LABELS[entry.family]} niv. ${entry.level}`).join("");
-    return C2.ctxDep
-      ? `Avec ${el}, toute sa production est multipliée (détail plus bas).`
-      : `En vrai, avec ${el}${ft2}, il produit ${fmtOutput(C2.tot)} à chaque activation.`;
+    return null;
   })();
-  let card = (lv, name, text, cls, more) => (
+  // Carte d'effets : lignes pour un module (réel ou à venir).
+  let card = (lv, name, target, cls, more, live = false) => (
     <div className={"mm-card " + (cls || "")}>
       <span className="mm-lv">{lv}</span>
       {name && <b className="mm-cname">{name}</b>}
-      <p className="mm-ctext">
-        {FX(text)}
-        {more ? <span className="dim">{" " + more}</span> : null}
-      </p>
+      <EffectLines module={target} state={live ? board : null} slot={live ? slot : null} numbered={live} />
+      {more ? <p className="mm-ctext dim">{more}</p> : null}
     </div>
   );
   let fusionNote = `Au niveau 3, fusionne-le avec le bouton Fusion (${e.fusionCost ?? 12} ◆, puis plus cher à chaque fusion) : avec un 2e ${a.name}, il devient ${n.name} ; avec un autre module niveau 3, un hybride qui garde les deux effets et les deux familles.`;
@@ -84,10 +88,10 @@ export function ModuleSheetMobile(e) {
     next = (
       <section className="mm-sec">
         <h3>Prochaine amélioration</h3>
-        {card("Niveau 2", null, a.describe(2), "next")}
+        {card("Niveau 2", null, { defId: module.defId, level: 2 }, "next")}
         <h3>Au niveau 3, tu choisiras une spécialisation</h3>
         <div className="mm-two">
-          {["A", "B"].map((i) => card("Spécialisation " + i, B[i].name, B[i].text, "later"))}
+          {["A", "B"].map((i) => <React.Fragment key={i}>{card("Spécialisation " + i, B[i].name, { defId: module.defId, level: 3, branch: i }, "later")}</React.Fragment>)}
         </div>
       </section>
     );
@@ -217,8 +221,14 @@ export function ModuleSheetMobile(e) {
       <div className="mm-body">
         <section className="mm-sec">
           <h3>Ce qu’il fait maintenant</h3>
-          {card(cur.lv, cur.name, cur.text, "now", cur.more)}
-          {effL && <p className="mm-eff">{FX(effL)}</p>}
+          {nowText && (
+            <div className="mm-now">
+              <span className="mm-now-k">En ce moment, sur ton plateau</span>
+              <span className="mm-now-v">{FX(nowText.value)}</span>
+              <small>{nowText.note}</small>
+            </div>
+          )}
+          {card(cur.lv, cur.name, module, "now", cur.more, true)}
         </section>
         {module.edition
           && (
@@ -253,7 +263,7 @@ export function ModuleSheetMobile(e) {
                   >
                     <span className="mm-letter">{i}</span>
                     <b className="mm-cname">{B[i].name}</b>
-                    <span className="mm-ctext">{FX(B[i].text)}</span>
+                    <EffectLines module={{ defId: module.defId, level: 3, branch: i }} compact />
                   </button>
                 ))}
               </div>

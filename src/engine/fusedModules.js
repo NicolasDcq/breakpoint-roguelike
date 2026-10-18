@@ -1,11 +1,11 @@
 // Modules fusionnés (2.0) et spécialisations A/B du niveau 3.
 
 import { aboveBelow, columnMates } from "./grid.js";
-import { moduleFamilies } from "./hybrids.js";
+import { isModuleType, isProducerModule, moduleFamilies } from "./hybrids.js";
 import { MODULES } from "./modules.js";
 import { round2 } from "./util.js";
 
-export const isServerAt = (e, t) => e[t]?.defId === "server";
+export const isServerAt = (e, t) => isModuleType(e[t], "server");
 
 export const FUSED_MODULES = {
   server: {
@@ -110,7 +110,7 @@ export const FUSED_MODULES = {
     run: (e) => {
       let t = [...e.neighbors(), ...e.diagonals()].sort((o, a) => o - a).filter((o) => {
         let a = e.board[o];
-        return a !== null && MODULES[a.defId].kind === "producer";
+        return a !== null && isProducerModule(a);
       });
       if (t.length) {
         e.retrigger(t, 2 + e.retryBonus);
@@ -235,7 +235,7 @@ export const BRANCHES = {
       text: "Produit +4 Compute, et +8 de plus pour chaque Microservice voisin.",
       preview: "+4 ⚡ (+8/Micro)",
       usesNeighbors: true,
-      produce: (e) => ({ compute: 4 + 8 * e.neighbors().filter((t) => e.board[t]?.defId === "micro").length }),
+      produce: (e) => ({ compute: 4 + 8 * e.neighbors().filter((t) => isModuleType(e.board[t], "micro")).length }),
     },
     B: {
       name: "Polyglotte",
@@ -257,7 +257,7 @@ export const BRANCHES = {
       text: "Si une Base de données est voisine : +20 Compute sans consommer de Data. Sans Base voisine : rien.",
       preview: "+20 ⚡ (Base voisine)",
       usesNeighbors: true,
-      produce: (e) => e.neighbors().some((t) => e.board[t]?.defId === "database") ? { compute: 20 } : null,
+      produce: (e) => e.ownsDatabase || e.neighbors().some((t) => isModuleType(e.board[t], "database")) ? { compute: 20 } : null,
     },
   },
   gpu: {
@@ -388,7 +388,7 @@ export const BRANCHES = {
       preview: "↺ meilleur voisin ×3",
       usesNeighbors: true,
       run: (e) => {
-        let t = e.neighbors().filter((o) => e.board[o] && MODULES[e.board[o].defId].kind === "producer").sort((o, a) => (e.board[a].fused ? 4 : e.board[a].level) - (e.board[o].fused ? 4 : e.board[o].level)
+        let t = e.neighbors().filter((o) => e.board[o] && isProducerModule(e.board[o])).sort((o, a) => (e.board[a].fused ? 4 : e.board[a].level) - (e.board[o].fused ? 4 : e.board[o].level)
           || o - a)[0];
         if (t !== undefined) {
           e.retrigger([t], 3 + e.retryBonus);
@@ -401,7 +401,7 @@ export const BRANCHES = {
       preview: "↺ voisins + diagonales",
       usesNeighbors: true,
       run: (e) => {
-        let t = [...e.neighbors(), ...e.diagonals()].sort((o, a) => o - a).filter((o) => e.board[o] && MODULES[e.board[o].defId].kind === "producer");
+        let t = [...e.neighbors(), ...e.diagonals()].sort((o, a) => o - a).filter((o) => e.board[o] && isProducerModule(e.board[o]));
         if (t.length) {
           e.retrigger(t, 1 + e.retryBonus);
         }

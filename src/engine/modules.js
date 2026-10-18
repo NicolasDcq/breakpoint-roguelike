@@ -1,6 +1,7 @@
 // Les 20 modules de base : coût, famille, production par niveau.
 
 import { aboveBelow } from "./grid.js";
+import { isModuleType, isProducerModule } from "./hybrids.js";
 import { byLevel, fmtNum, round2 } from "./util.js";
 
 export const SERVER_COMPUTE = [5, 8, 12];
@@ -70,7 +71,7 @@ export const MODULES = {
     preview: (e) => `+${byLevel(MICRO_BASE, e)} ⚡ (+${byLevel(MICRO_PER_NEIGHBOR, e)}/voisin)`,
     produce: (e) => {
       let t = e.hasPlugin("microarch");
-      let o = e.neighbors().filter((a) => t || e.board[a]?.defId === "micro").length;
+      let o = e.neighbors().filter((a) => t || isModuleType(e.board[a], "micro")).length;
       return { compute: byLevel(MICRO_BASE, e.level) + byLevel(MICRO_PER_NEIGHBOR, e.level) * o };
     },
   },
@@ -207,12 +208,12 @@ export const MODULES = {
         : "Réactive chaque module producteur voisin.",
     preview: (e) => e === 1 ? "↺ Serveurs voisins" : e === 2 ? "↺ Serv.+API voisins" : "↺ producteurs voisins",
     run: (e) => {
-      let t = (a) => e.level === 1
-        ? a === "server"
-        : e.level === 2 ? a === "server" || a === "api" : MODULES[a].kind === "producer";
+      let t = (r) => e.level === 1
+        ? isModuleType(r, "server")
+        : e.level === 2 ? isModuleType(r, "server") || isModuleType(r, "api") : isProducerModule(r);
       let o = e.neighbors().filter((a) => {
         let r = e.board[a];
-        return r !== null && t(r.defId);
+        return r !== null && t(r);
       });
       if (o.length) {
         e.retrigger(o, 1 + e.retryBonus);
