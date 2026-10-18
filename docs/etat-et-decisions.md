@@ -38,7 +38,7 @@ Une famille entière monte d'un niveau, pour toute la partie, sans plafond. Paqu
 25 cases. Une forme parmi 8 au départ (5 cases). Achat : case voisine d'une case ouverte, 8 directions. Modules de départ posés sur les cases ouvertes. Récompense « +1 emplacement » : case achetable. Anciennes sauvegardes 4×4 refusées.
 
 ## Étape 4 : tiroir de pièces détachées — INTÉGRÉ ET VÉRIFIÉ
-2 emplacements au départ, 6 au maximum. Glisser-déposer dans les deux sens, même tuile que le plateau. Extension : 20/40/70/110 $ + 1 goodie consommé (à confirmer). Non fait : fusion depuis le tiroir.
+2 emplacements au départ, 6 au maximum. Glisser-déposer dans les deux sens, même tuile que le plateau. Extension : 20/40/70/110 $ + 1 goodie consommé (à confirmer). Fusion depuis le tiroir : faite avec la fusion hybride (18/10).
 
 ## Étape 4 bis : boss trou — INTÉGRÉ
 Une case ouverte devient un trou au début du contrat ; son module part au tiroir ou est détruit si le tiroir est plein. Plafond : 1 (niveaux 1-7), 2 (incident), 4 (infini).
@@ -49,7 +49,7 @@ Chaque module actif coûte de l'argent à la fin de chaque contrat ; tout reste 
 ## Tutoriel avec Loup Niel — INTÉGRÉ (v76, 17/10)
 Objectif : faire tester le jeu à des nouveaux joueurs sans les lancer dans le grand bain.
 - **Partie d'entraînement à part, avant la vraie** (décision de l'utilisateur) : bouton au menu ; au premier lancement, encart « Première fois ? » avec Loup Niel et « Lancer le tutoriel » ; ensuite, bouton discret « Tutoriel avec Loup Niel » sous Jouer. Rien n'est enregistré pendant le tutoriel (pas de sauvegarde, pas de progression du profil). À la fin ou si on passe : retour au menu (ou reprise de la vraie partie sauvegardée s'il y en a une). Marqueur `localStorage['breakpoint.tutoDone']`.
-- Partie fixée : graine 424242, Start-up, difficulté 1, premier Plugin imposé (le Stagiaire). Objectifs de la version 1 : A 30, B 40, C 45 (`TUTO_TARGETS`, validés par l'utilisateur le 17/10). La version 2 ne demande aucun déploiement : spécialisation, fusion, fin. Arrivage forcé « colis + paquet ». L'argent et la Data sont complétés juste ce qu'il faut aux étapes d'achat. **Cadeau de fusion** : à la Version 2, deux Serveurs passent au niveau 3 (créés s'il en manque) pour faire une vraie fusion.
+- Partie fixée : graine 424242, Start-up, difficulté 1, premier Plugin imposé (le Stagiaire). Objectifs de la version 1 : A 30, B 40, C 45 (`TUTO_TARGETS`, validés par l'utilisateur le 17/10). La version 2 ne demande aucun déploiement : spécialisation, fusion, fin. Arrivage forcé « colis + paquet ». L'argent et la Data sont complétés juste ce qu'il faut aux étapes d'achat. **Cadeau de fusion (18/10)** : à la Version 2, un Serveur passe au niveau 3 (spécialisation à choisir) et un Abonnement SaaS niveau 3 « Freemium » est posé ; la Data est complétée jusqu'au coût d'une fusion. Le joueur fait une fusion hybride (Cloud managé) dans le nouvel atelier.
 - **Guide : Loup Niel**, loup CTO de l'entreprise où le joueur vient d'être engagé. Style mascotte simple validé : dessin vectoriel rond façon Jimbo, gros contour noir, fourrure gris-bleu, lunettes rondes, sweat bleu nuit badge « CTO », **cheveux courts châtain clair**. 9 poses (neutre, salut, il explique, il réfléchit, bravo, inquiet, surpris, alerte boss, pause café), en SVG dans `src/tutorial/loupNielSprites.js`. Source : `tools/loup-niel-sprite.py` (fonction `svg(nom)`).
 - Fonctionnement : le reste de l'écran s'assombrit, la zone expliquée reste éclairée (contour ambre qui pulse) et seule elle répond au toucher. Bulle en haut ou en bas selon la zone ; sur l'écran de récompense mobile, juste au-dessus de la barre du bas. Étapes « Suivant » et étapes « à faire » (détectées sur l'état du jeu). Quand le joueur doit jouer librement (déployer, choisir une récompense, fermer un écran), une petite bulle de consigne non bloquante s'affiche ; elle passe en haut quand un écran du jeu est ouvert (colis, paquet, fusion). Le tutoriel fait défiler jusqu'à la zone éclairée si elle est hors écran. En cas d'échec : Loup Niel inquiet, « Recommencer » ou « Terminer ».
 - **22 étapes** : contrat A (accueil, objectif et 3 déploiements, ordre des numéros, 5 familles, fiche d'un module *, glisser *, Compute × Scale et prévu, Déployer *) · boutique après A (deux monnaies, colis *, acheter un module *, ouvrir une case *) · contrat B (Plugins et leur ordre, améliorer un module *) · boutique après B (paquet de mises à jour *) · contrat C (tiroir, contrainte du boss) · récompense de fin de version · goodies · Version 2 (spécialisation niveau 3 *, fusion *) · fin. (* = à faire.)
@@ -58,10 +58,33 @@ Objectif : faire tester le jeu à des nouveaux joueurs sans les lancer dans le g
   - Étape 5 (fiche d'un module) : la fiche se refermait aussitôt ouverte et le tutoriel passait à l'étape 6. Maintenant la fiche reste ouverte, le texte change (« Voilà sa fiche… ») et on passe avec « Suivant ».
   - Une étape « à faire » se valide même si la situation a déjà changé (ex. : le déploiement livre le contrat d'un coup). Avant, le tutoriel restait muet.
   - Le tutoriel ne finissait jamais après la version 1. Cause probable : le raccourci de fusion sur la fiche niveau 3 fusionnait les deux Serveurs sans spécialisation ; l'étape « choisis sa spécialisation » ne pouvait plus se valider (plus de Serveur), et le joueur continuait à déployer en version 2 contre des objectifs normaux.
-  - Pendant le tutoriel, le raccourci « Ou fusionner directement… » / « Fusion… » est masqué sur la fiche d'un module niveau 3 : le joueur choisit d'abord sa spécialisation, puis fait la fusion par le bouton Fusion (étape suivante). Propriété `fusionShortcut` (`App.jsx`).
+  - (18/10) La fiche d'un module n'a plus aucun raccourci de fusion : la fusion passe seulement par le bouton Fusion. La propriété `fusionShortcut` a disparu.
   - Vérifié par un parcours automatique complet (22 étapes) sur téléphone 390×844 et ordinateur 1366×768.
 - **Pas encore fait** : bulles « la première fois » hors tutoriel (première fusion possible, édition, réactivation en chaîne, trou de boss, boutique fermée, entreprise débloquée) et le wiki de Loup Niel (une fiche par notion sur le bouton ?).
 - Maquette : page « Tutoriel » du canvas.
+
+## Fusion hybride — INTÉGRÉE (18/10, branche `fusion-hybride`)
+Règles validées par l'utilisateur le 18/10 (maquettes : page « Fusion » du canvas, planches FU0 à FU5 et HY5 à HY8).
+- **Deux modules niveau 3 quelconques** fusionnent, du plateau ou du tiroir. Deux modules identiques donnent toujours la 2.0 (Datacenter…). Deux modules différents donnent un **hybride**.
+- L'hybride **garde les deux effets**, avec la spécialisation A/B de chaque parent : 4 versions par paire. Il **compte dans les deux familles** (bonus de famille, Marketplace, Pare-feu, Plugins de famille). Un hybride producteur + soutien produit puis agit (ex. Reverse Proxy : 1 ◆ → +26 Compute, puis le producteur suivant ×4).
+- **190 noms** tirés du vrai monde informatique (`src/engine/hybrids.js`, brouillon dans le projet : `claude/hybrides-noms.md`). Texte d'ambiance provisoire : « X et Y dans la même baie ».
+- **Coût : 8 ◆** pour toute fusion (`FUSION_COST`). Avant : gratuite.
+- **Éditions** : si les deux parents en ont une (différente), le joueur choisit laquelle garder ; sinon celle qui existe est gardée.
+- Un hybride monte en 2.1, 2.2, 2.3 comme une 2.0. Prix de vente : moitié du prix des deux parents + 2 $.
+- Interdit par le client : un hybride est bloqué si l'un de ses parents est interdit. Les Plugins de forme lisent sa première famille.
+- **Interface** : atelier à deux cases en haut et le résultat en dessous ; toucher une case ouvre la liste des modules niveau 3 fusionnables (plateau et tiroir) ; puis choix de l'édition, case gardée, coût. Pastille du bouton Fusion = nombre de fusions faisables d'affilée (modules prêts ÷ 2, arrondi en dessous). Plus de fusion depuis la fiche d'un module. Tuile d'un hybride : bandeau à deux couleurs, deux icônes, badge « HYB ».
+- Code : `hybrids.js` (noms, `FUSION_COST`, `moduleFamilies`, `isHybrid`), `moduleView` (vue combinée), `reducer.js` (`fuseModules`, `fusionResult`, `fusionCandidates`, `fusionCount`), `deploy.js` (familles multiples, produire puis agir), UI `src/ui/fusion/Fusion.jsx`, styles `21-fusion-hybride.css`. Sauvegarde : un hybride porte `partnerId` et `partnerBranch`.
+- Référence des tests régénérée (coût de la fusion, nouveaux messages) ; 3 tests ajoutés.
+- Bot : il essaie toutes les paires (`BOT_FUSION=all`, par défaut), seulement les paires identiques (`twins`) ou aucune (`none`).
+- **Bot du 18/10** (6 graines × 8 entreprises × niveaux 1/4/8 = 144 parties par mode, 0 erreur, 0 partie bloquée) :
+
+  | Mode | Niv. 1 | Niv. 4 | Niv. 8 | Fusions par partie |
+  |---|---|---|---|---|
+  | Toutes les paires (hybrides) | 35 % | 19 % | 10 % | 0,47 |
+  | Seulement identiques | 33 % | 12 % | 4 % | 0,09 |
+  | Aucune fusion | 33 % | 12 % | 2 % | 0 |
+
+  Les hybrides aident un peu, surtout aux niveaux 4 et 8, sans écraser le jeu : pas de paire dominante (le plus fréquent apparaît dans 6 parties sur 144, 40 hybrides différents). Les fusions restent rares (moins d'une par partie) : il faut deux niveaux 3 et 8 ◆. Business reste à 2 % du plateau chez le bot, qui juge sur le score et pas sur l'argent. La prime de synergie (+30 %) n'est pas ajoutée.
 
 ## Premier Plugin (décision du 16/10)
 On **garde le choix** du premier Plugin parmi 3 tirés au hasard (plutôt qu'un Plugin imposé) : on s'adapte au tirage sans subir un départ raté. Si un Plugin est toujours pris, c'est un problème d'équilibre à corriger. Réglages possibles, **non décidés** : seulement des communs au départ ; 3 Plugins d'axes différents (économie, production, réactivations) ; tirage orienté selon l'entreprise.
@@ -72,7 +95,7 @@ On **garde le choix** du premier Plugin parmi 3 tirés au hasard (plutôt qu'un 
 - **Boutique sur téléphone : écran plein par-dessus le plateau** (même composant que la fenêtre ordinateur), en-tête Boutique + argent fixe, bas fixe avec Relancer et Retour au plateau. Version dense : arrivage en 2 colonnes, goodie compact, Plugins en 2 colonnes. Elle s'ouvre avec le bouton et automatiquement après chaque contrat, comme sur ordinateur. Les colis et paquets s'ouvrent par-dessus.
 - **Choix du premier Plugin (v79)** : même disposition que l'ouverture du colis, sur ordinateur et téléphone. Les 3 Plugins en grandes cartes complètes, 3 de front sur ordinateur, 2 + 1 sur téléphone ; toucher une carte l'entoure en ambre ; bouton « Commencer avec : nom » dessous (collé en bas de l'écran sur téléphone). Pas de bouton Passer. Composant `PickStarter` (classes du colis `box-cards`, `box-card`, `pack-take`) + styles `pick-box`. Les styles `mobile-pick` restent utilisés par la récompense de fin de version (`RewardMobile`).
 - **Récompense de fin de version sur téléphone (v77)** : écran plein, sans défilement. Titre du contrat livré, Performance et paiements en pastilles, prochain contrat, les 3 Plugins du recrutement côte à côte, les autres récompenses en tuiles, panneau de détail de la sélection, barre fixe « Ne rien prendre » / « Prendre ». Plugins pleins : avertissement et boutons « Vendre ». Composant `RewardMobile` (appelé par `RewardModal` quand l'écran fait 700 px de large ou moins), styles `mobile-reward`.
-- **Fiche d'un module sur téléphone : écran plein (v80)**. En-tête fixe, corps qui défile, bas fixe avec le bouton principal (améliorer, choisir A ou B, fusionner, passer en 2.x), puis Vendre et **Retour au plateau**. Composant `ModuleSheetMobile` (garde la classe `module-sheet` pour le tutoriel), styles `mobile-module`. Ordinateur : fenêtre au centre, `ModuleInspector`.
+- **Fiche d'un module sur téléphone : panneau qui monte (18/10, remplace l'écran plein de la v80)**. Le plateau reste visible et assombri derrière ; poignée en haut ; module qui flotte (contour lumineux, broches dorées) ; nom, pastilles de famille, « Producteur · case n » et texte d'ambiance dans l'en-tête ; Data en haut à droite. Corps qui défile, bas fixe avec le bouton principal (améliorer, choisir A ou B, passer en 2.x ; plus de fusion), puis Vendre et **Retour au plateau**. Toucher le fond ferme la fiche. Composant `ModuleSheetMobile` (garde la classe `module-sheet` pour le tutoriel), styles `mobile-module`. Ordinateur : fenêtre au centre, `ModuleInspector`.
 - **Chiffres des descriptions (v81)** : chaque chiffre suivi d'une ressource devient une pastille colorée : Compute cyan, Scale rouge (#ff5a6e), Data et ◆ violet, $ ambre. Fonction `FX(texte)` (`src/ui/fx.jsx`, styles `fx`). Pas encore : texte des éditions dans les offres de la boutique.
 - **Achat d'un emplacement (v83)** : toucher une case « Ouvrir » ouvre une fenêtre de validation. Case grisée sans l'argent. Sur téléphone, prix masqué sur les cases. Composant `UnlockAsk`, styles `unlock-ask`.
 - **Confirmation de nouvelle run (v84)** : Loup Niel inquiet, phrase tirée parmi 7 (`QUIT_LINES`), boutons « Je reste » et « Nouvelle run ». Composant `QuitConfirm`, styles `quit-modal`.
@@ -101,5 +124,5 @@ On **garde le choix** du premier Plugin parmi 3 tirés au hasard (plutôt qu'un 
 6. ~~Tutoriel avec Loup Niel~~ — retours des testeurs ; puis bulles « la première fois » et wiki de Loup Niel.
 7. Consommation des modules (maquette à valider, puis intégration).
 8. Sockets et puces (colis à étiquette violette).
-9. Fusion hybride.
+9. ~~Fusion hybride~~ (18/10) — équilibrage au bot à poursuivre (voir la section dédiée).
 10. Modules et Plugins manquants.

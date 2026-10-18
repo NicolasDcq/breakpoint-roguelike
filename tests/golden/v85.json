@@ -1,5 +1,5 @@
 {
- "source": "Régénéré le 2026-10-17",
+ "source": "Régénéré le 2026-10-18",
  "runs": [
   {
    "seed": 1000,
@@ -23,7 +23,7 @@
    "actions": 98,
    "phase": "defeat",
    "contractIndex": 16,
-   "chain": "303e55ccacaf4273"
+   "chain": "56ac4a7edbebc394"
   },
   {
    "seed": 16838,
@@ -35,7 +35,7 @@
    "actions": 25,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "83b6b33de21fd48a"
+   "chain": "f27657d8dff84ff8"
   },
   {
    "seed": 24757,
@@ -47,7 +47,7 @@
    "actions": 100,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "2a7ad6da8d1b38bf"
+   "chain": "237148aa9854a342"
   },
   {
    "seed": 32676,
@@ -59,7 +59,7 @@
    "actions": 30,
    "phase": "defeat",
    "contractIndex": 2,
-   "chain": "de30097e90760480"
+   "chain": "943adb404f94344c"
   },
   {
    "seed": 40595,
@@ -71,7 +71,7 @@
    "actions": 120,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "c83755487bd356f1"
+   "chain": "9a4c277e4f8327f0"
   },
   {
    "seed": 48514,
@@ -95,7 +95,7 @@
    "actions": 106,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "63915fad860fa256"
+   "chain": "d48784f6c5748c41"
   },
   {
    "seed": 64352,
@@ -119,7 +119,7 @@
    "actions": 19,
    "phase": "defeat",
    "contractIndex": 2,
-   "chain": "1eedb9ee7766500e"
+   "chain": "150e23fed55bd40e"
   },
   {
    "seed": 80190,
@@ -143,7 +143,7 @@
    "actions": 144,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "ceb0dde19c76eac3"
+   "chain": "b7418046d67551f6"
   },
   {
    "seed": 96028,
@@ -167,7 +167,7 @@
    "actions": 125,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "98cda38695853807"
+   "chain": "bb578115b11140d6"
   },
   {
    "seed": 111866,
@@ -191,7 +191,7 @@
    "actions": 966,
    "phase": "defeat",
    "contractIndex": 176,
-   "chain": "e660d15cd9b14ce1"
+   "chain": "6118f172f44aecb6"
   },
   {
    "seed": 127704,
@@ -215,7 +215,7 @@
    "actions": 98,
    "phase": "defeat",
    "contractIndex": 23,
-   "chain": "0c96fb67dad93ee3"
+   "chain": "be9079efde974a56"
   },
   {
    "seed": 143542,
@@ -227,7 +227,7 @@
    "actions": 12,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "e441c197c501c4b7"
+   "chain": "69beb610397bcb9a"
   },
   {
    "seed": 151461,
@@ -239,7 +239,7 @@
    "actions": 94,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "4e1bf09f8830674e"
+   "chain": "f3e11066176cd1c2"
   },
   {
    "seed": 159380,
@@ -287,7 +287,7 @@
    "actions": 133,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "94790af119093699"
+   "chain": "02b8e3e6e8c6e5b9"
   },
   {
    "seed": 191056,
@@ -299,7 +299,7 @@
    "actions": 5,
    "phase": "defeat",
    "contractIndex": 0,
-   "chain": "ca18f156ad8dfd3c"
+   "chain": "8e140e1d29a95088"
   },
   {
    "seed": 198975,
@@ -311,7 +311,7 @@
    "actions": 128,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "4cfc03639af63449"
+   "chain": "a359ade97e65dfed"
   },
   {
    "seed": 206894,
@@ -323,7 +323,7 @@
    "actions": 48,
    "phase": "defeat",
    "contractIndex": 5,
-   "chain": "0d514c2ef2a07e44"
+   "chain": "6033b24f565b8a89"
   },
   {
    "seed": 214813,
@@ -335,7 +335,7 @@
    "actions": 120,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "f07d55a5948ca36c"
+   "chain": "59f90046913b66d6"
   },
   {
    "seed": 222732,
@@ -347,7 +347,7 @@
    "actions": 17,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "c9d10800a6161fad"
+   "chain": "4e4576464d60fcd6"
   },
   {
    "seed": 230651,
@@ -359,7 +359,7 @@
    "actions": 107,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "19e0dff094e72278"
+   "chain": "bc5bebddcf1b9aa1"
   },
   {
    "seed": 238570,
@@ -383,7 +383,7 @@
    "actions": 150,
    "phase": "defeat",
    "contractIndex": 35,
-   "chain": "91b8f4a488a2c740"
+   "chain": "01670ef802cbe983"
   },
   {
    "seed": 254408,
@@ -407,7 +407,7 @@
    "actions": 148,
    "phase": "defeat",
    "contractIndex": 22,
-   "chain": "797e41819f595dea"
+   "chain": "f751bdd584e5980d"
   },
   {
    "seed": 270246,
@@ -419,7 +419,7 @@
    "actions": 23,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "30040321343f9ada"
+   "chain": "f3b91921ea29767a"
   },
   {
    "seed": 278165,
@@ -431,7 +431,7 @@
    "actions": 127,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "49fa0c8018561e95"
+   "chain": "35ba33ecb6811983"
   },
   {
    "seed": 286084,
@@ -443,7 +443,7 @@
    "actions": 34,
    "phase": "defeat",
    "contractIndex": 3,
-   "chain": "832eeb4957bb8da9"
+   "chain": "575243ce9446d40a"
   },
   {
    "seed": 294003,
@@ -479,7 +479,7 @@
    "actions": 101,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "c7ee50208fdf5aca"
+   "chain": "a7b4319fcfd631d1"
   },
   {
    "seed": 317760,
@@ -503,7 +503,7 @@
    "actions": 105,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "18abee6577b5e1c0"
+   "chain": "f02f4e93513f08e5"
   },
   {
    "seed": 333598,
@@ -539,7 +539,7 @@
    "actions": 14,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "1cbfc01944304d77"
+   "chain": "c2693a227cdbf619"
   },
   {
    "seed": 357355,
@@ -551,7 +551,7 @@
    "actions": 127,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "463a92deeaa6b857"
+   "chain": "6a642c54300d9bda"
   },
   {
    "seed": 365274,
@@ -575,7 +575,7 @@
    "actions": 1500,
    "phase": "build",
    "contractIndex": 330,
-   "chain": "da0554d10bf23a3f"
+   "chain": "a726beb3f972bd5f"
   },
   {
    "seed": 381112,
@@ -587,7 +587,7 @@
    "actions": 24,
    "phase": "defeat",
    "contractIndex": 2,
-   "chain": "b77a71d2238763da"
+   "chain": "a6382c6f8a7a5e4d"
   },
   {
    "seed": 389031,
@@ -599,7 +599,7 @@
    "actions": 48,
    "phase": "defeat",
    "contractIndex": 9,
-   "chain": "df5379ee087f19a8"
+   "chain": "63063ded36821bc0"
   },
   {
    "seed": 396950,
@@ -623,7 +623,7 @@
    "actions": 92,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "e299d23f0d9b963b"
+   "chain": "0086071894cddc8c"
   },
   {
    "seed": 412788,
@@ -635,7 +635,7 @@
    "actions": 9,
    "phase": "defeat",
    "contractIndex": 0,
-   "chain": "6121adcea4bc50ee"
+   "chain": "0891d45abbe97a33"
   },
   {
    "seed": 420707,
@@ -647,7 +647,7 @@
    "actions": 103,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "e7d5a64f50b3ae4b"
+   "chain": "455f8fec7984723a"
   },
   {
    "seed": 428626,
@@ -671,7 +671,7 @@
    "actions": 109,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "ad694d2ca154961d"
+   "chain": "5f3b74596cf269e2"
   },
   {
    "seed": 444464,
@@ -683,7 +683,7 @@
    "actions": 32,
    "phase": "defeat",
    "contractIndex": 4,
-   "chain": "33d3b01913f2365b"
+   "chain": "7268da4c315d48ac"
   },
   {
    "seed": 452383,
@@ -719,7 +719,7 @@
    "actions": 92,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "3c2f3f8cfefe8f69"
+   "chain": "0ea669cb046cec2c"
   },
   {
    "seed": 476140,
@@ -731,7 +731,7 @@
    "actions": 19,
    "phase": "defeat",
    "contractIndex": 2,
-   "chain": "c61c5780cd8aaf02"
+   "chain": "ebe99a8ae053e1b6"
   },
   {
    "seed": 484059,
@@ -743,7 +743,7 @@
    "actions": 51,
    "phase": "defeat",
    "contractIndex": 9,
-   "chain": "fde3267b9fb7ac42"
+   "chain": "d1100a12679eb84e"
   },
   {
    "seed": 491978,
@@ -767,7 +767,7 @@
    "actions": 90,
    "phase": "defeat",
    "contractIndex": 19,
-   "chain": "3014ff89eede02b5"
+   "chain": "4f8cffaa953b4c7a"
   },
   {
    "seed": 507816,
@@ -779,7 +779,7 @@
    "actions": 40,
    "phase": "defeat",
    "contractIndex": 4,
-   "chain": "b618e2ce2d4dfa83"
+   "chain": "fbc996d184be62f9"
   },
   {
    "seed": 515735,
@@ -791,7 +791,7 @@
    "actions": 131,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "f2e223df79ddb653"
+   "chain": "563a5e1ff19f37a0"
   },
   {
    "seed": 523654,
@@ -815,7 +815,7 @@
    "actions": 59,
    "phase": "defeat",
    "contractIndex": 14,
-   "chain": "a6516d10146a9c50"
+   "chain": "c5c552a038044dda"
   },
   {
    "seed": 539492,
@@ -839,7 +839,7 @@
    "actions": 110,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "50db3d99665f715e"
+   "chain": "840f6623cfe0190a"
   },
   {
    "seed": 555330,
@@ -851,7 +851,7 @@
    "actions": 13,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "5fc24f217c634a13"
+   "chain": "2eae9cd141bb3d8a"
   },
   {
    "seed": 563249,
@@ -863,7 +863,7 @@
    "actions": 117,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "d45dd63550278c6b"
+   "chain": "a0f112f5c7b2ccfb"
   },
   {
    "seed": 571168,
@@ -887,7 +887,7 @@
    "actions": 101,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "8b7e0135bc3fe76e"
+   "chain": "2f4a0138a512e4e6"
   },
   {
    "seed": 587006,
@@ -899,7 +899,7 @@
    "actions": 36,
    "phase": "defeat",
    "contractIndex": 5,
-   "chain": "eb6eebe18e6690ce"
+   "chain": "18e02b1fb906e265"
   },
   {
    "seed": 594925,
@@ -911,7 +911,7 @@
    "actions": 57,
    "phase": "defeat",
    "contractIndex": 11,
-   "chain": "b60bc5a0116ade4d"
+   "chain": "cc9986dd57812aff"
   },
   {
    "seed": 602844,
@@ -923,7 +923,7 @@
    "actions": 11,
    "phase": "defeat",
    "contractIndex": 0,
-   "chain": "4b77cbfc38ff3935"
+   "chain": "18eb90540c1018aa"
   },
   {
    "seed": 610763,
@@ -935,7 +935,7 @@
    "actions": 102,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "5fda28b0f4518dca"
+   "chain": "602bbd63c8b1b390"
   },
   {
    "seed": 618682,
@@ -959,7 +959,7 @@
    "actions": 1008,
    "phase": "defeat",
    "contractIndex": 206,
-   "chain": "79105dd1170a01f1"
+   "chain": "538404b2703b2dbf"
   },
   {
    "seed": 634520,
@@ -983,7 +983,7 @@
    "actions": 118,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "77265a67680f11e2"
+   "chain": "5d96147673a4d9a3"
   },
   {
    "seed": 650358,
@@ -1007,7 +1007,7 @@
    "actions": 134,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "65e1a62045fdb822"
+   "chain": "2689c9d39e519f3c"
   },
   {
    "seed": 666196,
@@ -1031,7 +1031,7 @@
    "actions": 52,
    "phase": "defeat",
    "contractIndex": 9,
-   "chain": "2cfa761164b19b47"
+   "chain": "bf47cbcaf79075c5"
   },
   {
    "seed": 682034,
@@ -1043,7 +1043,7 @@
    "actions": 20,
    "phase": "defeat",
    "contractIndex": 2,
-   "chain": "d1a31111988ebe96"
+   "chain": "25aea1bf50065993"
   },
   {
    "seed": 689953,
@@ -1055,7 +1055,7 @@
    "actions": 161,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "b04c665f2d29ff9e"
+   "chain": "7e1ff66555c80d31"
   },
   {
    "seed": 697872,
@@ -1079,7 +1079,7 @@
    "actions": 99,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "50d14ccbef86962d"
+   "chain": "f146d11f0731719c"
   },
   {
    "seed": 713710,
@@ -1091,7 +1091,7 @@
    "actions": 37,
    "phase": "defeat",
    "contractIndex": 5,
-   "chain": "d423d042afe30401"
+   "chain": "50a0a1827ab8f0b7"
   },
   {
    "seed": 721629,
@@ -1103,7 +1103,7 @@
    "actions": 49,
    "phase": "defeat",
    "contractIndex": 11,
-   "chain": "72fe373b8abfdcb1"
+   "chain": "cb0d2e9e1ca71dee"
   },
   {
    "seed": 729548,
@@ -1115,7 +1115,7 @@
    "actions": 36,
    "phase": "defeat",
    "contractIndex": 2,
-   "chain": "7fc863ec2c3f1323"
+   "chain": "7db0bdeb0f9714e0"
   },
   {
    "seed": 737467,
@@ -1127,7 +1127,7 @@
    "actions": 100,
    "phase": "victory",
    "contractIndex": 23,
-   "chain": "007a0237bcb1dde2"
+   "chain": "f3d3b63133b0636a"
   },
   {
    "seed": 745386,
@@ -1139,7 +1139,7 @@
    "actions": 16,
    "phase": "defeat",
    "contractIndex": 1,
-   "chain": "d851ce34a79e4d4c"
+   "chain": "1a3e80b818509130"
   },
   {
    "seed": 753305,
@@ -1151,7 +1151,7 @@
    "actions": 53,
    "phase": "defeat",
    "contractIndex": 9,
-   "chain": "e5255bdba1822411"
+   "chain": "1c1f0b9fe6c41b40"
   }
  ]
 }

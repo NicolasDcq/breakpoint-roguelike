@@ -3,6 +3,7 @@
 import { randomSeed } from "../engine/rng.js";
 import { newRun } from "../engine/run.js";
 import { loadRun } from "../save/storage.js";
+import { FUSION_COST } from "../engine/hybrids.js";
 
 const TUTO_SEED = 424242;
 
@@ -95,38 +96,40 @@ export function tutoSnapshot(t) {
   };
 }
 
+// Cadeau de la Version 2 : un Serveur niveau 3 (spécialisation à choisir) et un
+// Abonnement SaaS niveau 3 déjà spécialisé, pour faire une vraie fusion hybride.
 function fusionGift(t) {
   var b2 = [...t.board];
-  var srv = [];
-  b2.forEach(function(m, i2) {
-    if (m && m.defId === "server" && !m.fused) {
-      srv.push(i2);
-    }
-  });
   var free = [];
   t.unlocked.forEach(function(u, i2) {
     if (u && !b2[i2] && !(t.holes || []).includes(i2)) {
       free.push(i2);
     }
   });
-  while (srv.length < 2 && free.length) {
-    var i = free.shift();
-    b2[i] = { uid: "tzg" + i, defId: "server", level: 1 };
-    srv.push(i);
-  }
-  if (srv.length < 2) {
-    for (var j = b2.length - 1; j >= 0 && srv.length < 2; j--) {
-      if (b2[j] && b2[j].defId !== "server") {
-        b2[j] = { uid: "tzg" + j, defId: "server", level: 1 };
-        srv.push(j);
+  function place(defId, avoid) {
+    var at = b2.findIndex(function(m, i2) {
+      return m && m.defId === defId && !m.fused && i2 !== avoid;
+    });
+    if (at < 0 && free.length) {
+      at = free.shift();
+    }
+    if (at < 0) {
+      for (var j = b2.length - 1; j >= 0; j--) {
+        if (j !== avoid && b2[j] && b2[j].defId !== "server" && !b2[j].fused) {
+          at = j;
+          break;
+        }
       }
     }
+    return at;
   }
-  srv.slice(0, 2).forEach(function(i2) {
-    var m = b2[i2];
-    b2[i2] = { uid: m.uid, defId: "server", level: 3, ...m.edition ? { edition: m.edition } : {} };
-  });
-  return { board: b2, tzGift: true };
+  var srv = place("server", -1);
+  var m = b2[srv];
+  b2[srv] = { uid: m ? m.uid : "tzg" + srv, defId: "server", level: 3, ...m && m.edition ? { edition: m.edition } : {} };
+  var saas = place("saas", srv);
+  var n = b2[saas];
+  b2[saas] = { uid: n && n.defId === "saas" ? n.uid : "tzg" + saas, defId: "saas", level: 3, branch: "B" };
+  return { board: b2, data: Math.max(t.data, FUSION_COST), tzGift: true };
 }
 
 export const TUTO_STEPS = [
@@ -423,7 +426,7 @@ export const TUTO_STEPS = [
       return c.sel != null ? [".mm-foot", ".module-sheet", ".module-modal"] : [".board"];
     },
     pose: "surpris",
-    text: "Cadeau de bienvenue : j’ai passé <b>deux Serveurs au niveau 3</b> ! Au niveau 3, un module choisit une <b>spécialisation</b> : A ou B, deux façons de jouer.",
+    text: "Cadeau de bienvenue : un <b>Serveur</b> et un <b>Abonnement SaaS</b> au niveau 3 ! Au niveau 3, un module choisit une <b>spécialisation</b> : A ou B, deux façons de jouer. Le SaaS a déjà la sienne.",
     action: "Touche un Serveur et choisis sa spécialisation",
     done: function(c) {
       return c.t.board.some(function(m) {
@@ -440,8 +443,8 @@ export const TUTO_STEPS = [
       return c.sel != null ? [".mm-foot", ".module-sheet", ".module-modal"] : [".fusion-btn"];
     },
     pose: "surpris",
-    text: "Le meilleur pour la fin : deux modules <b>identiques au niveau 3</b> peuvent <b>fusionner</b> en un module <b>2.0</b>, bien plus fort. Et ça libère une case !",
-    action: "Appuie sur Fusion et fusionne tes Serveurs",
+    text: "Le meilleur pour la fin : la <b>fusion</b>. Deux modules <b>niveau 3</b>, n’importe lesquels, deviennent un seul module. Il garde <b>les deux effets</b> et leurs spécialisations, compte dans <b>les deux familles</b>, et libère une case ! La pastille du bouton dit combien de fusions sont prêtes.",
+    action: "Appuie sur Fusion, touche les deux cases du haut pour choisir ton Serveur et ton SaaS, puis Fusionner",
     done: function(c, s2) {
       return c.t.stats.fusions > s2.fus;
     },
@@ -452,7 +455,7 @@ export const TUTO_STEPS = [
       return c.t.phase === "build" && !c.fusion;
     },
     wait: function() {
-      return "Joli Datacenter ! Ferme cet écran pour finir.";
+      return "Joli Cloud managé ! Ferme cet écran pour finir.";
     },
     pose: "cafe",
     hero: true,

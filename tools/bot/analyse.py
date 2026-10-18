@@ -65,3 +65,8 @@ print('  modules présents en fin (% des parties) :', ', '.join(f'{k} {v/len(rec
 srv = sum(1 for r in recs if 'server' in r['modules'] and 'database' in r['modules'])
 print(f'  Serveur + Base ensemble : {srv/len(recs)*100:.0f} % des parties')
 print(f'  durée moyenne d’une partie : {sum(r["ms"] for r in recs)/len(recs)/1000:.1f} s')
+fu = [r.get('fusions') or 0 for r in recs]
+hy = C.Counter()
+for r in recs: hy.update(r.get('hybrids') or [])
+print(f'\n== Fusions : {sum(fu)/len(recs):.2f} par partie ; hybrides en fin : {sum(hy.values())/len(recs):.2f} par partie')
+if hy: print('  les plus fréquents :', ', '.join(f'{k} {v}' for k, v in hy.most_common(10)))

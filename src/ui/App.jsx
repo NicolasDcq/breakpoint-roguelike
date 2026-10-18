@@ -11,12 +11,11 @@ import { MAX_DIFFICULTY, difficultyInfo } from "../engine/difficulty.js";
 import { brokenSlots } from "../engine/drawer.js";
 import { betaCrashes } from "../engine/editions.js";
 import { GOODIE_IDS } from "../engine/goodies.js";
-import { findFusionPartner } from "../engine/moduleView.js";
 import { PLUGINS, pluginSellPrice } from "../engine/plugins.js";
 import {
   canDeploy,
-  fusionPairs,
-  nearFusions,
+  fusionCandidates,
+  fusionCount,
   previewDeploy,
   runReducer,
 } from "../engine/reducer.js";
@@ -498,7 +497,7 @@ export function App() {
               setShopPop(true);
             }}
           shopClosed={!!findRule(contract, "shopClosed")}
-          fusionCount={fusionPairs(run.board).length}
+          fusionCount={fusionCount(run)}
           onFusion={() => {
             setSelectedSlot(null);
             setShowFusion(true);
@@ -527,12 +526,6 @@ export function App() {
               revealed={playback.animating ? playback.index : null}
               hint={hintFor === run.contractIndex ? contractHint(run.contractIndex, contract) : null}
               onUpgrade={(k, X) => dispatch({ type: "UPGRADE", slot: k, branch: X })}
-              onFuse={() => {
-                setSelectedSlot(null);
-                setShowFusion(true);
-              }}
-              fusionPartner={selected ? findFusionPartner(run.board, selected.slot) : -1}
-              fusionShortcut={!run.tuto}
               onSell={(k) => dispatch({ type: "SELL_MODULE", slot: k })}
               onDeselect={() => setSelectedSlot(null)}
               onBuy={(k) => dispatch({ type: "BUY", index: k })}
@@ -590,6 +583,7 @@ export function App() {
               buyable={buyableSlots(run.unlocked)}
               holes={run.holes}
               drawer={run.drawer}
+              fusionReady={fusionCount(run) > 0 ? new Set(fusionCandidates(run)) : null}
               onExpand={() => dispatch({ type: "DRAWER_EXPAND" })}
               gatedFrom={99}
               gateLabel={`Rangée 4 : version ${LEGACY_COLUMNS}`}
@@ -627,12 +621,6 @@ export function App() {
                 revealed={playback.animating ? playback.index : null}
                 hint={hintFor === run.contractIndex ? contractHint(run.contractIndex, contract) : null}
                 onUpgrade={(k, X) => dispatch({ type: "UPGRADE", slot: k, branch: X })}
-                onFuse={() => {
-                  setSelectedSlot(null);
-                  setShowFusion(true);
-                }}
-                fusionPartner={selected ? findFusionPartner(run.board, selected.slot) : -1}
-              fusionShortcut={!run.tuto}
                 onSell={(k) => dispatch({ type: "SELL_MODULE", slot: k })}
                 onDeselect={() => setSelectedSlot(null)}
                 onBuy={(k) => dispatch({ type: "BUY", index: k })}
@@ -710,12 +698,10 @@ export function App() {
         && run.phase === "build"
         && (
           <FusionModal
-            board={run.board}
-            pairs={fusionPairs(run.board)}
-            near={nearFusions(run)}
+            run={run}
             locked={busy}
             mobile={mobile}
-            onFuse={(k, X) => dispatch({ type: "FUSE", slot: k, partner: X })}
+            onFuse={(fusion) => dispatch({ type: "FUSE", ...fusion })}
             onClose={() => setShowFusion(false)}
           />
         )}

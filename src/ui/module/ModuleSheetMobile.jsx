@@ -4,6 +4,7 @@ import * as React from "react";
 import { sfx } from "../../audio/sfx.js";
 import { EDITIONS, ML_GROWTH } from "../../engine/editions.js";
 import { FAMILY_LABELS } from "../../engine/families.js";
+import { FUSION_COST } from "../../engine/hybrids.js";
 import { BRANCHES, FUSED_MODULES } from "../../engine/fusedModules.js";
 import { patchCost, upgradeCost } from "../../engine/goodies.js";
 import { MODULES } from "../../engine/modules.js";
@@ -14,7 +15,7 @@ import {
   moduleView,
   patchVersion,
 } from "../../engine/moduleView.js";
-import { ModuleIcon } from "../common/ModuleIcon.jsx";
+import { FamilyBand, FamilyChips } from "../fusion/Fusion.jsx";
 import { FX } from "../fx.jsx";
 import {
   ProductionDetail,
@@ -45,7 +46,9 @@ export function ModuleSheetMobile(e) {
   let cost = module.level === 2 ? l : 0;
   let short = module.level === 2 && l !== null && e.data < l;
   let B = BRANCHES[module.defId];
-  let cur = module.fused
+  let cur = r.hybrid
+    ? { lv: `Hybride · ${patchVersion(module)}`, name: r.baseName, text: r.text, more: describePatch(module) }
+    : module.fused
     ? { lv: patchVersion(module), name: n.name, text: n.text, more: describePatch(module) }
     : module.level === 3 && module.branch
       ? {
@@ -56,11 +59,12 @@ export function ModuleSheetMobile(e) {
       : { lv: "Niveau " + module.level, name: null, text: a.describe(module.level) };
   let effL = (() => {
     let el = editionNote(module, 1);
-    if (!el || a.kind !== "producer") {
+    if (!el || r.kind !== "producer") {
       return null;
     }
     let C2 = productionBreakdown(e, module, a);
-    let ft2 = C2.key && C2.N > 1 ? ` et la famille ${FAMILY_LABELS[a.family]} niv. ${C2.N}` : "";
+    let raised = C2.familyKeys.filter((entry) => entry.level > 1);
+    let ft2 = raised.map((entry) => ` et la famille ${FAMILY_LABELS[entry.family]} niv. ${entry.level}`).join("");
     return C2.ctxDep
       ? `Avec ${el}, toute sa production est multipliée (détail plus bas).`
       : `En vrai, avec ${el}${ft2}, il produit ${fmtOutput(C2.tot)} à chaque activation.`;
@@ -75,6 +79,7 @@ export function ModuleSheetMobile(e) {
       </p>
     </div>
   );
+  let fusionNote = `Au niveau 3, fusionne-le avec le bouton Fusion (${FUSION_COST} ◆) : avec un 2e ${a.name}, il devient ${n.name} ; avec un autre module niveau 3, un hybride qui garde les deux effets et les deux familles.`;
   let next = null;
   if (!module.fused && module.level === 1) {
     next = (
@@ -94,30 +99,30 @@ export function ModuleSheetMobile(e) {
           {module.level === 3
             ? "Niveau 3 atteint grâce à un bonus : choisis sa spécialisation, gratuitement."
             : "Le niveau 3 se joue en choisissant une spécialisation, A ou B. Compare-les en bas de l’écran."}
-          {" Le choix est définitif (seule une fusion le remplace)."}
+          {" Le choix est définitif ; une fusion hybride la garde."}
         </p>
-        <h3>Ensuite : la fusion</h3>
-        {card("Fusion", n.name, n.text, "later")}
-        <p className="mm-note">
-          {`Deux ${a.name} niveau 3 fusionnent en ${n.name}, quelle que soit leur spécialisation.`}
-        </p>
+        <p className="mm-note">{fusionNote}</p>
       </section>
     );
   } else if (!module.fused && module.level === 3) {
     next = (
       <section className="mm-sec">
         <h3>Prochaine étape : la fusion</h3>
-        {card("Fusion", n.name, n.text, "next")}
-        <p className="mm-note">
-          {e.fusionPartner >= 0
-            ? `Tu as un 2e ${a.name} niveau 3 : vous pouvez fusionner. Ça libère une case.`
-            : `Il te faut un 2e ${a.name} niveau 3 (n’importe quelle spécialisation) pour fusionner.`}
-        </p>
+        <p className="mm-note">{fusionNote.replace("Au niveau 3, fusionne", "Fusionne")}</p>
       </section>
     );
   } else if (module.fused) {
     next = (
       <section className="mm-sec">
+        {r.hybrid && (
+          <p className="mm-note">
+            {"Fusion de "}
+            {r.parents.map((parent) => `${MODULES[parent.defId].name}${parent.branchName ? ` (${parent.branchName})` : ""}`).join(" et ")}
+            {". Il compte comme "}
+            {r.families.map((family) => FAMILY_LABELS[family]).join(" et comme ")}
+            {"."}
+          </p>
+        )}
         <p className="mm-note">
           {d === null
             ? "Version finale atteinte."
@@ -154,15 +159,7 @@ export function ModuleSheetMobile(e) {
       </button>
     );
   } else if (module.level === 3) {
-    main = (
-      <button
-        className="primary fuse mm-go"
-        disabled={e.locked || e.fusionPartner < 0}
-        onClick={() => e.onFuse(slot)}
-      >
-        {e.fusionPartner >= 0 ? "Fusionner…" : "Fusion : 2e niveau 3 requis"}
-      </button>
-    );
+    main = null;
   } else {
     main = (
       <button
@@ -178,22 +175,30 @@ export function ModuleSheetMobile(e) {
       </button>
     );
   }
+  let where = slot >= 100 ? `tiroir ${slot - 99}` : `case ${slot + 1}`;
   return (
+    <>
+    <div className="mm-backdrop" aria-hidden="true" onClick={e.onDeselect} />
     <div
       className={`module-sheet mm accent-${a.accent}`}
       role="dialog"
       aria-modal="true"
       aria-label={"Fiche de " + r.name}
     >
+      <span className="mm-handle" aria-hidden="true" />
       <header className="mm-head">
-        <span className="insp-icon mm-icon"><ModuleIcon id={module.defId} size={40} /></span>
-        <div className="mm-title">
-          <h2>{module.fused ? n.name : r.name}</h2>
-          <span className="mm-sub">
-            {`Famille ${FAMILY_LABELS[a.family]} · ${a.kind === "utility" ? "utilitaire" : "producteur"} · case ${slot + 1}`}
+        <span className={`mm-tile accent-${a.accent}`} aria-hidden="true">
+          <FamilyBand module={module} size={18} className="mm-tile-band" />
+          <span className="mm-tile-name">{r.baseName ?? r.name}</span>
+          <span className="mm-tile-lvl num">
+            {module.fused ? patchVersion(module) : `${"■".repeat(module.level)}${"□".repeat(3 - module.level)}`}
           </span>
+        </span>
+        <div className="mm-title">
+          <h2>{r.name}</h2>
           <span className="mm-tags">
-            {module.fused && <span className="fused-tag">{patchVersion(module)}</span>}
+            <FamilyChips families={r.families} />
+            {module.fused && <span className="fused-tag">{r.hybrid ? "HYBRIDE" : patchVersion(module)}</span>}
             {r.branchName
               && <span className="branch-tag">{module.branch + " · " + r.branchName}</span>}
             {module.edition
@@ -203,6 +208,10 @@ export function ModuleSheetMobile(e) {
                 </span>
               )}
           </span>
+          <span className="mm-sub">
+            {`${r.kind === "utility" ? "Utilitaire" : "Producteur"} · ${where}`}
+          </span>
+          {r.flavor && <span className="mm-flavor">{r.flavor}</span>}
         </div>
         <span className="mm-wallet num">{e.data}{" ◆"}</span>
       </header>
@@ -225,7 +234,6 @@ export function ModuleSheetMobile(e) {
           )}
         {next}
         {ProductionDetail(e, module, a)}
-        {r.flavor && <p className="flavor mm-flavor">{r.flavor}</p>}
       </div>
       <footer className="mm-foot">
         {pick
@@ -252,19 +260,6 @@ export function ModuleSheetMobile(e) {
               </div>
             </div>
           )}
-        {pick
-          && module.level === 3
-          && e.fusionPartner >= 0
-          && e.fusionShortcut !== false
-          && (
-            <button
-              className="primary fuse mm-alt"
-              disabled={e.locked}
-              onClick={() => e.onFuse(slot)}
-            >
-              Ou fusionner directement…
-            </button>
-          )}
         {main}
         <div className="mm-row">
           <button className="ghost mm-sell" disabled={e.locked} onClick={() => e.onSell(slot)}>
@@ -276,5 +271,6 @@ export function ModuleSheetMobile(e) {
         </div>
       </footer>
     </div>
+    </>
   );
 }

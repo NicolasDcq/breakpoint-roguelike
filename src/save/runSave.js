@@ -54,9 +54,14 @@ export function parseRun(raw) {
       || state.unlocked.length !== 25) {
       return null;
     }
-    for (let a of state.board) {
-      if (a !== null
-        && (!a || !(a.defId in MODULES) || ![1, 2, 3].includes(a.level) || typeof a.uid != "string")) {
+    // Plateau et tiroir : modules connus ; un hybride a un second parent connu.
+    let badModule = (m) => !m
+      || !(m.defId in MODULES)
+      || ![1, 2, 3].includes(m.level)
+      || typeof m.uid != "string"
+      || m.partnerId !== undefined && !(m.partnerId in MODULES);
+    for (let a of [...state.board, ...Array.isArray(state.drawer) ? state.drawer : []]) {
+      if (a !== null && badModule(a)) {
         return null;
       }
     }

@@ -99,3 +99,61 @@ test("pastille de montée de niveau : mêmes conditions que l'action UPGRADE", (
   assert.equal(upgradeAvailability({ ...base, phase: "reward", data: 99 }, mod()), null);
   assert.equal(upgradeAvailability({ ...base, data: 99 }, null), null);
 });
+
+// Fusion hybride : deux modules niveau 3 différents, effets combinés, deux familles.
+function fusionTable() {
+  const s = newRun(77, 1, false, "startup");
+  const state = { ...s, phase: "build", data: 20, board: s.board.map(() => null), drawer: [null, null] };
+  state.board[0] = { uid: "a", defId: "server", level: 3, branch: "A", edition: "opt" };
+  state.board[1] = { uid: "b", defId: "saas", level: 3, branch: "B", edition: "free" };
+  state.board[2] = { uid: "c", defId: "server", level: 3, branch: "B" };
+  state.drawer[0] = { uid: "d", defId: "api", level: 3, branch: "A" };
+  return state;
+}
+
+test("fusion hybride : nom, deux familles, spécialisations gardées, coût en Data", async () => {
+  const { moduleView, countFamilies } = await import("../src/engine/moduleView.js");
+  const { fusionCount } = await import("../src/engine/reducer.js");
+  const { FUSION_COST, HYBRID_NAMES } = await import("../src/engine/hybrids.js");
+  assert.equal(Object.keys(HYBRID_NAMES).length, 190);
+  assert.equal(new Set(Object.values(HYBRID_NAMES)).size, 190);
+  const state = fusionTable();
+  assert.equal(fusionCount(state), 2);
+  const next = runReducer(state, { type: "FUSE", slot: 1, partner: 0, edition: "partner" });
+  const hybrid = next.board[1];
+  assert.equal(next.board[0], null);
+  assert.equal(next.data, 20 - FUSION_COST);
+  assert.equal(hybrid.defId, "server");
+  assert.equal(hybrid.partnerId, "saas");
+  assert.equal(hybrid.branch, "A");
+  assert.equal(hybrid.partnerBranch, "B");
+  assert.equal(hybrid.edition, "opt");
+  const view = moduleView(hybrid);
+  assert.equal(view.name, "Cloud managé");
+  assert.deepEqual(view.families, ["calcul", "business"]);
+  assert.equal(countFamilies(next.board).business, 1);
+  assert.equal(countFamilies(next.board).calcul, 2);
+});
+
+test("fusion hybride : les deux effets s'additionnent au déploiement", () => {
+  const state = fusionTable();
+  const fused = runReducer(state, { type: "FUSE", slot: 0, partner: 1, edition: "slot" });
+  const result = previewDeploy({ ...fused, board: fused.board.map((m, i) => (i === 2 ? null : m)) });
+  const first = result.events.find((e) => e.t === "activate" && e.slot === 0);
+  assert.equal(first.out.compute, 30);
+  assert.equal(first.out.budget, 2);
+  assert.equal(first.out.scale, 0.75);
+});
+
+test("fusion : depuis le tiroir, deux modules identiques donnent la 2.0, pas de fusion sans Data", () => {
+  const state = fusionTable();
+  const withDrawer = runReducer(state, { type: "FUSE", slot: 2, partner: 100 });
+  assert.equal(withDrawer.drawer[0], null);
+  assert.equal(withDrawer.board[2].partnerId, "api");
+  const twin = runReducer(state, { type: "FUSE", slot: 0, partner: 2 });
+  assert.equal(twin.board[0].fused, true);
+  assert.equal(twin.board[0].partnerId, undefined);
+  const poor = runReducer({ ...state, data: 3 }, { type: "FUSE", slot: 0, partner: 1 });
+  assert.equal(poor.board[0].defId, "server");
+  assert.equal(poor.notice.tone, "error");
+});
