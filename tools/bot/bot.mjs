@@ -4,7 +4,7 @@
 //
 //   node tools/bot/bot.mjs <graine> <niveau> <entreprise>
 import { runReducer, fusionCandidates } from "../../src/engine/reducer.js";
-import { FUSION_COST } from "../../src/engine/hybrids.js";
+import { fusionCost } from "../../src/engine/hybrids.js";
 import { MODULES } from "../../src/engine/modules.js";
 import { COMPANIES } from "../../src/engine/companies.js";
 import { findRule } from "../../src/engine/contracts.js";
@@ -118,14 +118,14 @@ function shopStep(s, log) {
   // Fusions : toutes les paires (BOT_FUSION=twins : seulement deux modules identiques,
   // comme avant les hybrides ; BOT_FUSION=none : aucune).
   const fusionMode = process.env.BOT_FUSION ?? "all";
-  const ready = fusionMode === "none" || s.data < FUSION_COST ? [] : fusionCandidates(s);
+  const ready = fusionMode === "none" || s.data < fusionCost(s) ? [] : fusionCandidates(s);
   const at = (k) => (k >= 100 ? s.drawer[k - 100] : s.board[k]);
   for (let x = 0; x < ready.length; x++) for (let y = x + 1; y < ready.length; y++) {
     const [p, q] = [ready[x], ready[y]];
     if (fusionMode === "twins" && at(p).defId !== at(q).defId) continue;
     const editions = at(p).edition && at(q).edition ? ["slot", "partner"] : [undefined];
     // Case gardée : celle du plateau (la première si les deux y sont), pour limiter le calcul.
-    for (const edition of editions) consider("fuse", A(s, { type: "FUSE", slot: p, partner: q, edition }), 0, FUSION_COST, 0.02);
+    for (const edition of editions) consider("fuse", A(s, { type: "FUSE", slot: p, partner: q, edition }), 0, fusionCost(s), 0.02);
   }
   const free = openSlots(s).filter((i) => !s.board[i]);
   const drawerFree = (s.drawer ?? []).some((d) => !d);

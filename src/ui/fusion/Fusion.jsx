@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { EDITIONS } from "../../engine/editions.js";
 import { FAMILY_LABELS } from "../../engine/families.js";
-import { FUSION_COST } from "../../engine/hybrids.js";
+import { FUSION_COST_STEP, fusionCost } from "../../engine/hybrids.js";
 import { MODULES } from "../../engine/modules.js";
 import { moduleView, patchVersion } from "../../engine/moduleView.js";
 import { fusionCandidates, fusionCount, fusionResult } from "../../engine/reducer.js";
@@ -315,7 +315,8 @@ export function FusionModal({ run, locked, mobile, onFuse, onClose }) {
   let editionOwner = editionFrom === "slot" ? 0 : 1;
   let editionAction = bothEditions ? (editionOwner === keepIndex ? "slot" : "partner") : undefined;
   let result = ready ? fusionResult(keepModule, otherModule, editionAction) : null;
-  let enough = run.data >= FUSION_COST;
+  let cost = fusionCost(run);
+  let enough = run.data >= cost;
 
   return (
     <Modal className="fusion-modal" onClose={onClose}>
@@ -385,8 +386,9 @@ export function FusionModal({ run, locked, mobile, onFuse, onClose }) {
               </div>
             </div>
             <span className={`fu-cost num ${enough ? "" : "short"}`}>
-              {`${FUSION_COST} ◆ · stock ${run.data} ➜ ${run.data - FUSION_COST}`}
+              {`${cost} ◆ · stock ${run.data} ➜ ${run.data - cost}`}
             </span>
+            <span className="fu-cost-next dim small">{`La fusion suivante coûtera ${cost + FUSION_COST_STEP} ◆.`}</span>
           </div>
         )}
       </div>
@@ -404,7 +406,7 @@ export function FusionModal({ run, locked, mobile, onFuse, onClose }) {
           }}
         >
           {enough ? "Fusionner " : "Il faut "}
-          <span className="fu-nowrap">{enough ? `· ${FUSION_COST} ◆` : `${FUSION_COST} ◆`}</span>
+          <span className="fu-nowrap">{enough ? `· ${cost} ◆` : `${cost} ◆`}</span>
         </button>
       </div>
     </Modal>

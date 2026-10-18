@@ -4,7 +4,6 @@ import * as React from "react";
 import { sfx } from "../../audio/sfx.js";
 import { EDITIONS, ML_GROWTH } from "../../engine/editions.js";
 import { FAMILY_LABELS } from "../../engine/families.js";
-import { FUSION_COST } from "../../engine/hybrids.js";
 import { BRANCHES, FUSED_MODULES } from "../../engine/fusedModules.js";
 import { patchCost, upgradeCost } from "../../engine/goodies.js";
 import { MODULES } from "../../engine/modules.js";
@@ -79,7 +78,7 @@ export function ModuleSheetMobile(e) {
       </p>
     </div>
   );
-  let fusionNote = `Au niveau 3, fusionne-le avec le bouton Fusion (${FUSION_COST} ◆) : avec un 2e ${a.name}, il devient ${n.name} ; avec un autre module niveau 3, un hybride qui garde les deux effets et les deux familles.`;
+  let fusionNote = `Au niveau 3, fusionne-le avec le bouton Fusion (${e.fusionCost ?? 12} ◆, puis plus cher à chaque fusion) : avec un 2e ${a.name}, il devient ${n.name} ; avec un autre module niveau 3, un hybride qui garde les deux effets et les deux familles.`;
   let next = null;
   if (!module.fused && module.level === 1) {
     next = (
