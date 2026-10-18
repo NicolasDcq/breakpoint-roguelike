@@ -1,8 +1,6 @@
 // Colonne latérale : fiche, boutique, journal.
 
-import { Modal } from "./common/Modal.jsx";
 import { Journal } from "./journal/Journal.jsx";
-import { ModuleInspector } from "./module/ModuleInspector.jsx";
 import { ModuleSheetMobile } from "./module/ModuleSheetMobile.jsx";
 import { Shop, ShopModal } from "./shop/Shop.jsx";
 
@@ -11,15 +9,9 @@ export function SidePanel(e) {
     <>
       {e.shopPop && <ShopModal {...e} />}
       <aside className="side">
-        {e.selected && e.mobile
-          ? <ModuleSheetMobile {...e} selected={e.selected} key="mm" />
-          : null}
-        {e.selected && !e.mobile
-          ? (
-            <Modal className="module-modal" onClose={e.onDeselect}>
-              <ModuleInspector {...e} selected={e.selected} />
-            </Modal>
-          )
+        {/* Même fiche sur téléphone et ordinateur (panneau qui monte / fenêtre au centre). */}
+        {e.selected
+          ? <ModuleSheetMobile {...e} selected={e.selected} desktop={!e.mobile} key="mm" />
           : e.hint && <div className="hint"><p>{e.hint}</p></div>}
         {!e.mobile
           && (
