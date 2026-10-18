@@ -5,8 +5,12 @@
 
 import { MODULES } from "./modules.js";
 
-// Coût d'une fusion, hybride ou 2.0, en Data.
-export const FUSION_COST = 8;
+// Coût d'une fusion, hybride ou 2.0, en Data : 12 ◆ la première, puis +6 ◆ à
+// chaque fusion déjà faite dans la partie (12, 18, 24…).
+export const FUSION_BASE_COST = 12;
+export const FUSION_COST_STEP = 6;
+
+export const fusionCost = (state) => FUSION_BASE_COST + FUSION_COST_STEP * (state.stats?.fusions ?? 0);
 
 const ORDER = Object.keys(MODULES);
 

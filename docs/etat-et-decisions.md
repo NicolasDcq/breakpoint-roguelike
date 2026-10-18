@@ -68,7 +68,7 @@ Règles validées par l'utilisateur le 18/10 (maquettes : page « Fusion » du c
 - **Deux modules niveau 3 quelconques** fusionnent, du plateau ou du tiroir. Deux modules identiques donnent toujours la 2.0 (Datacenter…). Deux modules différents donnent un **hybride**.
 - L'hybride **garde les deux effets**, avec la spécialisation A/B de chaque parent : 4 versions par paire. Il **compte dans les deux familles** (bonus de famille, Marketplace, Pare-feu, Plugins de famille). Un hybride producteur + soutien produit puis agit (ex. Reverse Proxy : 1 ◆ → +26 Compute, puis le producteur suivant ×4).
 - **190 noms** tirés du vrai monde informatique (`src/engine/hybrids.js`, brouillon dans le projet : `claude/hybrides-noms.md`). Texte d'ambiance provisoire : « X et Y dans la même baie ».
-- **Coût : 8 ◆** pour toute fusion (`FUSION_COST`). Avant : gratuite.
+- **Coût qui monte (18/10, décision de l'utilisateur)** : 12 ◆ la première fusion de la partie, puis +6 ◆ à chaque fusion déjà faite (12, 18, 24…), hybride ou 2.0 (`fusionCost`, `src/engine/hybrids.js`). L'atelier affiche le prix de la suivante. Avant les hybrides : gratuite ; première version : 8 ◆ fixe, jugé trop bas pour le gain.
 - **Éditions** : si les deux parents en ont une (différente), le joueur choisit laquelle garder ; sinon celle qui existe est gardée.
 - Un hybride monte en 2.1, 2.2, 2.3 comme une 2.0. Prix de vente : moitié du prix des deux parents + 2 $.
 - Interdit par le client : un hybride est bloqué si l'un de ses parents est interdit. Les Plugins de forme lisent sa première famille.
@@ -85,6 +85,7 @@ Règles validées par l'utilisateur le 18/10 (maquettes : page « Fusion » du c
   | Aucune fusion | 33 % | 12 % | 2 % | 0 |
 
   Les hybrides aident un peu, surtout aux niveaux 4 et 8, sans écraser le jeu : pas de paire dominante (le plus fréquent apparaît dans 6 parties sur 144, 40 hybrides différents). Les fusions restent rares (moins d'une par partie) : il faut deux niveaux 3 et 8 ◆. Business reste à 2 % du plateau chez le bot, qui juge sur le score et pas sur l'argent. La prime de synergie (+30 %) n'est pas ajoutée.
+- **Bot avec le coût qui monte** (même série) : 35 % / 12 % / 12 %, 0,40 fusion par partie. Écart dans le bruit de 48 parties : la fusion reste un bonus modeste, plus chère sans devenir inutile.
 
 ## Premier Plugin (décision du 16/10)
 On **garde le choix** du premier Plugin parmi 3 tirés au hasard (plutôt qu'un Plugin imposé) : on s'adapte au tirage sans subir un départ raté. Si un Plugin est toujours pris, c'est un problème d'équilibre à corriger. Réglages possibles, **non décidés** : seulement des communs au départ ; 3 Plugins d'axes différents (économie, production, réactivations) ; tirage orienté selon l'entreprise.

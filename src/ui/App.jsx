@@ -11,6 +11,7 @@ import { MAX_DIFFICULTY, difficultyInfo } from "../engine/difficulty.js";
 import { brokenSlots } from "../engine/drawer.js";
 import { betaCrashes } from "../engine/editions.js";
 import { GOODIE_IDS } from "../engine/goodies.js";
+import { fusionCost } from "../engine/hybrids.js";
 import { PLUGINS, pluginSellPrice } from "../engine/plugins.js";
 import {
   canDeploy,
@@ -545,6 +546,7 @@ export function App() {
               arrTaken={run.arrTaken ?? [false, false]}
               onBuySlot={(k) => dispatch({ type: "BUY_PACK", slot: k })}
               sellValue={selected ? sellPriceOf(selected.module) : null}
+              fusionCost={fusionCost(run)}
               freeUpgrade={freeUpgradeAvailable(run)}
               mobile={mobile}
               onInspectOffer={(k) => setPluginDetail({ offer: k })}
@@ -640,6 +642,7 @@ export function App() {
                 arrTaken={run.arrTaken ?? [false, false]}
                 onBuySlot={(k) => dispatch({ type: "BUY_PACK", slot: k })}
                 sellValue={selected ? sellPriceOf(selected.module) : null}
+              fusionCost={fusionCost(run)}
                 freeUpgrade={freeUpgradeAvailable(run)}
                 mobile={mobile}
                 onInspectOffer={(k) => setPluginDetail({ offer: k })}

@@ -3,7 +3,7 @@
 import { randomSeed } from "../engine/rng.js";
 import { newRun } from "../engine/run.js";
 import { loadRun } from "../save/storage.js";
-import { FUSION_COST } from "../engine/hybrids.js";
+import { fusionCost } from "../engine/hybrids.js";
 
 const TUTO_SEED = 424242;
 
@@ -129,7 +129,7 @@ function fusionGift(t) {
   var saas = place("saas", srv);
   var n = b2[saas];
   b2[saas] = { uid: n && n.defId === "saas" ? n.uid : "tzg" + saas, defId: "saas", level: 3, branch: "B" };
-  return { board: b2, data: Math.max(t.data, FUSION_COST), tzGift: true };
+  return { board: b2, data: Math.max(t.data, fusionCost(t)), tzGift: true };
 }
 
 export const TUTO_STEPS = [

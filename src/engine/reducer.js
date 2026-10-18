@@ -9,7 +9,7 @@ import { EDITIONS } from "./editions.js";
 import { FAMILY_LABELS, PACK_CHOICES, drawPackFamilies, familyLevel } from "./families.js";
 import { BRANCHES, FUSED_MODULES } from "./fusedModules.js";
 import { GOODIES, goodieIncome, goodiePrice, upgradeCost } from "./goodies.js";
-import { FUSION_COST, hybridPair } from "./hybrids.js";
+import { fusionCost, hybridPair } from "./hybrids.js";
 import { MODULES } from "./modules.js";
 import { MAX_PATCH, findFusionPartner, moduleView, patchVersion } from "./moduleView.js";
 import { PLUGINS, pluginSellPrice } from "./plugins.js";
@@ -676,14 +676,15 @@ function fuseModules(state, action) {
   if (partnerSlot === action.slot || !ready(first) || !ready(second)) {
     return withError(state, "Il faut deux modules niveau 3 pour fusionner.");
   }
-  if (state.data < FUSION_COST) {
-    return withError(state, `Pas assez de Data (${FUSION_COST} ◆ requis pour fusionner).`);
+  let cost = fusionCost(state);
+  if (state.data < cost) {
+    return withError(state, `Pas assez de Data (${cost} ◆ requis pour fusionner).`);
   }
   let next = {
     ...state,
     board: [...state.board],
     drawer: [...state.drawer ?? []],
-    data: state.data - FUSION_COST,
+    data: state.data - cost,
     stats: { ...state.stats },
   };
   let uid = nextUid(next, "f");

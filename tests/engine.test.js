@@ -114,7 +114,7 @@ function fusionTable() {
 test("fusion hybride : nom, deux familles, spécialisations gardées, coût en Data", async () => {
   const { moduleView, countFamilies } = await import("../src/engine/moduleView.js");
   const { fusionCount } = await import("../src/engine/reducer.js");
-  const { FUSION_COST, HYBRID_NAMES } = await import("../src/engine/hybrids.js");
+  const { fusionCost, HYBRID_NAMES } = await import("../src/engine/hybrids.js");
   assert.equal(Object.keys(HYBRID_NAMES).length, 190);
   assert.equal(new Set(Object.values(HYBRID_NAMES)).size, 190);
   const state = fusionTable();
@@ -122,7 +122,9 @@ test("fusion hybride : nom, deux familles, spécialisations gardées, coût en D
   const next = runReducer(state, { type: "FUSE", slot: 1, partner: 0, edition: "partner" });
   const hybrid = next.board[1];
   assert.equal(next.board[0], null);
-  assert.equal(next.data, 20 - FUSION_COST);
+  assert.equal(next.data, 20 - fusionCost(state));
+  assert.equal(fusionCost(state), 12);
+  assert.equal(fusionCost(next), 18);
   assert.equal(hybrid.defId, "server");
   assert.equal(hybrid.partnerId, "saas");
   assert.equal(hybrid.branch, "A");
