@@ -13,6 +13,7 @@ import { fusionCandidates, fusionCount, fusionResult } from "../../engine/reduce
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { FX } from "../fx.jsx";
+import { EffectLines } from "../module/EffectLines.jsx";
 
 export const FuseIcon = ({ size = 22 }) => (
   <svg
@@ -119,7 +120,7 @@ function ResultBox({ result }) {
             </span>
           )}
         </div>
-        <p className="fu-text">{FX(view.text)}</p>
+        <EffectLines module={result} numbered />
       </div>
     </div>
   );
@@ -183,7 +184,7 @@ function Picker({ run, index, other, current, onPick, onCancel }) {
               {chosenView.branchName && <span className="fu-pick-branch">{chosenView.branchName}</span>}
             </div>
             <FamilyChips families={chosenView.families} />
-            <p className="fu-text">{FX(chosenView.text)}</p>
+            <EffectLines module={chosenModule} state={run} slot={chosen < 100 ? chosen : null} />
             {chosenModule.edition && (
               <p className="fu-text dim">
                 {`Édition ${EDITIONS[chosenModule.edition].name} : `}
@@ -229,7 +230,7 @@ function FusionDone({ run, done, remaining, onNext, onClose }) {
       </div>
       <div className="fu-card">
         <FamilyChips families={view.families} />
-        <p className="fu-text strong">{FX(view.text)}</p>
+        <EffectLines module={module} state={run} slot={done.slot < 100 ? done.slot : null} numbered />
         <p className="fu-text dim">
           {`Installé en ${placeLabel(done.slot).toLowerCase()}, ${placeLabel(done.freed).toLowerCase()} est libéré`}
           {module.edition ? `, édition ${EDITIONS[module.edition].name} gardée` : ""}

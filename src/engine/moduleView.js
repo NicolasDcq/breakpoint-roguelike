@@ -1,7 +1,8 @@
 // Vue résolue d'un module (niveau, spécialisation, fusion), coûts et ventes.
 
 import { BRANCHES, FUSED_MODULES } from "./fusedModules.js";
-import { hybridName, isHybrid, moduleFamilies } from "./hybrids.js";
+import { effectLines, linesText } from "./effectLines.js";
+import { hybridName, isHybrid, isModuleType, moduleFamilies } from "./hybrids.js";
 import { MODULES } from "./modules.js";
 import { fmtNum, round2 } from "./util.js";
 
@@ -55,10 +56,59 @@ function addOutputs(first, second) {
   return sum;
 }
 
+// Ressource qu'une partie dépense pour produire (API : Data, Analytics : Data, GPU : $).
+export function partSpends(defId, branch) {
+  if (defId === "analytics" || (defId === "api" && branch !== "B")) {
+    return "data";
+  }
+  return defId === "gpu" && branch !== "B" ? "budget" : null;
+}
+
+// Un hybride se nourrit lui-même : la partie qui produit de la Data ou des $
+// passe d'abord, et l'autre partie prend dans cette production avant le stock.
+function produceTogether(module, producers, ctx) {
+  let own = { data: 0, budget: 0 };
+  let spent = { data: 0, budget: 0 };
+  let take = (key, amount, fallback) => {
+    if (own[key] >= amount) {
+      own[key] -= amount;
+      spent[key] += amount;
+      return true;
+    }
+    return fallback(amount);
+  };
+  let inner = {
+    ...ctx,
+    ownsDatabase: isModuleType(module, "database"),
+    consumeData: (amount) => take("data", amount, ctx.consumeData),
+    consumeBudget: (amount) => take("budget", amount, ctx.consumeBudget),
+  };
+  let ordered = [...producers].sort((a, b) => (a.spends ? 1 : 0) - (b.spends ? 1 : 0));
+  let total = null;
+  for (let part of ordered) {
+    let out = part.produce(inner) ?? null;
+    if (out) {
+      own.data += out.data ?? 0;
+      own.budget += out.budget ?? 0;
+      total = addOutputs(total, out);
+    }
+  }
+  if (total) {
+    total = { ...total };
+    if (spent.data) {
+      total.data = (total.data ?? 0) - spent.data;
+    }
+    if (spent.budget) {
+      total.budget = (total.budget ?? 0) - spent.budget;
+    }
+  }
+  return total;
+}
+
 // Vue d'un hybride : les deux effets s'additionnent, les deux familles comptent.
 function hybridView(module) {
-  let first = partView(module.defId, module.branch);
-  let second = partView(module.partnerId, module.partnerBranch);
+  let first = { ...partView(module.defId, module.branch), spends: partSpends(module.defId, module.branch) };
+  let second = { ...partView(module.partnerId, module.partnerBranch), spends: partSpends(module.partnerId, module.partnerBranch) };
   let parts = [first, second];
   let producers = parts.filter((part) => part.kind === "producer");
   let runners = parts.filter((part) => part.run);
@@ -80,11 +130,9 @@ function hybridView(module) {
     kind: producers.length ? "producer" : "utility",
     accent: MODULES[module.defId].accent,
     usesNeighbors: parts.some((part) => part.usesNeighbors),
-    text: `${first.text} ${second.text}`,
+    text: linesText(effectLines(module)),
     preview: `${first.preview} · ${second.preview}`,
-    produce: producers.length
-      ? (ctx) => producers.reduce((total, part) => addOutputs(total, part.produce(ctx) ?? null), null)
-      : undefined,
+    produce: producers.length ? (ctx) => produceTogether(module, producers, ctx) : undefined,
     run: runners.length ? (ctx) => runners.forEach((part) => part.run(ctx)) : undefined,
     shields: parts.some((part) => part.shields),
     aura: auras.length ? (ctx) => auras.reduce((mult, part) => mult * part.aura(ctx), 1) : undefined,

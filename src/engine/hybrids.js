@@ -12,11 +12,11 @@ export const FUSION_COST_STEP = 6;
 
 export const fusionCost = (state) => FUSION_BASE_COST + FUSION_COST_STEP * (state.stats?.fusions ?? 0);
 
-const ORDER = Object.keys(MODULES);
-
-// Ordre canonique des deux parents : celui des modules dans MODULES.
+// Ordre canonique des deux parents : celui des modules dans MODULES
+// (lu à l'appel : modules.js importe ce fichier).
 export function hybridPair(a, b) {
-  return ORDER.indexOf(a) <= ORDER.indexOf(b) ? [a, b] : [b, a];
+  let order = Object.keys(MODULES);
+  return order.indexOf(a) <= order.indexOf(b) ? [a, b] : [b, a];
 }
 
 export const HYBRID_NAMES = {
@@ -218,6 +218,13 @@ export function hybridName(a, b) {
 }
 
 export const isHybrid = (module) => !!module?.fused && !!module.partnerId;
+
+// Un hybride est aussi un module de chacun de ses deux types (Serveur, Base…).
+export const isModuleType = (module, id) => !!module && (module.defId === id || module.partnerId === id);
+
+// Producteur si l'un de ses parents produit.
+export const isProducerModule = (module) => !!module
+  && (MODULES[module.defId].kind === "producer" || (!!module.partnerId && MODULES[module.partnerId].kind === "producer"));
 
 // Familles d'un module : deux pour un hybride de familles différentes.
 export function moduleFamilies(module) {

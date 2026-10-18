@@ -17,6 +17,7 @@ import {
   patchVersion,
 } from "../../engine/moduleView.js";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
+import { EffectLines } from "../module/EffectLines.jsx";
 import { FX } from "../fx.jsx";
 
 export function ModuleTip({ id, level, fused, branch, patch, edition, learn, module }) {
@@ -39,7 +40,7 @@ export function ModuleTip({ id, level, fused, branch, patch, edition, learn, mod
     return (
       <div className="tip-body">
         <strong>{view.name}{" "}<span className="fused-tag">HYBRIDE</span></strong>
-        <p>{FX(view.text)}</p>
+        <EffectLines module={module} compact />
         {u}
         <p className="dim">{describePatch(module)}</p>
         <p className="tip-syn">
@@ -57,7 +58,7 @@ export function ModuleTip({ id, level, fused, branch, patch, edition, learn, mod
     return (
       <div className="tip-body">
         <strong>{c.name}{" "}<span className="fused-tag">{patchVersion({ patch })}</span></strong>
-        <p>{FX(c.text)}</p>
+        <EffectLines module={{ defId: id, level: 3, fused: true }} compact />
         {u}
         <p className="dim">{describePatch({ defId: id, patch })}</p>
         <p className="tip-flavor">{c.flavor}</p>
@@ -73,7 +74,7 @@ export function ModuleTip({ id, level, fused, branch, patch, edition, learn, mod
         {" "}
         <span className="dim">{"niveau "}{level}{i ? ` · ${branch} ${i.name}` : ""}</span>
       </strong>
-      <p>{FX(i ? i.text : d.describe(level))}</p>
+      <EffectLines module={{ defId: id, level, branch: i ? branch : undefined }} compact />
       {u}
       {level === 1 && <p className="dim">{"Niveau 2 : "}{d.describe(2)}</p>}
       {level === 2

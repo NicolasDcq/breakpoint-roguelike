@@ -16,6 +16,7 @@ import {
   opsRetriggerScale,
 } from "./families.js";
 import { diagonals, linkedNeighbors } from "./grid.js";
+import { isProducerModule } from "./hybrids.js";
 import { MODULES } from "./modules.js";
 import { countFamilies, moduleView } from "./moduleView.js";
 import { PLUGINS, effectiveFamilyLevel } from "./plugins.js";
@@ -122,7 +123,7 @@ export function executeDeploy(input) {
   let lastProducer = -1;
   for (let x = 0; x < 25; x++) {
     let B = board[x];
-    if (B && MODULES[B.defId].kind === "producer" && !broken.has(x) && B.defId !== bannedId) {
+    if (B && isProducerModule(B) && !broken.has(x) && B.defId !== bannedId && B.partnerId !== bannedId) {
       lastProducer = x;
     }
   }
