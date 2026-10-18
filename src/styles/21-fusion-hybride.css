@@ -626,3 +626,33 @@ button.fu-mini:disabled {
   grid-row: auto;
   justify-self: start;
 }
+
+/* Ordinateur : la même fiche, en fenêtre au centre. */
+.module-sheet.mm.mm-desk {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: min(620px, calc(100vw - 40px));
+  max-height: min(860px, calc(100vh - 40px));
+  border-bottom: 3px solid var(--ink);
+  border-radius: 16px;
+  transform: translate(-50%, -50%);
+  animation: mm-pop .25s ease-out;
+  z-index: 60;
+}
+.module-sheet.mm.mm-desk .mm-handle {
+  display: none;
+}
+body:has(.mm-desk) .mm-backdrop {
+  z-index: 59;
+}
+@keyframes mm-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%);
+  }
+}
+.mm-card .mm-ctext.dim {
+  font-size: 13px;
+  opacity: .75;
+}

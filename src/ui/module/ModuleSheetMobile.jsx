@@ -39,6 +39,17 @@ export function ModuleSheetMobile(e) {
   let [sel, setSel] = RR.useState(null);
   RR.useEffect(
     () => {
+      if (!e.desktop) {
+        return undefined;
+      }
+      let onKey = (event) => event.key === "Escape" && e.onDeselect();
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    },
+    [e.desktop, e.onDeselect],
+  );
+  RR.useEffect(
+    () => {
       setSel(null);
     },
     [module.uid, module.level, module.branch],
@@ -183,7 +194,7 @@ export function ModuleSheetMobile(e) {
     <>
     <div className="mm-backdrop" aria-hidden="true" onClick={e.onDeselect} />
     <div
-      className={`module-sheet mm accent-${a.accent}`}
+      className={`module-sheet mm ${e.desktop ? "mm-desk" : ""} accent-${a.accent}`}
       role="dialog"
       aria-modal="true"
       aria-label={"Fiche de " + r.name}
