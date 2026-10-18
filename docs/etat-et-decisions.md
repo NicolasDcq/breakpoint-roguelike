@@ -76,6 +76,15 @@ Règles validées par l'utilisateur le 18/10 (maquettes : page « Fusion » du c
 - Code : `hybrids.js` (noms, `FUSION_COST`, `moduleFamilies`, `isHybrid`), `moduleView` (vue combinée), `reducer.js` (`fuseModules`, `fusionResult`, `fusionCandidates`, `fusionCount`), `deploy.js` (familles multiples, produire puis agir), UI `src/ui/fusion/Fusion.jsx`, styles `21-fusion-hybride.css`. Sauvegarde : un hybride porte `partnerId` et `partnerBranch`.
 - Référence des tests régénérée (coût de la fusion, nouveaux messages) ; 3 tests ajoutés.
 - Bot : il essaie toutes les paires (`BOT_FUSION=all`, par défaut), seulement les paires identiques (`twins`) ou aucune (`none`).
+- **Bot du 18/10** (6 graines × 8 entreprises × niveaux 1/4/8 = 144 parties par mode, 0 erreur, 0 partie bloquée) :
+
+  | Mode | Niv. 1 | Niv. 4 | Niv. 8 | Fusions par partie |
+  |---|---|---|---|---|
+  | Toutes les paires (hybrides) | 35 % | 19 % | 10 % | 0,47 |
+  | Seulement identiques | 33 % | 12 % | 4 % | 0,09 |
+  | Aucune fusion | 33 % | 12 % | 2 % | 0 |
+
+  Les hybrides aident un peu, surtout aux niveaux 4 et 8, sans écraser le jeu : pas de paire dominante (le plus fréquent apparaît dans 6 parties sur 144, 40 hybrides différents). Les fusions restent rares (moins d'une par partie) : il faut deux niveaux 3 et 8 ◆. Business reste à 2 % du plateau chez le bot, qui juge sur le score et pas sur l'argent. La prime de synergie (+30 %) n'est pas ajoutée.
 
 ## Premier Plugin (décision du 16/10)
 On **garde le choix** du premier Plugin parmi 3 tirés au hasard (plutôt qu'un Plugin imposé) : on s'adapte au tirage sans subir un départ raté. Si un Plugin est toujours pris, c'est un problème d'équilibre à corriger. Réglages possibles, **non décidés** : seulement des communs au départ ; 3 Plugins d'axes différents (économie, production, réactivations) ; tirage orienté selon l'entreprise.
