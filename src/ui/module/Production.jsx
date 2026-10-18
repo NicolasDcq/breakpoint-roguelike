@@ -14,10 +14,18 @@ import { round2 } from "../../engine/util.js";
 import { FX } from "../fx.jsx";
 
 export function productionBreakdown(e, o, a) {
-  let fam = a.family;
+  let d = moduleView(o) || a;
+  let fam = d.family ?? a.family;
   let ltsOn = (e.jokers || []).some((j) => j.defId === "lts");
   let N = effectiveFamilyLevel(e.familyLevels || {}, fam, ltsOn);
-  let d = moduleView(o) || a;
+  // Un hybride compte dans ses deux familles : chaque famille multiplie sa ressource.
+  let familyKeys = (d.families ?? [fam])
+    .map((family) => ({
+      family,
+      level: effectiveFamilyLevel(e.familyLevels || {}, family, ltsOn),
+      key: family === "calcul" ? "compute" : family === "stockage" ? "data" : null,
+    }))
+    .filter((entry) => entry.key);
   let pr2 = typeof d.produce === "function" ? d.produce : null;
   let ctxDep = false;
   let base = {};
@@ -79,12 +87,14 @@ export function productionBreakdown(e, o, a) {
   if (em !== 1 && ed.scale) {
     ed.scale = round2(ed.scale * em);
   }
-  let key = fam === "calcul" ? "compute" : fam === "stockage" ? "data" : null;
+  let key = familyKeys[0]?.key ?? null;
   let tot = { ...ed };
-  if (key && tot[key]) {
-    tot[key] = Math.round(tot[key] * familyMultiplier(N));
+  for (let entry of familyKeys) {
+    if (tot[entry.key]) {
+      tot[entry.key] = Math.round(tot[entry.key] * familyMultiplier(entry.level));
+    }
   }
-  return { N, ctxDep, base, em, pm, ed, tot, key, d };
+  return { N, ctxDep, base, em, pm, ed, tot, key, familyKeys, d };
 }
 
 export function fmtOutput(x) {
@@ -108,11 +118,12 @@ export function editionNote(o, sh) {
 }
 
 export function ProductionDetail(e, o, a) {
-  if (!a || a.kind !== "producer") {
+  let view = o ? moduleView(o) : null;
+  if (!a || !view || view.kind !== "producer") {
     return null;
   }
   let L = [];
-  let fam = a.family;
+  let fam = view.family;
   let cm = (x) => String(x).replace(".", ",");
   let unit = { compute: "Compute", data: "Data", scale: "Scale", budget: "$" };
   let C2 = productionBreakdown(e, o, a);
@@ -143,28 +154,28 @@ export function ProductionDetail(e, o, a) {
       null,
     ]);
   }
-  let key = C2.key;
-  if (key) {
+  for (let { family, level, key } of C2.familyKeys) {
     let v = C2.ed[key] || 0;
-    let mult = familyMultiplier(N);
+    let mult = familyMultiplier(level);
     let d = Math.round(v * mult) - v;
     let nm = unit[key];
     if (ctxDep) {
       L.push([
-        `Famille ${FAMILY_LABELS[fam]} niv. ${N}`,
+        `Famille ${FAMILY_LABELS[family]} niv. ${level}`,
         `×${cm(mult.toFixed(1))} sur le ${nm} du module`,
         null,
       ]);
     } else {
       L.push([
-        `Famille ${FAMILY_LABELS[fam]} niv. ${N}`,
-        N > 1 && v
+        `Famille ${FAMILY_LABELS[family]} niv. ${level}`,
+        level > 1 && v
           ? `×${cm(mult.toFixed(1))} sur le ${nm} du module`
           : "niveau de départ, pas de bonus",
-        N > 1 && v ? "+" + d : "0",
+        level > 1 && v ? "+" + d : "0",
       ]);
     }
   }
+  let key = C2.key;
   if (fam === "reseau") {
     let q = networkScaleBonus(N, 1);
     L.push([
@@ -177,7 +188,7 @@ export function ProductionDetail(e, o, a) {
     let c = opsRetriggerScale(N);
     L.push([`Famille Ops niv. ${N}`, "Scale à chaque réactivation", c ? "+" + cm(c) : "0"]);
   }
-  if (!ctxDep && (edl || C2.pm !== 1 || key && N > 1)) {
+  if (!ctxDep && (edl || C2.pm !== 1 || C2.familyKeys.some((entry) => entry.level > 1))) {
     L.push(["Total du module", null, fmtOutput(C2.tot) || "0", 1]);
   }
   return (

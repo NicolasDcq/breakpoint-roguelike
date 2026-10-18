@@ -9,6 +9,7 @@ import { EDITIONS } from "./editions.js";
 import { FAMILY_LABELS, PACK_CHOICES, drawPackFamilies, familyLevel } from "./families.js";
 import { BRANCHES, FUSED_MODULES } from "./fusedModules.js";
 import { GOODIES, goodieIncome, goodiePrice, upgradeCost } from "./goodies.js";
+import { FUSION_COST, hybridPair } from "./hybrids.js";
 import { MODULES } from "./modules.js";
 import { MAX_PATCH, findFusionPartner, moduleView, patchVersion } from "./moduleView.js";
 import { PLUGINS, pluginSellPrice } from "./plugins.js";
@@ -362,38 +363,7 @@ export function runReducer(state, action) {
       return withNotice(r, applyUpgrade(r, action.slot, action.branch), "good");
     }
     case "FUSE": {
-      if (state.phase !== "build") {
-        return state;
-      }
-      let o = state.board[action.slot];
-      if (!o) {
-        return state;
-      }
-      let a = action.partner ?? findFusionPartner(state.board, action.slot);
-      let r = a >= 0 ? state.board[a] : null;
-      let n = (i) => !!i && i.defId === o.defId && i.level === 3 && !i.fused;
-      if (a === action.slot || !n(o) || !n(r)) {
-        return withError(state, `Il faut un deuxième module ${MODULES[o.defId].name} niveau 3 pour fusionner.`);
-      }
-      let l = { ...state, board: [...state.board], stats: { ...state.stats } };
-      let d = nextUid(l, "f");
-      let u = o.edition ? o : state.board[a];
-      l.board[action.slot] = {
-        uid: d,
-        defId: o.defId,
-        level: 3,
-        fused: true,
-        ...u.edition ? { edition: u.edition } : {},
-        ...u.learn ? { learn: u.learn } : {},
-      };
-      l.board[a] = null;
-      l.fusedUid = d;
-      l.stats.fusions += 1;
-      return withNotice(
-        l,
-        `Fusion : ${MODULES[o.defId].name} ×2 → ${FUSED_MODULES[o.defId].name}. L’emplacement ${a + 1} est libéré.`,
-        "good",
-      );
+      return fuseModules(state, action);
     }
     case "UNLOCK": {
       if (state.phase !== "build" || state.unlocked[action.slot]) {
@@ -643,50 +613,100 @@ export function deploy(state) {
   return next;
 }
 
-export function fusionPairs(board) {
-  let byType = new Map();
-  board.forEach((a, r) => {
-    if (a && a.level === 3 && !a.fused) {
-      byType.set(a.defId, [...byType.get(a.defId) ?? [], r]);
+// Modules prêts à fusionner : niveau 3, pas déjà fusionnés, sur le plateau
+// (numéro de case) ou dans le tiroir (100 + numéro du tiroir).
+export function fusionCandidates(state) {
+  let ready = (module) => !!module && module.level === 3 && !module.fused;
+  let slots = [];
+  state.board.forEach((module, slot) => {
+    if (ready(module)) {
+      slots.push(slot);
     }
   });
-  let pairs = [];
-  for (let [a, r] of byType) {
-    for (let n = 0; n + 1 < r.length; n += 2) {
-      pairs.push({ defId: a, slots: [r[n], r[n + 1]] });
+  (state.drawer ?? []).forEach((module, index) => {
+    if (ready(module)) {
+      slots.push(100 + index);
     }
-  }
-  return pairs.sort((a, r) => a.slots[0] - r.slots[0]);
+  });
+  return slots;
 }
 
-export function nearFusions(state) {
-  let near = [];
-  let paired = new Set(fusionPairs(state.board).flatMap((a) => a.slots));
-  state.board.forEach((a, r) => {
-    if (!a || a.level !== 3 || a.fused || paired.has(r) || near.some((d) => d.defId === a.defId)) {
-      return;
+// Nombre de fusions qu'on peut faire d'affilée (pastille du bouton Fusion).
+export const fusionCount = (state) => Math.floor(fusionCandidates(state).length / 2);
+
+const moduleAt = (state, slot) => slot >= 100 ? (state.drawer ?? [])[slot - 100] ?? null : state.board[slot] ?? null;
+
+// Résultat d'une fusion, sans l'appliquer : utilisé par l'atelier pour l'aperçu.
+export function fusionResult(first, second, editionFrom = null) {
+  let keepEdition = editionFrom === "partner"
+    ? second
+    : editionFrom === "slot"
+      ? first
+      : first.edition ? first : second;
+  let edition = keepEdition.edition ? { edition: keepEdition.edition } : {};
+  let learn = keepEdition.learn ? { learn: keepEdition.learn } : {};
+  if (first.defId === second.defId) {
+    return { defId: first.defId, level: 3, fused: true, ...edition, ...learn };
+  }
+  let [defId, partnerId] = hybridPair(first.defId, second.defId);
+  let [main, partner] = defId === first.defId ? [first, second] : [second, first];
+  return {
+    defId,
+    partnerId,
+    level: 3,
+    fused: true,
+    ...main.branch ? { branch: main.branch } : {},
+    ...partner.branch ? { partnerBranch: partner.branch } : {},
+    ...edition,
+    ...learn,
+  };
+}
+
+function fuseModules(state, action) {
+  if (state.phase !== "build") {
+    return state;
+  }
+  let first = moduleAt(state, action.slot);
+  if (!first) {
+    return state;
+  }
+  let partnerSlot = action.partner ?? findFusionPartner(state.board, action.slot);
+  let second = partnerSlot >= 0 ? moduleAt(state, partnerSlot) : null;
+  let ready = (module) => !!module && module.level === 3 && !module.fused;
+  if (partnerSlot === action.slot || !ready(first) || !ready(second)) {
+    return withError(state, "Il faut deux modules niveau 3 pour fusionner.");
+  }
+  if (state.data < FUSION_COST) {
+    return withError(state, `Pas assez de Data (${FUSION_COST} ◆ requis pour fusionner).`);
+  }
+  let next = {
+    ...state,
+    board: [...state.board],
+    drawer: [...state.drawer ?? []],
+    data: state.data - FUSION_COST,
+    stats: { ...state.stats },
+  };
+  let uid = nextUid(next, "f");
+  let fused = { uid, ...fusionResult(first, second, action.edition) };
+  let put = (slot, value) => {
+    if (slot >= 100) {
+      next.drawer[slot - 100] = value;
+    } else {
+      next.board[slot] = value;
     }
-    let n = -1;
-    state.board.forEach((d, u) => {
-      if (u !== r
-        && d
-        && d.defId === a.defId
-        && !d.fused
-        && d.level < 3
-        && (n < 0 || d.level > state.board[n].level)) {
-        n = u;
-      }
-    });
-    if (n < 0) {
-      return;
-    }
-    let l = 0;
-    for (let d = state.board[n].level; d < 3; d++) {
-      l += upgradeCost(d, state.goodies) ?? 0;
-    }
-    near.push({ defId: a.defId, ready: r, other: n, data: l });
-  });
-  return near;
+  };
+  put(action.slot, fused);
+  put(partnerSlot, null);
+  next.fusedUid = uid;
+  next.stats.fusions += 1;
+  let freed = partnerSlot >= 100
+    ? `La place ${partnerSlot - 99} du tiroir est libérée.`
+    : `L’emplacement ${partnerSlot + 1} est libéré.`;
+  return withNotice(
+    next,
+    `Fusion : ${MODULES[first.defId].name} + ${MODULES[second.defId].name} → ${moduleView(fused).name}. ${freed}`,
+    "good",
+  );
 }
 
 export function previewDeploy(state) {

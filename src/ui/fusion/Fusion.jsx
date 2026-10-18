@@ -1,10 +1,15 @@
-// Atelier de fusion.
+// Atelier de fusion : deux cases en haut (les composants choisis), le résultat
+// en dessous. Toucher une case du haut ouvre la liste des modules niveau 3
+// fusionnables (plateau et tiroir). Deux modules identiques donnent la 2.0,
+// deux modules différents donnent un hybride qui garde les deux effets.
 
 import { useState } from "react";
 import { EDITIONS } from "../../engine/editions.js";
-import { FUSED_MODULES } from "../../engine/fusedModules.js";
+import { FAMILY_LABELS } from "../../engine/families.js";
+import { FUSION_COST } from "../../engine/hybrids.js";
 import { MODULES } from "../../engine/modules.js";
 import { moduleView, patchVersion } from "../../engine/moduleView.js";
+import { fusionCandidates, fusionCount, fusionResult } from "../../engine/reducer.js";
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { FX } from "../fx.jsx";
@@ -25,185 +30,381 @@ export const FuseIcon = ({ size = 22 }) => (
   </svg>
 );
 
-function FusionSlot({ m, slot, dim }) {
-  let a = MODULES[m.defId];
-  return (
-    <div className={`fu-mini accent-${a.accent} ${dim ? "dim" : ""}`}>
-      <span className="fu-slot num">{slot + 1}</span>
-      <span className="fu-band"><ModuleIcon id={m.defId} size={12} /></span>
-      <span className="fu-name">{a.name}</span>
-      <span className="fu-lvl num">
-        {"■".repeat(m.level)}
-        {"□".repeat(3 - m.level)}
-        {m.branch ? ` ${m.branch}` : ""}
+export const FAMILY_ACCENT = { calcul: "cyan", stockage: "violet", reseau: "pink", business: "amber", ops: "green" };
+
+const moduleAt = (run, slot) => (slot >= 100 ? (run.drawer ?? [])[slot - 100] : run.board[slot]) ?? null;
+
+export const placeLabel = (slot) => (slot >= 100 ? `Tiroir ${slot - 99}` : `Empl. ${slot + 1}`);
+
+const levelText = (module) => `${"■".repeat(module.level)}${"□".repeat(3 - module.level)}${module.branch ? ` ${module.branch}` : ""}`;
+
+// Bandeau de couleur d'un module : une couleur, ou deux pour un hybride.
+export function FamilyBand({ module, size = 12, className = "" }) {
+  let families = moduleView(module).families;
+  if (families.length > 1) {
+    return (
+      <span className={`fu-band dual ${className}`}>
+        {families.map((family) => <i key={family} className={`accent-${FAMILY_ACCENT[family]}`} />)}
       </span>
-      {m.edition && <span className="fu-ed">{EDITIONS[m.edition].tag}</span>}
+    );
+  }
+  return (
+    <span className={`fu-band accent-${MODULES[module.defId].accent} ${className}`}>
+      <ModuleIcon id={module.defId} size={size} />
+    </span>
+  );
+}
+
+export function FamilyChips({ families }) {
+  return (
+    <span className="fu-fams">
+      {families.map((family) => (
+        <span key={family} className={`fu-fam accent-${FAMILY_ACCENT[family]}`}>{FAMILY_LABELS[family]}</span>
+      ))}
+    </span>
+  );
+}
+
+function PickedSlot({ run, slot, index, onOpen, disabled }) {
+  let module = slot == null ? null : moduleAt(run, slot);
+  if (!module) {
+    return (
+      <button className="fu-pick empty" onClick={onOpen} disabled={disabled}>
+        <span className="fu-pick-plus">+</span>
+        <b>{`Composant ${index + 1}`}</b>
+        <small>Touche pour choisir</small>
+      </button>
+    );
+  }
+  let def = MODULES[module.defId];
+  let view = moduleView(module);
+  return (
+    <button className={`fu-pick accent-${def.accent}`} onClick={onOpen} disabled={disabled}>
+      <span className="fu-pick-head num">
+        <span>{placeLabel(slot)}</span>
+        <span>{levelText(module)}</span>
+      </span>
+      {module.edition && <span className="fu-ed">{EDITIONS[module.edition].tag}</span>}
+      <span className="fu-pick-name">{def.name}</span>
+      {view.branchName && <span className="fu-pick-branch">{view.branchName}</span>}
+      <small>Toucher pour changer</small>
+    </button>
+  );
+}
+
+function ResultBox({ result }) {
+  if (!result) {
+    return (
+      <div className="fu-outcome empty">
+        <span className="fu-q">?</span>
+        <b>Le module fusionné apparaît ici</b>
+        <small>Nom, familles et effets, avec tes spécialisations.</small>
+      </div>
+    );
+  }
+  let view = moduleView(result);
+  return (
+    <div className="fu-outcome">
+      <FamilyBand module={result} size={16} className="fu-outcome-band" />
+      <div className="fu-outcome-body">
+        <div className="fu-outcome-title">
+          <span className={view.hybrid ? "fu-tag" : "fu-v2 num"}>{view.hybrid ? "HYBRIDE" : "2.0"}</span>
+          <span className="fu-outcome-name">{view.name}</span>
+        </div>
+        <div className="fu-outcome-meta">
+          <FamilyChips families={view.families} />
+          {view.hybrid && (
+            <span className="fu-outcome-branches">
+              {view.parents.map((parent) => parent.branchName ?? MODULES[parent.defId].name).join(" · ")}
+            </span>
+          )}
+        </div>
+        <p className="fu-text">{FX(view.text)}</p>
+      </div>
     </div>
   );
 }
 
-function FusionCard({ pair, board, onFuse, disabled }) {
-  let [r, n] = useState(pair.slots[0]);
-  let l = r === pair.slots[0] ? pair.slots[1] : pair.slots[0];
-  let [d, u] = pair.slots.map((p) => board[p]);
-  let i = FUSED_MODULES[pair.defId];
-  let c = board[r].edition ?? board[l].edition;
+function Picker({ run, index, other, current, onPick, onCancel }) {
+  let candidates = fusionCandidates(run);
+  let [chosen, setChosen] = useState(current ?? null);
+  let groups = [
+    { label: "Plateau", slots: candidates.filter((slot) => slot < 100) },
+    { label: "Tiroir", slots: candidates.filter((slot) => slot >= 100) },
+  ].filter((group) => group.slots.length);
+  let chosenModule = chosen == null ? null : moduleAt(run, chosen);
+  let chosenView = chosenModule ? moduleView(chosenModule) : null;
   return (
-    <div className="fu-card">
-      <div className="fu-row">
-        <FusionSlot m={d} slot={pair.slots[0]} />
-        <span className="fu-plus">+</span>
-        <FusionSlot m={u} slot={pair.slots[1]} />
-        <span className="fu-arrow">➜</span>
-        <div className={`fu-result accent-${MODULES[pair.defId].accent}`}>
-          <span className="fu-v2 num">2.0</span>
-          <span className="fu-name">{i.name}</span>
-          {c && <span className="fu-ed">{EDITIONS[c].tag}</span>}
+    <>
+      <div className="fu-head">
+        <div>
+          <h2 className="fu-title">{`Composant ${index + 1}`}</h2>
+          <span className="dim small">
+            {candidates.length}
+            {" module"}
+            {candidates.length > 1 ? "s" : ""}
+            {" niveau 3 fusionnable"}
+            {candidates.length > 1 ? "s" : ""}
+          </span>
         </div>
       </div>
-      <p className="fu-text">{FX(i.text)}</p>
-      <div className="fu-actions">
-        <div className="fu-keep">
-          <span>Garder en</span>
-          <div className="fu-seg" role="radiogroup" aria-label="Emplacement de la version 2.0">
-            {pair.slots.map((p) => (
-              <button
-                key={p}
-                role="radio"
-                aria-checked={r === p}
-                className={r === p ? "on" : ""}
-                onClick={() => n(p)}
-              >
-                <span className="num">{"Empl. "}{p + 1}</span>
-              </button>
-            ))}
+      <div className="fu-list">
+        {groups.map((group) => (
+          <div key={group.label} className="fu-card fu-group">
+            <span className="fu-group-label">{group.label}</span>
+            <div className="fu-grid">
+              {group.slots.map((slot) => {
+                let module = moduleAt(run, slot);
+                let def = MODULES[module.defId];
+                let taken = slot === other;
+                return (
+                  <button
+                    key={slot}
+                    className={`fu-mini accent-${def.accent} ${chosen === slot ? "sel" : ""} ${taken ? "dim" : ""}`}
+                    disabled={taken}
+                    aria-pressed={chosen === slot}
+                    onClick={() => setChosen(slot)}
+                  >
+                    <span className="fu-slot num">{slot >= 100 ? `T${slot - 99}` : slot + 1}</span>
+                    {module.edition && <span className="fu-ed">{EDITIONS[module.edition].tag}</span>}
+                    <span className="fu-band"><ModuleIcon id={module.defId} size={12} /></span>
+                    <span className="fu-name">{def.name}</span>
+                    <span className="fu-lvl num">{taken ? "déjà pris" : levelText(module)}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-        <button className="fu-go" disabled={disabled} onClick={() => onFuse(r, l)}>
-          Fusionner
+        ))}
+        {chosenView && (
+          <div className="fu-card fu-detail">
+            <div className="fu-detail-head">
+              <b>{MODULES[chosenModule.defId].name}</b>
+              {chosenView.branchName && <span className="fu-pick-branch">{chosenView.branchName}</span>}
+            </div>
+            <FamilyChips families={chosenView.families} />
+            <p className="fu-text">{FX(chosenView.text)}</p>
+            {chosenModule.edition && (
+              <p className="fu-text dim">
+                {`Édition ${EDITIONS[chosenModule.edition].name} : `}
+                {FX(EDITIONS[chosenModule.edition].text)}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="fu-foot">
+        <button className="fu-cancel" onClick={onCancel}>Annuler</button>
+        <button className="deploy" disabled={chosen == null} onClick={() => onPick(chosen)}>
+          {chosenModule ? `Choisir : ${MODULES[chosenModule.defId].name}` : "Choisir"}
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
-export function FusionModal({ board, pairs, near, locked, mobile, onFuse, onClose }) {
-  let [d, u] = useState(null);
-  let i = d ? board[d.slot] : null;
-  if (d && i?.fused) {
-    let c = FUSED_MODULES[i.defId];
+function FusionDone({ run, done, remaining, onNext, onClose }) {
+  let module = run.board[done.slot] ?? (run.drawer ?? [])[done.slot - 100];
+  if (!module) {
+    return null;
+  }
+  let view = moduleView(module);
+  return (
+    <Modal className="fusion-modal fusion-done" onClose={onClose}>
+      <span className="dim small">{done.sources}</span>
+      <h2 className="fu-title gold">Fusion réussie</h2>
+      <div className="fu-reveal">
+        <span className="fu-rays" aria-hidden="true" />
+        <div className={`fu-result big accent-${MODULES[module.defId].accent}`}>
+          <span className={view.hybrid ? "fu-tag" : "fu-v2 num"}>{view.hybrid ? "HYBRIDE" : patchVersion(module)}</span>
+          <FamilyBand module={module} size={18} />
+          <span className="fu-name">{view.name}</span>
+          {view.hybrid && (
+            <span className="fu-outcome-branches">
+              {view.parents.map((parent) => parent.branchName ?? MODULES[parent.defId].name).join(" · ")}
+            </span>
+          )}
+          {module.edition && <span className="fu-ed">{EDITIONS[module.edition].tag}</span>}
+        </div>
+      </div>
+      <div className="fu-card">
+        <FamilyChips families={view.families} />
+        <p className="fu-text strong">{FX(view.text)}</p>
+        <p className="fu-text dim">
+          {`Installé en ${placeLabel(done.slot).toLowerCase()}, ${placeLabel(done.freed).toLowerCase()} est libéré`}
+          {module.edition ? `, édition ${EDITIONS[module.edition].name} gardée` : ""}
+          {". "}
+          {view.families.length > 1
+            ? `Il compte comme ${view.families.map((family) => FAMILY_LABELS[family]).join(" et comme ")}. `
+            : ""}
+          Monte ensuite en 2.1, 2.2, 2.3 avec de la Data.
+        </p>
+      </div>
+      <div className="fu-foot">
+        {remaining > 0 && (
+          <button className="fu-next" onClick={onNext}>
+            Fusion suivante
+            <small className="num">
+              {remaining}
+              {" restante"}
+              {remaining > 1 ? "s" : ""}
+            </small>
+          </button>
+        )}
+        <button className="deploy" onClick={onClose}>Continuer</button>
+      </div>
+    </Modal>
+  );
+}
+
+export function FusionModal({ run, locked, mobile, onFuse, onClose }) {
+  let [picks, setPicks] = useState([null, null]);
+  let [picking, setPicking] = useState(null);
+  let [editionFrom, setEditionFrom] = useState("slot");
+  let [keepIndex, setKeepIndex] = useState(0);
+  let [done, setDone] = useState(null);
+  let count = fusionCount(run);
+  let candidates = fusionCandidates(run);
+
+  if (done) {
     return (
-      <Modal className="fusion-modal fusion-done" onClose={onClose}>
-        <span className="dim small">{d.sources}</span>
-        <h2 className="fu-title gold">Fusion réussie</h2>
-        <div className="fu-reveal">
-          <span className="fu-rays" aria-hidden="true" />
-          <div className={`fu-result big accent-${MODULES[i.defId].accent}`}>
-            <span className="fu-v2 num">{patchVersion(i)}</span>
-            <span className="fu-band"><ModuleIcon id={i.defId} size={18} /></span>
-            <span className="fu-name">{c.name}</span>
-            {i.edition && <span className="fu-ed">{EDITIONS[i.edition].tag}</span>}
-          </div>
-        </div>
-        <div className="fu-card">
-          <p className="fu-text strong">{FX(c.text)}</p>
-          <p className="fu-text dim">
-            {"Installé en emplacement "}
-            {d.slot + 1}
-            {", l’emplacement "}
-            {d.freed + 1}
-            {" est libéré"}
-            {i.edition ? `, édition ${EDITIONS[i.edition].name} gardée` : ""}
-            . Monte ensuite en 2.1, 2.2, 2.3 avec de la Data.
-          </p>
-        </div>
-        <div className="fu-foot">
-          {pairs.length > 0
-            && (
-              <button className="fu-next" onClick={() => u(null)}>
-                Fusion suivante
-                <small className="num">
-                  {pairs.length}
-                  {" restante"}
-                  {pairs.length > 1 ? "s" : ""}
-                </small>
-              </button>
-            )}
-          <button className="deploy" onClick={onClose}>Continuer</button>
-        </div>
+      <FusionDone
+        run={run}
+        done={done}
+        remaining={count}
+        onClose={onClose}
+        onNext={() => {
+          setDone(null);
+          setPicks([null, null]);
+          setKeepIndex(0);
+          setEditionFrom("slot");
+        }}
+      />
+    );
+  }
+
+  if (picking != null) {
+    return (
+      <Modal className="fusion-modal fusion-picker" onClose={() => setPicking(null)}>
+        <Picker
+          run={run}
+          index={picking}
+          other={picks[1 - picking]}
+          current={picks[picking]}
+          onCancel={() => setPicking(null)}
+          onPick={(slot) => {
+            let next = [...picks];
+            next[picking] = slot;
+            setPicks(next);
+            setPicking(null);
+            setEditionFrom("slot");
+          }}
+        />
       </Modal>
     );
   }
+
+  let [first, second] = picks.map((slot) => (slot == null ? null : moduleAt(run, slot)));
+  let ready = !!first && !!second;
+  let keepSlot = picks[keepIndex];
+  let otherSlot = picks[1 - keepIndex];
+  let keepModule = ready ? moduleAt(run, keepSlot) : null;
+  let otherModule = ready ? moduleAt(run, otherSlot) : null;
+  let bothEditions = ready && first.edition && second.edition && first.edition !== second.edition;
+  // L'édition choisie est celle du composant 1 ou 2 ; le moteur la lit par rapport à la case gardée.
+  let editionOwner = editionFrom === "slot" ? 0 : 1;
+  let editionAction = bothEditions ? (editionOwner === keepIndex ? "slot" : "partner") : undefined;
+  let result = ready ? fusionResult(keepModule, otherModule, editionAction) : null;
+  let enough = run.data >= FUSION_COST;
+
   return (
     <Modal className="fusion-modal" onClose={onClose}>
       <div className="fu-head">
         <div>
           <h2 className="fu-title">Fusion</h2>
-          <span className="dim small">
-            2 modules identiques niveau 3 ➜ 1 version 2.0, l’autre emplacement est libéré.
-          </span>
+          <span className="dim small">2 modules niveau 3 ➜ 1 module fusionné, une case est libérée.</span>
         </div>
-        {pairs.length > 0
-          && (
-            <span className="fu-count num">
-              {pairs.length}
-              {" prête"}
-              {pairs.length > 1 ? "s" : ""}
-            </span>
-          )}
+        {count > 0 && (
+          <span className="fu-count num">
+            {count}
+            {" prête"}
+            {count > 1 ? "s" : ""}
+          </span>
+        )}
       </div>
       <div className="fu-list">
-        {pairs.length === 0
-          && (
-            <p className="fu-empty">
-              Aucune fusion prête. Il faut deux exemplaires du même module au niveau 3, quelle que soit leur spécialisation.
-            </p>
-          )}
-        {pairs.map((c) => (
-          <FusionCard
-            key={`${c.defId}-${c.slots.join("-")}`}
-            pair={c}
-            board={board}
-            disabled={locked}
-            onFuse={(p, m) => {
-              let y = `${moduleView(board[p]).name} + ${moduleView(board[m]).name}`;
-              onFuse(p, m);
-              u({ slot: p, freed: m, sources: y });
-            }}
-          />
-        ))}
-        {near.length > 0
-          && (
-            <div className="fu-card soon">
-              <div className="fu-soon-head">
-                <span>Bientôt</span>
-                <span className="dim small">il manque un niveau 3</span>
-              </div>
-              {near.map((c) => (
-                <div key={c.defId} className="fu-row soon-row">
-                  <FusionSlot m={board[c.ready]} slot={c.ready} />
-                  <span className="fu-plus">+</span>
-                  <FusionSlot m={board[c.other]} slot={c.other} dim />
-                  <div className="fu-soon-text">
-                    <b>{FUSED_MODULES[c.defId].name}</b>
-                    <span>
-                      {"Améliore "}
-                      {MODULES[c.defId].name}
-                      {" de l’empl. "}
-                      {c.other + 1}
-                      {" au niveau 3 ("}
-                      {c.data}
-                      {" ◆)"}
-                    </span>
-                  </div>
-                </div>
+        {candidates.length < 2 && (
+          <p className="fu-empty">
+            Il faut deux modules niveau 3 (sur le plateau ou dans le tiroir), de n’importe quel type.
+          </p>
+        )}
+        <div className="fu-picks">
+          <PickedSlot run={run} slot={picks[0]} index={0} disabled={candidates.length < 2} onOpen={() => setPicking(0)} />
+          <span className="fu-plus">+</span>
+          <PickedSlot run={run} slot={picks[1]} index={1} disabled={candidates.length < 2} onOpen={() => setPicking(1)} />
+        </div>
+        <div className="fu-down" aria-hidden="true">▼</div>
+        <ResultBox result={result} />
+        {bothEditions && (
+          <div className="fu-card fu-editions">
+            <div className="fu-soon-head">
+              <span>Édition à garder</span>
+              <span className="dim small">les deux en ont une</span>
+            </div>
+            <div className="fu-edition-row">
+              {[first, second].map((module, index) => (
+                <button
+                  key={index}
+                  className={`fu-edition ${editionOwner === index ? "on" : ""}`}
+                  aria-pressed={editionOwner === index}
+                  onClick={() => setEditionFrom(index === 0 ? "slot" : "partner")}
+                >
+                  <b>{EDITIONS[module.edition].name}</b>
+                  <span>{FX(EDITIONS[module.edition].text)}</span>
+                </button>
               ))}
             </div>
-          )}
+          </div>
+        )}
+        {ready && (
+          <div className="fu-card fu-settings">
+            <div className="fu-keep">
+              <span>Garder en</span>
+              <div className="fu-seg" role="radiogroup" aria-label="Case du module fusionné">
+                {picks.map((slot, index) => (
+                  <button
+                    key={slot}
+                    role="radio"
+                    aria-checked={keepIndex === index}
+                    className={keepIndex === index ? "on" : ""}
+                    onClick={() => setKeepIndex(index)}
+                  >
+                    <span className="num">{placeLabel(slot)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <span className={`fu-cost num ${enough ? "" : "short"}`}>
+              {`${FUSION_COST} ◆ · stock ${run.data} ➜ ${run.data - FUSION_COST}`}
+            </span>
+          </div>
+        )}
       </div>
       <div className="fu-foot">
         <button className="fu-back" onClick={onClose}>
           {mobile ? "Retour au plateau" : "Fermer"}
+        </button>
+        <button
+          className="fu-go"
+          disabled={!ready || !enough || locked}
+          onClick={() => {
+            let sources = `${MODULES[keepModule.defId].name} ${levelText(keepModule)} + ${MODULES[otherModule.defId].name} ${levelText(otherModule)}`;
+            onFuse({ slot: keepSlot, partner: otherSlot, edition: editionAction });
+            setDone({ slot: keepSlot, freed: otherSlot, sources });
+          }}
+        >
+          {enough ? "Fusionner " : "Il faut "}
+          <span className="fu-nowrap">{enough ? `· ${FUSION_COST} ◆` : `${FUSION_COST} ◆`}</span>
         </button>
       </div>
     </Modal>

@@ -2,6 +2,7 @@
 
 import { EDITIONS, ML_GROWTH } from "../../engine/editions.js";
 import { FAMILY_LABELS } from "../../engine/families.js";
+import { FUSION_COST } from "../../engine/hybrids.js";
 import { BRANCHES, FUSED_MODULES } from "../../engine/fusedModules.js";
 import { patchCost, upgradeCost } from "../../engine/goodies.js";
 import { MODULES } from "../../engine/modules.js";
@@ -34,9 +35,9 @@ export function ModuleInspector(e) {
         <span className="insp-icon"><ModuleIcon id={module.defId} size={34} /></span>
         <div>
           <h2>
-            {module.fused ? FUSED_MODULES[module.defId].name : r.name}
+            {r.name}
             {" "}
-            {module.fused && <span className="fused-tag">{patchVersion(module)}</span>}
+            {module.fused && <span className="fused-tag">{r.hybrid ? "HYBRIDE" : patchVersion(module)}</span>}
             {r.branchName
               && <span className="branch-tag">{module.branch}{" · "}{r.branchName}</span>}
             {module.edition
@@ -47,17 +48,37 @@ export function ModuleInspector(e) {
               )}
           </h2>
           <span className="dim small">
-            {"Emplacement "}
-            {slot + 1}
-            {", famille "}
-            {FAMILY_LABELS[a.family]}
+            {slot >= 100 ? `Tiroir ${slot - 99}` : `Emplacement ${slot + 1}`}
+            {r.families.length > 1 ? ", familles " : ", famille "}
+            {r.families.map((family) => FAMILY_LABELS[family]).join(" et ")}
             {", "}
-            {a.kind === "utility" ? "utilitaire" : "producteur"}
+            {r.kind === "utility" ? "utilitaire" : "producteur"}
           </span>
         </div>
         <button className="icon-btn" aria-label="Fermer" onClick={e.onDeselect}>✕</button>
       </div>
-      <ol className="levels">
+      {r.hybrid && (
+        <ol className="levels">
+          {r.parents.map((parent) => (
+            <li key={parent.defId} className="past branch-row">
+              <span className="lvl">Parent</span>
+              <span>
+                <b>{`${MODULES[parent.defId].name}${parent.branch ? ` · ${parent.branch} ${parent.branchName}` : ""} : `}</b>
+                {FX(parent.branch ? BRANCHES[parent.defId][parent.branch].text : MODULES[parent.defId].describe(3))}
+              </span>
+            </li>
+          ))}
+          <li className="fusion-row current">
+            <span className="lvl">{patchVersion(module)}</span>
+            <span>
+              <b>{r.name}</b>
+              {" : les deux effets s’additionnent. "}
+              <span className="dim">{describePatch(module)}</span>
+            </span>
+          </li>
+        </ol>
+      )}
+      {!r.hybrid && <ol className="levels">
         {[1, 2].map((i) => (
           <li
             key={i}
@@ -102,7 +123,7 @@ export function ModuleInspector(e) {
             {module.fused && <span className="dim">{" "}{describePatch(module)}</span>}
           </span>
         </li>
-      </ol>
+      </ol>}
       {module.edition
         && (
           <p className="insp-edition">
@@ -145,31 +166,10 @@ export function ModuleInspector(e) {
                     </span>
                   </button>
                 ))}
-                {module.level === 3
-                  && e.fusionPartner >= 0
-                  && e.fusionShortcut !== false
-                  && (
-                    <button
-                      className="primary fuse"
-                      disabled={e.locked}
-                      onClick={() => e.onFuse(slot)}
-                    >
-                      Fusion…
-                    </button>
-                  )}
               </div>
             )
             : module.level === 3
-              ? (
-                <button
-                  className="primary fuse"
-                  disabled={e.locked || e.fusionPartner < 0}
-                  onClick={() => e.onFuse(slot)}
-                  title={e.fusionPartner < 0 ? `Il faut un 2e module ${a.name} niveau 3` : undefined}
-                >
-                  {e.fusionPartner >= 0 ? "Fusion…" : "Fusion : 2e niveau 3 requis"}
-                </button>
-              )
+              ? null
               : (
                 <button
                   className="primary data"
@@ -189,9 +189,9 @@ export function ModuleInspector(e) {
         {module.level === 3 && !module.branch && !module.fused
           ? "Niveau 3 atteint grâce à un bonus : choisis sa spécialisation, gratuitement. Le choix est définitif."
           : module.level === 2 && !module.fused
-            ? "Niveau 3 : choisis une spécialisation, A ou B. Le choix est définitif (une fusion le remplace)."
+            ? "Niveau 3 : choisis une spécialisation, A ou B. Le choix est définitif ; une fusion hybride la garde."
             : module.level === 3 && !module.fused
-              ? `Deux modules ${a.name} niveau 3 fusionnent en ${n.name}, quelle que soit leur spécialisation, et libèrent un emplacement.`
+              ? `Fusion avec le bouton Fusion (${FUSION_COST} ◆) : un 2e ${a.name} donne ${n.name} ; un autre module niveau 3 donne un hybride qui garde les deux effets et les deux familles.`
               : module.fused
                 ? `Les versions mineures coûtent ${PATCH_COSTS.map((i, c) => patchCost(c, e.goodies)).join(", ")} ◆.`
                 : e.mobile

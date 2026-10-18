@@ -5,7 +5,7 @@ import { describeEvent } from "./events.js";
 
 export function Journal(e) {
   let t = useRef(null);
-  let a = (e.last ? e.revealed === null ? e.last.events : e.last.events.slice(0, e.revealed + 1) : []).map((r) => describeEvent(r, e.jokers)).filter((r) => r !== null);
+  let a = (e.last ? e.revealed === null ? e.last.events : e.last.events.slice(0, e.revealed + 1) : []).map((r) => describeEvent(r, e.jokers, e.last?.boardAfter ?? [])).filter((r) => r !== null);
   useEffect(
     () => {
       if (t.current) {

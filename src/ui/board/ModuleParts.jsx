@@ -8,6 +8,7 @@ import {
   familyLevel,
 } from "../../engine/families.js";
 import { BRANCHES, FUSED_MODULES } from "../../engine/fusedModules.js";
+import { isHybrid } from "../../engine/hybrids.js";
 import { FAMILY_GLYPHS, MODULES } from "../../engine/modules.js";
 import {
   countFamilies,
@@ -18,7 +19,7 @@ import {
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { FX } from "../fx.jsx";
 
-export function ModuleTip({ id, level, fused, branch, patch, edition, learn }) {
+export function ModuleTip({ id, level, fused, branch, patch, edition, learn, module }) {
   let d = MODULES[id];
   let u = edition
     ? (
@@ -33,6 +34,24 @@ export function ModuleTip({ id, level, fused, branch, patch, edition, learn }) {
       </p>
     )
     : null;
+  if (module && isHybrid(module)) {
+    let view = moduleView(module);
+    return (
+      <div className="tip-body">
+        <strong>{view.name}{" "}<span className="fused-tag">HYBRIDE</span></strong>
+        <p>{FX(view.text)}</p>
+        {u}
+        <p className="dim">{describePatch(module)}</p>
+        <p className="tip-syn">
+          {"Fusion de "}
+          {view.parents.map((parent) => `${MODULES[parent.defId].name}${parent.branchName ? ` (${parent.branchName})` : ""}`).join(" et ")}
+          {". Compte comme "}
+          {view.families.map((family) => FAMILY_LABELS[family]).join(" et ")}
+          {"."}
+        </p>
+      </div>
+    );
+  }
   if (fused) {
     let c = FUSED_MODULES[id];
     return (
@@ -74,10 +93,9 @@ export function ModuleTip({ id, level, fused, branch, patch, edition, learn }) {
       {level === 3
         && (
           <p className="dim">
-            {"Fusion avec un 2e niveau 3 : "}
-            {FUSED_MODULES[id].name}
-            {". "}
-            {FX(FUSED_MODULES[id].text)}
+            {"Fusion (bouton Fusion) avec un autre niveau 3 : un 2e "}
+            {d.name}
+            {` donne ${FUSED_MODULES[id].name}, un autre module donne un hybride.`}
           </p>
         )}
       <p className="tip-flavor">{d.flavor}</p>
@@ -163,8 +181,17 @@ function EditionPattern({ m, crash }) {
   }
 }
 
+const FAMILY_COLOR = {
+  calcul: "var(--cyan)",
+  stockage: "var(--violet)",
+  reseau: "var(--rose)",
+  business: "var(--amber)",
+  ops: "var(--green)",
+};
+
 export function EditionOverlay({ m, crash }) {
-  let o = MODULES[m.defId].family;
+  let families = moduleView(m).families;
+  let o = families[0];
   return (
     <>
       {m.edition
@@ -183,20 +210,31 @@ export function EditionOverlay({ m, crash }) {
           </span>
         )}
       {crash && <span className="ed-crash">PLANTE</span>}
+      {families.map((family, index) => (
+        <span
+          key={family}
+          className={`tile-fam fam-${family} ${index ? "second" : ""}`}
+          title={`Famille ${FAMILY_LABELS[family]}`}
+          aria-hidden="true"
+        >
+          {FAMILY_GLYPHS[family]}
+        </span>
+      ))}
       <span
-        className={`tile-fam fam-${o}`}
-        title={`Famille ${FAMILY_LABELS[o]}`}
-        aria-hidden="true"
+        className="tile-icon"
+        style={families.length > 1
+          ? { background: `linear-gradient(90deg, ${FAMILY_COLOR[families[0]]} 50%, ${FAMILY_COLOR[families[1]]} 50%)` }
+          : undefined}
       >
-        {FAMILY_GLYPHS[o]}
+        <ModuleIcon id={m.defId} size={30} />
+        {isHybrid(m) && <ModuleIcon id={m.partnerId} size={30} />}
       </span>
-      <span className="tile-icon"><ModuleIcon id={m.defId} size={30} /></span>
       <span className="tile-name">
-        {m.fused ? FUSED_MODULES[m.defId].name : moduleView(m).name}
+        {moduleView(m).name}
       </span>
       <span className="tile-effect">{moduleView(m).preview}</span>
       {m.fused
-        ? <span className="fused-tag tile-badge">{patchVersion(m)}</span>
+        ? <span className={`fused-tag tile-badge ${isHybrid(m) ? "hybrid" : ""}`}>{isHybrid(m) ? (m.patch ? `HYB ${patchVersion(m)}` : "HYB") : patchVersion(m)}</span>
         : (
           <span className="tile-level" aria-hidden="true">
             {[1, 2, 3].map((a) => <i key={a} className={a <= m.level ? "on" : ""} />)}

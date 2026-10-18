@@ -7,7 +7,7 @@ import { moduleAt } from "../../engine/drawer.js";
 import { FAMILY_LABELS } from "../../engine/families.js";
 import { diagonals, neighbors, previousFilledSlot } from "../../engine/grid.js";
 import { MODULES } from "../../engine/modules.js";
-import { findFusionPartner, moduleView } from "../../engine/moduleView.js";
+import { moduleView } from "../../engine/moduleView.js";
 import {
   TRACE_HEIGHT,
   TRACE_WIDTH,
@@ -67,10 +67,6 @@ export function Board(e) {
     }
     if (N.fused && (N.defId === "server" || N.defId === "cdn" || N.defId === "balancer")) {
       diagonals(m).forEach((j) => e.board[j] && y.add(j));
-    }
-    let U = findFusionPartner(e.board, m);
-    if (U >= 0) {
-      y.add(U);
     }
     if (N.defId === "dns"
       && (m - 5 >= 0 && e.board[m - 5] && (N.level > 1 || N.fused) && y.add(m - 5),
@@ -307,6 +303,7 @@ export function Board(e) {
                         patch={U.patch}
                         edition={U.edition}
                         learn={U.learn}
+                        module={U}
                       />}
                       disabled={e.locked || c !== null}
                       className="tile-wrap"
@@ -318,7 +315,7 @@ export function Board(e) {
                         tabIndex={0}
                         role="button"
                         aria-pressed={e.selected === S}
-                        aria-label={`${moduleView(U).name}${U.fused ? " (fusionné)" : ` niveau ${U.level}`}, famille ${FAMILY_LABELS[MODULES[U.defId].family]}, emplacement ${S + 1}`}
+                        aria-label={`${moduleView(U).name}${U.fused ? " (fusionné)" : ` niveau ${U.level}`}, famille ${moduleView(U).families.map((family) => FAMILY_LABELS[family]).join(" et ")}, emplacement ${S + 1}`}
                         onKeyDown={(q) => {
                           if (q.key === "Enter" || q.key === " ") {
                             q.preventDefault();
@@ -328,7 +325,7 @@ export function Board(e) {
                       >
                         <EditionOverlay m={U} crash={e.crashSlots?.has(S)} />
                         {!e.locked
-                          && findFusionPartner(e.board, S) >= 0
+                          && e.fusionReady?.has(S)
                           && (
                             <span
                               className="fuse-ready fuse-dot"
@@ -352,7 +349,7 @@ export function Board(e) {
                           )}
                         {!e.locked
                           && e.upgradable?.has(S)
-                          && findFusionPartner(e.board, S) < 0
+                          && !e.fusionReady?.has(S)
                           && (
                             <span
                               className="up-ready up-dot"

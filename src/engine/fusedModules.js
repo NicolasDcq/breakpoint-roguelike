@@ -1,6 +1,7 @@
 // Modules fusionnés (2.0) et spécialisations A/B du niveau 3.
 
 import { aboveBelow, columnMates } from "./grid.js";
+import { moduleFamilies } from "./hybrids.js";
 import { MODULES } from "./modules.js";
 import { round2 } from "./util.js";
 
@@ -301,7 +302,7 @@ export const BRANCHES = {
       usesNeighbors: true,
       produce: (e) => ({
         data: 4,
-        compute: 4 * e.neighbors().filter((t) => e.board[t] && MODULES[e.board[t].defId].family === "calcul").length,
+        compute: 4 * e.neighbors().filter((t) => e.board[t] && moduleFamilies(e.board[t]).includes("calcul")).length,
       }),
     },
   },
@@ -361,7 +362,7 @@ export const BRANCHES = {
       preview: "+0.8 × /voisin, Business ×1.5",
       usesNeighbors: true,
       produce: (e) => ({ scale: round2(0.8 * e.neighbors().length) }),
-      aura: (e) => e.family === "business" ? 1.5 : 1,
+      aura: (e) => (e.families ?? [e.family]).includes("business") ? 1.5 : 1,
     },
   },
   firewall: {

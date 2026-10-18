@@ -415,7 +415,7 @@ export const PLUGIN_LIST = [
     text: "Les modules Calcul (Serveur, Microservice, API, GPU, Serverless) produisent ×1.5.",
     flavor: "Tout est dans le cloud. Surtout la facture.",
     synergies: ["Serveur", "Microservice", "GPU", "Réactivations"],
-    multiplier: (e) => e.family === "calcul" ? { mult: 1.5, boost: false } : null,
+    multiplier: (e) => e.families.includes("calcul") ? { mult: 1.5, boost: false } : null,
   },
   {
     id: "archivist",
@@ -426,7 +426,7 @@ export const PLUGIN_LIST = [
     text: "Les modules Stockage produisent +1 Data.",
     flavor: "Elle a imprimé Internet. Deux fois.",
     synergies: ["Base de données", "Analytics", "Index de Recherche"],
-    flatData: (e) => e.family === "stockage" ? 1 : 0,
+    flatData: (e) => e.families.includes("stockage") ? 1 : 0,
   },
   {
     id: "demoday",

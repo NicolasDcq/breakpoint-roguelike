@@ -170,7 +170,7 @@ export function executeDeploy(input) {
     if (broken.has(slot) && !shielded) {
       return fizzle(slot, mod.uid, "Emplacement en panne");
     }
-    if (bannedId === mod.defId && !shielded) {
+    if ((bannedId === mod.defId || bannedId === mod.partnerId) && !shielded) {
       return fizzle(slot, mod.uid, "Interdit par le client");
     }
     if (betaCrashes(mod, input.contract.id, input.deployIndex)) {
@@ -235,6 +235,7 @@ export function executeDeploy(input) {
       slot,
       module: mod,
       family: view.family,
+      families: view.families,
       retrigger: isRetrigger,
       firstProducer: !acc.firstProducerDone,
       lastProducer: slot === lastProducer,
@@ -244,7 +245,10 @@ export function executeDeploy(input) {
       sameNeighbor: neighborsOf(slot).some((E) => board[E]?.defId === mod.defId),
       consumedData: 0,
     };
-    if (view.kind === "utility") {
+    // Un hybride producteur + soutien produit puis agit ; s'il ne produit rien,
+    // il agit quand même comme un module de soutien.
+    let produced = view.kind === "utility" ? null : view.produce?.(ctx) ?? null;
+    if (view.kind === "utility" || (!produced && view.run)) {
       let E = mod.edition === "free" ? 1 : 0;
       acc.budget += E;
       emit({
@@ -265,7 +269,6 @@ export function executeDeploy(input) {
       view.run?.(ctx);
       return;
     }
-    let produced = view.produce?.(ctx) ?? null;
     if (!produced) {
       return fizzle(slot, mod.uid, failReason || "Rien à produire");
     }
@@ -281,17 +284,20 @@ export function executeDeploy(input) {
     }
     let sources = [];
     let pluginUids = [];
-    let famLevel = effectiveFamilyLevel(input.familyLevels, view.family, hasPlugin("lts"));
-    if (famLevel > 1) {
+    for (let family of view.families) {
+      let famLevel = effectiveFamilyLevel(input.familyLevels, family, hasPlugin("lts"));
+      if (famLevel <= 1) {
+        continue;
+      }
       let E = familyMultiplier(famLevel);
-      let Z = `${FAMILY_LABELS[view.family]} niv. ${famLevel} ×${E}`;
-      if (view.family === "calcul" && out.compute) {
+      let Z = `${FAMILY_LABELS[family]} niv. ${famLevel} ×${E}`;
+      if (family === "calcul" && out.compute) {
         out.compute = Math.round(out.compute * E);
         sources.push(Z);
-      } else if (view.family === "stockage" && out.data) {
+      } else if (family === "stockage" && out.data) {
         out.data = Math.round(out.data * E);
         sources.push(Z);
-      } else if (view.family === "business" && out.budget) {
+      } else if (family === "business" && out.budget) {
         out.budget = Math.round(out.budget * E);
         sources.push(Z);
       }
@@ -333,7 +339,7 @@ export function executeDeploy(input) {
     }
     for (let E of neighborsOf(slot)) {
       let Z = board[E] ? moduleView(board[E]) : null;
-      let ue = Z?.aura?.({ defId: mod.defId, family: view.family }) ?? 1;
+      let ue = Z?.aura?.({ defId: mod.defId, family: view.family, families: view.families }) ?? 1;
       if (ue !== 1) {
         mult *= ue;
         sources.push(`${Z.branchName ?? Z.name} ×${ue}`);
@@ -400,6 +406,9 @@ export function executeDeploy(input) {
       }
     }
     afterActivation({ ...pluginCtx, boosted, out: final });
+    if (view.hybrid) {
+      view.run?.(ctx);
+    }
     if (!fromQueue && acc.queue && acc.queue.remaining > 0) {
       acc.queue.remaining--;
       let E = acc.queue.times;
