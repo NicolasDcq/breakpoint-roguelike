@@ -12,20 +12,17 @@ export const RULES = Object.freeze({
   removeStartPrice: 2,
   rerollStartPrice: 1,
   shop: { modules: 4, plugins: 2 },
+  /** Le marché d'une partie : environ 65 % des modules de chaque famille, et 8 Plugins sur 12. */
+  market: { moduleShare: 0.65, plugins: 8 },
   /** Boosters d'architecture : 2 par boutique (la relance ne les renouvelle pas), 3 plans, 1 gardé. */
   booster: { perShop: 2, price: 6, choices: 3 },
   /** Coût en ◆ pour passer du niveau N au niveau N+1. */
   cardUpgradeCost: { 1: 3, 2: 6 },
   maxCardLevel: 3,
+  /** Taille du parc de départ (voir les profils dans starters.js). */
+  startParcSize: 20,
   /** Paiement d'un contrat livré, selon sa lettre. */
   contractPay: { A: 4, B: 5, C: 7 },
-  startParc: [
-    "server", "server", "server", "server",
-    "database", "database", "database",
-    "micro", "micro", "micro",
-    "cdn", "cdn", "saas", "saas",
-    "firewall", "analytics", "cache", "cache", "worker", "queue",
-  ],
 });
 
 export const upgradeCost = (level) => RULES.cardUpgradeCost[level] ?? null;

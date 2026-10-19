@@ -4,6 +4,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Rng } from "../src/domain/shared/Rng.js";
 import { CELL_COUNT, GRID_SIZE, neighborCells } from "../src/domain/board/grid.js";
+import { generateRun } from "../src/domain/generation/RunGenerator.js";
+import { STARTERS } from "../src/domain/catalog/starters.js";
+import { FAMILY_IDS } from "../src/domain/catalog/families.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
@@ -96,12 +99,53 @@ test("un Plugin de fin agit après le plateau", () => {
 
 const service = (seed = 11) => new GameService({ repository: new MemoryRunRepository(), seeds: fixedSeedSource(seed) });
 
+test("chaque profil de départ a 20 modules, dont 7 Calcul au moins", () => {
+  for (const starter of Object.values(STARTERS)) {
+    assert.equal(starter.parc.length, RULES.startParcSize, starter.id);
+    assert.ok(starter.parc.filter((id) => familyOf(id) === "calcul").length >= 7, starter.id);
+  }
+});
+
+test("une partie est générée par sa graine : même graine, même partie", () => {
+  assert.deepEqual(generateRun(new Rng(42)), generateRun(new Rng(42)));
+  const recipes = [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => generateRun(new Rng(seed)));
+  assert.ok(new Set(recipes.map((recipe) => recipe.starterId)).size > 1, "les profils changent");
+  assert.ok(new Set(recipes.map((recipe) => recipe.contracts[2].boss)).size > 1, "les boss changent");
+});
+
+test("une partie a 12 contrats, 4 boss différents sur les contrats C, et un marché de chaque famille", () => {
+  const { contracts, market } = generateRun(new Rng(7));
+  assert.equal(contracts.length, 12);
+  const bosses = contracts.filter((contract) => contract.letter === "C").map((contract) => contract.boss);
+  assert.equal(new Set(bosses).size, 4);
+  assert.ok(contracts.filter((contract) => contract.letter !== "C").every((contract) => !contract.boss));
+  for (const family of FAMILY_IDS) assert.ok(market.modules.some((id) => familyOf(id) === family), family);
+  assert.equal(market.plugins.length, RULES.market.plugins);
+  const run = Run.start(7);
+  run.phase = Phase.WON;
+  run.openShop();
+  assert.ok(run.offers.every((offer) => (offer.kind === OfferKind.MODULE ? market.modules : market.plugins).includes(offer.id)));
+});
+
+test("les boss changent les limites : main réduite, pas de défausse, Plugins coupés", () => {
+  const run = Run.start(3);
+  run.contracts = run.contracts.map((contract, index) => (index === 0 ? { ...contract, boss: "smallHand" } : contract));
+  run.startRound();
+  assert.equal(run.round.hand.length, 5);
+  run.contracts = run.contracts.map((contract, index) => (index === 0 ? { ...contract, boss: "noDiscard" } : contract));
+  run.startRound();
+  assert.equal(run.round.discardsLeft, 0);
+  run.contracts = run.contracts.map((contract, index) => (index === 0 ? { ...contract, boss: "noPlugins" } : contract));
+  run.pluginIds = ["intern"];
+  assert.deepEqual(run.activePluginIds, []);
+});
+
 test("une nouvelle partie pioche 7 cartes sans remélange", () => {
   const run = Run.start(5);
   assert.equal(run.round.hand.length, RULES.handSize);
-  assert.equal(run.round.drawPile.length, RULES.startParc.length - RULES.handSize);
+  assert.equal(run.round.drawPile.length, RULES.startParcSize - RULES.handSize);
   run.discard(run.round.hand.slice(0, 3));
-  assert.equal(run.round.drawPile.length, RULES.startParc.length - RULES.handSize - 3);
+  assert.equal(run.round.drawPile.length, RULES.startParcSize - RULES.handSize - 3);
   assert.equal(run.round.discardPile.length, 3);
 });
 
@@ -169,7 +213,7 @@ test("la boutique refuse un achat sans argent, puis un achat déjà fait", () =>
   assert.equal(run.buy(0).reason, Refusal.NOT_ENOUGH_MONEY);
   run.money = 3;
   assert.ok(run.buy(0).ok);
-  assert.equal(run.parc.size, RULES.startParc.length + 1);
+  assert.equal(run.parc.size, RULES.startParcSize + 1);
   assert.equal(run.buy(0).reason, Refusal.ALREADY_SOLD);
 });
 

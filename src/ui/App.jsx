@@ -20,8 +20,10 @@ import { ShopModal } from "./screens/ShopModal.jsx";
 import { EndModal, WonModal } from "./screens/ResultModals.jsx";
 import { BoosterOpening } from "./screens/Booster.jsx";
 import { ArchitecturesModal, ConfirmNewRun, ParcModal, PluginModal, RulesModal } from "./screens/InfoModals.jsx";
+import { BriefingModal } from "./screens/BriefingModal.jsx";
 
 const RULES_SEEN = "rulesSeen";
+const BRIEFING_SEEN = "briefingSeen";
 
 export function App() {
   const { game, sound, preferences } = useGame();
@@ -30,7 +32,12 @@ export function App() {
   const [marked, setMarked] = useState([]);
   const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
-  const [overlay, setOverlay] = useState(() => (preferences.get(RULES_SEEN) === "1" ? null : { name: "rules" }));
+  // Au lancement : les règles la première fois, puis « Ta partie » pour chaque nouvelle graine.
+  const briefingDue = () => preferences.get(BRIEFING_SEEN) !== String(game.getView().seed);
+  const [overlay, setOverlay] = useState(() => {
+    if (preferences.get(RULES_SEEN) !== "1") return { name: "rules" };
+    return briefingDue() ? { name: "briefing" } : null;
+  });
   const [shopMode, setShopMode] = useState(null);
   const [toast, showToast] = useToast();
   const { animation, play, setSpeed, skip } = useDeployAnimation({ game, sound });
@@ -93,7 +100,7 @@ export function App() {
     if (result) showToast(`${ARCHITECTURE_BY_ID[result.architecture.id].name} · +${fmt(result.score)} Performance (${fmt(result.compute)} × ${fmtDec(result.scale)})`);
   };
 
-  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); close(); };
+  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); open("briefing"); };
 
   const shopActions = {
     buy: (index) => attempt(game.buyOffer(index), "cash"),
@@ -118,7 +125,7 @@ export function App() {
   return (
     <div className={`app ${view.contract.boss ? "boss-mode" : ""} ${mobile ? "is-mobile" : ""}`}>
       <aside className="hud">
-        <TopBar view={view} onRules={() => open("rules")} onRestart={() => open("confirm")} />
+        <TopBar view={view} onRules={() => open("rules")} onRestart={() => open("confirm")} onBriefing={() => open("briefing")} />
         <ScorePanel
           view={view}
           animation={animation}
@@ -158,7 +165,8 @@ export function App() {
       {sheetCard && !busy && (
         <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} onClose={() => setSheet(null)} actions={sheetActions} />
       )}
-      {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
+      {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); if (briefingDue()) open("briefing"); else close(); }} />}
+      {overlay?.name === "briefing" && <BriefingModal view={view} onClose={() => { preferences.set(BRIEFING_SEEN, String(view.seed)); close(); }} />}
       {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}
       {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
       {overlay?.name === "plugin" && <PluginModal id={overlay.id} onClose={close} />}

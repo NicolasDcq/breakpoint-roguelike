@@ -1,5 +1,16 @@
 # État du jeu et décisions
 
+## 19/10 · Parties procédurales
+
+Chaque partie est tirée de sa graine (`domain/generation/RunGenerator.js`) :
+- **Profil de départ** (6 profils, `catalog/starters.js`) : Start-up classique, Architecture microservices, Data lab, Hébergeur réseau, Agence e-commerce, Tout serverless. 20 modules chacun, 7 Calcul au moins.
+- **Marché** : la boutique ne vend qu'environ 65 % des modules de chaque famille (11 sur 17) et 8 Plugins sur 12.
+- **Contrats** : noms de clients tirés par version (7 par version), objectif ± 8 %, et 4 boss différents tirés parmi 8 pour les contrats C.
+- **Boss** (`catalog/bosses.js`) : Client pressé (3 déploiements), Panne (case 6), Panne de courant (Serveurs), Budget serré (3 modules), Réseau saturé (Réseau), Équipe réduite (main de 5), Gel des changements (0 défausse), Audit de sécurité (Plugins coupés). Chacun ajuste un peu l'objectif (`targetFactor`).
+- Écran **« Ta partie »** au début de chaque partie (et bouton dans la barre du haut) : profil, marché, contrats et boss.
+- Objectifs de référence revus : 155, 230, 285, 445, 595, 775, 1010, 1300, 1730, 2260, 2950, 3450.
+- Bot (160 parties) : 38 % de victoires. Par profil : microservices 48 %, serverless 47 %, classique 38 %, e-commerce 35 %, réseau 30 %, data lab 23 %.
+
 ## 19/10 · Plans lisibles d'un coup d'œil
 
 Le nom d'une architecture ne parle qu'aux joueurs qui connaissent le jeu. Chaque plan **dessine** maintenant la pose à faire : de petites tuiles de modules (même module = même icône, couleur de la famille ; « + » entre deux groupes), avec la phrase courte en dessous (« 3 fois le même module »).

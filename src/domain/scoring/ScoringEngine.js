@@ -57,7 +57,7 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
     if (state.activations++ > MAX_ACTIVATIONS) return;
     const card = cards[cell];
     if (!card) return;
-    const blocked = blockedBy(bossId, cell, card);
+    const blocked = blockedBy(bossId, cell, card, familyOf);
     if (blocked) {
       result.events.push({ cell, failure: blocked });
       return;

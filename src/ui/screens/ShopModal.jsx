@@ -116,7 +116,7 @@ export function ShopModal({ view, mode, actions }) {
                 <span className="dim small">Prochain contrat</span>
                 <b>V{next.version}{next.letter} · {next.name}</b>
                 <b className="num c-budget">{next.target}</b>
-                {BOSSES[next.boss] && <span className="rule-chip">{BOSSES[next.boss].rule}</span>}
+                {BOSSES[next.boss] && <span className="rule-chip">{BOSSES[next.boss].text}</span>}
               </div>
             </div>
           </>

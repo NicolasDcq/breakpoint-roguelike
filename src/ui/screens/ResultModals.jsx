@@ -1,6 +1,6 @@
 // Contrat livré, et fin de partie (victoire ou défaite).
 
-import { CONTRACTS, PLUGINS, Phase } from "../../domain/index.js";
+import { PLUGINS, Phase } from "../../domain/index.js";
 import { Modal } from "../common/Modal.jsx";
 import { fmt } from "../format.js";
 import { PLUGIN_LOOK } from "../visuals.js";
@@ -25,18 +25,19 @@ export function WonModal({ view, onShop }) {
 
 export function EndModal({ view, onNewRun }) {
   const victory = view.phase === Phase.VICTORY;
-  const delivered = victory ? CONTRACTS.length : view.contractIndex;
+  const total = view.contracts.length;
+  const delivered = victory ? total : view.contractIndex;
   const plays = Object.values(view.architecturePlays).reduce((sum, count) => sum + count, 0);
   return (
     <Modal className={`end-modal ${victory ? "won" : "lost"}`}>
       <h2 className="end-title">{victory ? "Mise en production réussie" : "Incident en production"}</h2>
       <p className="modal-sub">
         {victory
-          ? `Les ${CONTRACTS.length} contrats sont livrés, ${CONTRACTS.at(-1).name} compris.`
+          ? `Les ${total} contrats sont livrés, ${view.contracts.at(-1).name} compris.`
           : `${view.contract.name} n’a pas été livré : ${fmt(view.score)} sur ${fmt(view.contract.target)}.`}
       </p>
       <div className="stats">
-        <div><span className="num">{delivered}/{CONTRACTS.length}</span><span>contrats livrés</span></div>
+        <div><span className="num">{delivered}/{total}</span><span>contrats livrés</span></div>
         <div><span className="num">{view.parc.length}</span><span>modules dans le parc</span></div>
         <div><span className="num">{plays}</span><span>déploiements</span></div>
       </div>

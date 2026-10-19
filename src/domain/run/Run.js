@@ -4,7 +4,6 @@
 import { Rng } from "../shared/Rng.js";
 import { ok, refuse, Refusal } from "../shared/Result.js";
 import { RULES, upgradeCost } from "../catalog/rules.js";
-import { CONTRACTS } from "../catalog/contracts.js";
 import { BOSSES, bossLimits } from "../catalog/bosses.js";
 import { PLUGINS } from "../catalog/plugins.js";
 import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
@@ -13,20 +12,26 @@ import { Round } from "../round/Round.js";
 import { scoreDeployment } from "../scoring/ScoringEngine.js";
 import { OfferKind, drawBooster, removalPrice, rollOffers } from "../shop/Shop.js";
 import { Phase } from "./Phase.js";
+import { generateRun } from "../generation/RunGenerator.js";
 
-const SNAPSHOT_VERSION = 2;
+const SNAPSHOT_VERSION = 3;
 
 export class Run {
   constructor(state) {
     Object.assign(this, state);
   }
 
-  /** Nouvelle partie, entièrement déterminée par sa graine. */
+  /** Nouvelle partie, entièrement déterminée par sa graine : la recette est tirée au hasard. */
   static start(seed) {
+    const rng = new Rng(seed);
+    const recipe = generateRun(rng);
     const run = new Run({
       seed,
-      rng: new Rng(seed),
-      parc: Parc.fromModules(RULES.startParc),
+      rng,
+      starterId: recipe.starterId,
+      market: recipe.market,
+      contracts: recipe.contracts,
+      parc: Parc.fromModules(recipe.startParc),
       contractIndex: 0,
       money: RULES.startMoney,
       data: RULES.startData,
@@ -49,19 +54,29 @@ export class Run {
   // ---------- Lecture ----------
 
   get contract() {
-    return CONTRACTS[this.contractIndex];
+    return this.contracts[this.contractIndex];
   }
 
   get nextContract() {
-    return CONTRACTS[this.contractIndex + 1] ?? null;
+    return this.contracts[this.contractIndex + 1] ?? null;
   }
 
   get bossRule() {
-    return BOSSES[this.contract.boss]?.rule ?? null;
+    return BOSSES[this.contract.boss]?.text ?? null;
   }
 
   get limits() {
-    return bossLimits(this.contract.boss, { deploys: RULES.deploysPerContract, maxPlaced: RULES.maxPlaced });
+    return bossLimits(this.contract.boss, {
+      deploys: RULES.deploysPerContract,
+      maxPlaced: RULES.maxPlaced,
+      handSize: RULES.handSize,
+      discards: RULES.discardsPerContract,
+    });
+  }
+
+  /** Les Plugins qui agissent en ce moment (un boss peut les couper). */
+  get activePluginIds() {
+    return this.limits.pluginsActive ? this.pluginIds : [];
   }
 
   card(uid) {
@@ -77,7 +92,7 @@ export class Run {
   preview(board = this.round.board) {
     return scoreDeployment({
       cards: this.cardsOn(board),
-      pluginIds: this.pluginIds,
+      pluginIds: this.activePluginIds,
       bossId: this.contract.boss ?? null,
       dataStock: this.data,
       money: this.money,
@@ -96,8 +111,8 @@ export class Run {
     this.round = Round.start({
       shuffledUids: this.rng.shuffle(this.parc.uids()),
       deploys: this.limits.deploys,
-      discards: RULES.discardsPerContract,
-      handSize: RULES.handSize,
+      discards: this.limits.discards,
+      handSize: this.limits.handSize,
     });
     this.phase = Phase.PLAY;
   }
@@ -119,7 +134,7 @@ export class Run {
 
   discard(uids) {
     if (this.phase !== Phase.PLAY) return refuse(Refusal.WRONG_PHASE);
-    const result = this.round.discard(uids, RULES.handSize);
+    const result = this.round.discard(uids, this.limits.handSize);
     if (result.ok && this.round.isStuck) this.phase = Phase.LOST;
     return result;
   }
@@ -145,7 +160,7 @@ export class Run {
     } else if (!this.round.deploysLeft) {
       this.phase = Phase.LOST;
     } else {
-      this.round.drawUp(RULES.handSize);
+      this.round.drawUp(this.limits.handSize);
       if (this.round.isStuck) this.phase = Phase.LOST;
     }
   }
@@ -153,7 +168,7 @@ export class Run {
   payContract() {
     const pay = RULES.contractPay[this.contract.letter];
     const left = this.round.deploysLeft;
-    const interest = this.pluginIds.reduce((sum, id) => sum + (PLUGINS[id].contractInterest?.(this.money) ?? 0), 0);
+    const interest = this.activePluginIds.reduce((sum, id) => sum + (PLUGINS[id].contractInterest?.(this.money) ?? 0), 0);
     this.money += pay + left + interest;
     this.lastPay = { pay, left, interest };
   }
@@ -164,7 +179,7 @@ export class Run {
     if (this.phase !== Phase.WON) return refuse(Refusal.WRONG_PHASE);
     this.phase = Phase.SHOP;
     this.rerollPrice = RULES.rerollStartPrice;
-    this.offers = rollOffers(this.rng, this.pluginIds);
+    this.offers = rollOffers(this.rng, this.pluginIds, this.market);
     this.boostersLeft = RULES.booster.perShop;
     this.boosterChoices = null;
     return ok();
@@ -219,7 +234,7 @@ export class Run {
     if (this.money < this.rerollPrice) return refuse(Refusal.NOT_ENOUGH_MONEY);
     this.money -= this.rerollPrice;
     this.rerollPrice++;
-    this.offers = rollOffers(this.rng, this.pluginIds);
+    this.offers = rollOffers(this.rng, this.pluginIds, this.market);
     return ok();
   }
 
@@ -263,7 +278,7 @@ export class Run {
   toSnapshot() {
     return {
       version: SNAPSHOT_VERSION,
-      seed: this.seed, rngState: this.rng.state, parc: this.parc.toJSON(), contractIndex: this.contractIndex,
+      seed: this.seed, rngState: this.rng.state, starterId: this.starterId, market: this.market, contracts: this.contracts, parc: this.parc.toJSON(), contractIndex: this.contractIndex,
       money: this.money, data: this.data, pluginIds: this.pluginIds, architectureLevels: this.architectureLevels,
       architecturePlays: this.architecturePlays, removePrice: this.removePrice, rerollPrice: this.rerollPrice,
       offers: this.offers, boostersLeft: this.boostersLeft, boosterChoices: this.boosterChoices, lastPay: this.lastPay, phase: this.phase, round: this.round.toJSON(),

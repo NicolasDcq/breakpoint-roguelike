@@ -18,12 +18,13 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 | Dossier | Rôle |
 |---|---|
 | `shared/` | `Rng` (hasard à graine), `Result` (réussi / refusé avec un code), `levels` (valeur selon le niveau) |
-| `catalog/` | données du jeu : familles, modules, Plugins, contrats, contraintes de boss, architectures, `rules.js` (tous les chiffres réglables) |
+| `catalog/` | données du jeu : familles, modules, Plugins, contrats (noms et objectifs), boss, profils de départ, architectures, `rules.js` (tous les chiffres réglables) |
 | `parc/` | `Card` (objet valeur) et `Parc` (la collection du joueur) |
 | `board/` | géométrie 4×4 (`grid.js`, taille réglable avec `GRID_SIZE`) et `Board` (objet valeur) |
 | `round/` | `Round` : un contrat en cours (pioche, main, plateau, essais) |
 | `scoring/` | `ScoringEngine` (calcul pur d'un déploiement) et `ActivationContext` (ce qu'un module a le droit de faire) |
 | `shop/` | service de boutique : tirage des offres, prix du retrait |
+| `generation/` | `RunGenerator` : la recette d'une partie tirée de sa graine (profil de départ, marché, contrats, boss) |
 | `run/` | `Run` : la racine de l'agrégat. Toute commande passe par elle et rend un `Result` |
 
 `domain/index.js` est la porte d'entrée : les autres couches n'importent que ce fichier (sauf les tests, qui testent aussi les pièces internes).
@@ -65,6 +66,8 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 - **Un module** : une entrée dans `domain/catalog/modules.js` (famille, prix, `lines`, `effect`).
 - **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets, et une icône dans `ui/visuals.js`.
 - **Une architecture** : une entrée dans `domain/catalog/architectures.js`, à sa place dans l'ordre de force.
-- **Un boss** : une entrée dans `domain/catalog/bosses.js`, et son identifiant sur un contrat.
+- **Un boss** : une entrée dans `domain/catalog/bosses.js` ; le générateur le tirera tout seul.
+- **Un profil de départ** : une entrée dans `domain/catalog/starters.js` (20 modules).
+- **Un client** : un nom dans `CLIENT_NAMES` (`domain/catalog/contracts.js`).
 
 Puis : `npm test`. Si les parties de référence changent et que c'est voulu, `npm run golden`.

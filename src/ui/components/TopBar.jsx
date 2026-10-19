@@ -1,7 +1,7 @@
 // Barre du haut : contrat, progression, ressources et boutons.
 
 import { useEffect, useState } from "react";
-import { CONTRACTS } from "../../domain/index.js";
+import { BOSSES, STARTERS } from "../../domain/index.js";
 import { useGame } from "../GameContext.jsx";
 import { fmt } from "../format.js";
 import { Tooltip } from "../common/Tooltip.jsx";
@@ -32,16 +32,17 @@ function SoundToggle() {
   );
 }
 
-function RunContracts({ current }) {
+function RunContracts({ contracts, current }) {
   return (
     <div className="tip-body">
       <strong>Les contrats de la partie</strong>
       <ol className="tip-list run-list">
-        {CONTRACTS.map((contract, index) => (
-          <li key={contract.name} className={`${index === current ? "current" : index < current ? "done" : ""} ${contract.letter === "A" ? "version-start" : ""}`}>
+        {contracts.map((contract, index) => (
+          <li key={`${contract.version}${contract.letter}`} className={`${index === current ? "current" : index < current ? "done" : ""} ${contract.letter === "A" ? "version-start" : ""}`}>
             <span className="run-label num">{contract.version}{contract.letter}</span>
             <span>{contract.name}</span>
             <span className="num">{fmt(contract.target)}</span>
+            {contract.boss && <span className="mini-rule boss">{BOSSES[contract.boss].name}</span>}
           </li>
         ))}
       </ol>
@@ -49,7 +50,7 @@ function RunContracts({ current }) {
   );
 }
 
-export function TopBar({ view, onRules, onRestart }) {
+export function TopBar({ view, onRules, onRestart, onBriefing }) {
   const { contract, score, bossRule, limits, deploysLeft } = view;
   const progress = Math.min(100, (score / contract.target) * 100);
   const used = limits.deploys - deploysLeft;
@@ -58,7 +59,7 @@ export function TopBar({ view, onRules, onRestart }) {
       <div className="brand">
         <span className="brand-mark" aria-hidden="true" />
         <span className="brand-name">Breakpoint</span>
-        <span className="env-badge">Le Parc</span>
+        <button className="env-badge" onClick={onBriefing} title="Voir la recette de cette partie">{STARTERS[view.starterId].name}</button>
       </div>
       <section className={`contract ${contract.boss ? "boss" : ""}`} aria-label="Contrat en cours">
         <div className={`contract-chip step-${contract.letter} ${contract.boss ? "boss" : ""}`} aria-hidden="true">
@@ -66,9 +67,9 @@ export function TopBar({ view, onRules, onRestart }) {
           <b>{contract.letter}</b>
         </div>
         <div className="contract-head">
-          <Tooltip touch content={<RunContracts current={view.contractIndex} />}>
+          <Tooltip touch content={<RunContracts contracts={view.contracts} current={view.contractIndex} />}>
             <span className="contract-step" tabIndex={0}>
-              Version {contract.version}/4, contrat {contract.letter}{contract.boss ? (view.nextContract ? " (boss)" : " (boss final)") : ""}
+              Version {contract.version}/{view.contracts.at(-1).version}, contrat {contract.letter}{contract.boss ? (view.nextContract ? " (boss)" : " (boss final)") : ""}
             </span>
           </Tooltip>
           <h1 className="contract-name">{contract.name}</h1>
@@ -110,6 +111,12 @@ export function TopBar({ view, onRules, onRestart }) {
         <button className="ghost" onClick={onRestart} aria-label="Nouvelle partie">
           <span className="lbl-long">Nouvelle partie</span>
           <span className="lbl-short" aria-hidden="true">↻</span>
+        </button>
+        <button className="ghost hint-btn" onClick={onBriefing} aria-label="Ta partie : profil, marché et boss" title="Ta partie : profil, marché et boss">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="5" y="4" width="14" height="17" rx="2" />
+            <path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3" />
+          </svg>
         </button>
       </div>
     </header>

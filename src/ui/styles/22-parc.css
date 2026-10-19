@@ -510,3 +510,87 @@ button.discard-btn.confirm {
 .arch-list .arch-diagram {
   justify-content: flex-start;
 }
+
+/* « Ta partie » : profil, marché, contrats */
+.briefing-modal {
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+.brief-sec {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 4px;
+}
+.brief-sec h3 {
+  margin: 0;
+  font: 700 11px/1.2 var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+.brief-sec p {
+  margin: 0;
+}
+.brief-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.brief-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 3px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  background: #1b2240;
+  font-size: 12px;
+}
+.brief-chip .arch-mini {
+  --mini: 20px;
+}
+.brief-plugins .brief-chip {
+  padding-left: 6px;
+}
+.brief-contracts {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.brief-contracts li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(5, 7, 15, .3);
+  font-size: 12.5px;
+}
+.brief-contracts li.boss {
+  box-shadow: inset 3px 0 0 #ff5a6e;
+}
+.brief-contracts li.current {
+  background: #1a1436;
+  box-shadow: inset 0 0 0 2px #9b6bff;
+}
+.brief-contracts li.done {
+  opacity: .5;
+}
+.brief-contracts .rule-chip {
+  grid-column: 2 / -1;
+  justify-self: start;
+}
+.brief-step {
+  color: #ffb020;
+}
+.brief-target {
+  color: #ffb020;
+}
+button.env-badge {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}

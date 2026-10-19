@@ -1,16 +1,17 @@
-// Les 12 contrats d'une partie : 4 versions × A, B, C. Le contrat C a une contrainte (boss).
+// Les contrats d'une partie : 4 versions × A, B, C. Le contrat C a une contrainte (boss).
+// Chaque partie tire ses noms de clients, ses objectifs (± un peu) et ses boss.
 
-export const CONTRACTS = Object.freeze([
-  { version: 1, letter: "A", name: "Site de la Mairie", target: 150 },
-  { version: 1, letter: "B", name: "Blog culinaire", target: 220 },
-  { version: 1, letter: "C", name: "Portail des Impôts", target: 270, boss: "fewDeploys" },
-  { version: 2, letter: "A", name: "Appli de covoiturage", target: 420 },
-  { version: 2, letter: "B", name: "Jeu mobile", target: 560 },
-  { version: 2, letter: "C", name: "Banque en ligne", target: 730, boss: "broken" },
-  { version: 3, letter: "A", name: "Plateforme de streaming", target: 950 },
-  { version: 3, letter: "B", name: "Réseau social", target: 1230 },
-  { version: 3, letter: "C", name: "Hôpital Saint-Octet", target: 1630, boss: "noServer" },
-  { version: 4, letter: "A", name: "Marketplace mondiale", target: 2130 },
-  { version: 4, letter: "B", name: "IA générative", target: 2780 },
-  { version: 4, letter: "C", name: "Agence spatiale", target: 3000, boss: "fewModules" },
-].map(Object.freeze));
+/** Objectif de référence de chaque contrat, dans l'ordre. */
+export const BASE_TARGETS = Object.freeze([155, 230, 285, 445, 595, 775, 1010, 1300, 1730, 2260, 2950, 3450]);
+export const VERSIONS = 4;
+export const LETTERS = Object.freeze(["A", "B", "C"]);
+/** L'objectif varie de ±8 % d'une partie à l'autre. */
+export const TARGET_SPREAD = 0.08;
+
+/** Noms possibles, par version : les clients grossissent au fil de la partie. */
+export const CLIENT_NAMES = Object.freeze([
+  ["Site de la Mairie", "Blog culinaire", "Portail des Impôts", "Boulangerie en ligne", "Club de foot du quartier", "Agenda de la médiathèque", "Annuaire des artisans"],
+  ["Appli de covoiturage", "Jeu mobile", "Banque en ligne", "Plateforme de livraison", "Réseau de vélos partagés", "Appli de rencontres", "Billetterie de festival"],
+  ["Plateforme de streaming", "Réseau social", "Hôpital Saint-Octet", "Bourse en ligne", "Opérateur télécom", "Moteur de recherche", "Cloud gaming"],
+  ["Marketplace mondiale", "IA générative", "Agence spatiale", "Banque centrale", "Jeux olympiques en direct", "Réseau électrique national", "Métavers"],
+]);

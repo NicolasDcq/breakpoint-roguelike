@@ -2,75 +2,75 @@
   "runs": [
     {
       "seed": 1,
-      "phase": "lost",
-      "contractIndex": 9,
-      "chain": "cd7fabf3815236a8"
+      "phase": "victory",
+      "contractIndex": 11,
+      "chain": "9fbfaf0e9fd23f79"
     },
     {
       "seed": 2,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "c8851a5c6672919c"
+      "contractIndex": 9,
+      "chain": "af0852bf68ad848a"
     },
     {
       "seed": 3,
-      "phase": "victory",
-      "contractIndex": 11,
-      "chain": "7bf02201e8a4033a"
+      "phase": "lost",
+      "contractIndex": 6,
+      "chain": "aae36280e30551f0"
     },
     {
       "seed": 4,
       "phase": "victory",
       "contractIndex": 11,
-      "chain": "4b1ff73c1adff484"
+      "chain": "39f7f7b78a719ae9"
     },
     {
       "seed": 5,
-      "phase": "victory",
-      "contractIndex": 11,
-      "chain": "4bd47aed26a8a639"
+      "phase": "lost",
+      "contractIndex": 5,
+      "chain": "cf0fd87e271b2023"
     },
     {
       "seed": 6,
-      "phase": "lost",
+      "phase": "victory",
       "contractIndex": 11,
-      "chain": "ba1c4f0ce148f2e4"
+      "chain": "c4cb78ca68a8351e"
     },
     {
       "seed": 7,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "b42388ad82b7cbe5"
+      "contractIndex": 5,
+      "chain": "7a3f0d3d2a6100e6"
     },
     {
       "seed": 8,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "6c32b1f61e84df66"
+      "contractIndex": 7,
+      "chain": "4cf7c34d5f5ccf5f"
     },
     {
       "seed": 9,
-      "phase": "lost",
+      "phase": "victory",
       "contractIndex": 11,
-      "chain": "b54870323d5e014d"
+      "chain": "fdc305778a82292a"
     },
     {
       "seed": 10,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "05f69f5a9a07bd27"
+      "contractIndex": 9,
+      "chain": "0100880fb5e8abb2"
     },
     {
       "seed": 11,
       "phase": "lost",
-      "contractIndex": 9,
-      "chain": "694ed101736ab949"
+      "contractIndex": 11,
+      "chain": "07af99255f321678"
     },
     {
       "seed": 12,
-      "phase": "lost",
+      "phase": "victory",
       "contractIndex": 11,
-      "chain": "0e9ce72930ad4c76"
+      "chain": "99f2063fd0c1d821"
     }
   ]
 }
