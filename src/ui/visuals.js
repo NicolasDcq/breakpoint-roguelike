@@ -50,3 +50,10 @@ export function popupLines(event) {
   ].filter(Boolean);
   return lines.length ? lines : [{ tone: "boost", text: event.isRetrigger ? "↺" : "✓" }];
 }
+
+/** Couleur des plans d'architecture, de la plus simple à la plus forte. */
+export const ARCHITECTURE_ACCENT = {
+  monolithe: "var(--green)", redondance: "var(--cyan)", double: "var(--cyan)",
+  cluster: "var(--violet)", fullstack: "var(--violet)", stack: "var(--violet)",
+  hautedispo: "var(--rose)", ferme: "var(--rose)", datacenter: "var(--amber)",
+};

@@ -11,10 +11,10 @@ import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 import { Parc } from "../parc/Parc.js";
 import { Round } from "../round/Round.js";
 import { scoreDeployment } from "../scoring/ScoringEngine.js";
-import { OfferKind, removalPrice, rollOffers } from "../shop/Shop.js";
+import { OfferKind, drawBooster, removalPrice, rollOffers } from "../shop/Shop.js";
 import { Phase } from "./Phase.js";
 
-const SNAPSHOT_VERSION = 1;
+const SNAPSHOT_VERSION = 2;
 
 export class Run {
   constructor(state) {
@@ -36,6 +36,8 @@ export class Run {
       removePrice: RULES.removeStartPrice,
       rerollPrice: RULES.rerollStartPrice,
       offers: [],
+      boostersLeft: 0,
+      boosterChoices: null,
       lastPay: null,
       phase: Phase.PLAY,
       round: null,
@@ -163,11 +165,42 @@ export class Run {
     this.phase = Phase.SHOP;
     this.rerollPrice = RULES.rerollStartPrice;
     this.offers = rollOffers(this.rng, this.pluginIds);
+    this.boostersLeft = RULES.booster.perShop;
+    this.boosterChoices = null;
     return ok();
   }
 
-  buy(offerIndex) {
+  /** Refus commun aux actions de boutique : mauvaise étape, ou booster ouvert pas encore choisi. */
+  shopBlocked() {
     if (this.phase !== Phase.SHOP) return refuse(Refusal.WRONG_PHASE);
+    if (this.boosterChoices) return refuse(Refusal.BOOSTER_PENDING);
+    return null;
+  }
+
+  /** Achète et ouvre un booster : il montre des plans d'architecture, on en garde un. */
+  openBooster() {
+    const blocked = this.shopBlocked();
+    if (blocked) return blocked;
+    if (!this.boostersLeft) return refuse(Refusal.NO_BOOSTER_LEFT);
+    if (this.money < RULES.booster.price) return refuse(Refusal.NOT_ENOUGH_MONEY);
+    this.money -= RULES.booster.price;
+    this.boostersLeft--;
+    this.boosterChoices = drawBooster(this.rng);
+    return ok(this.boosterChoices);
+  }
+
+  /** Garde un plan du booster (+1 niveau à cette architecture), ou aucun (null). */
+  pickFromBooster(architectureId) {
+    if (this.phase !== Phase.SHOP || !this.boosterChoices) return refuse(Refusal.WRONG_PHASE);
+    if (architectureId !== null && !this.boosterChoices.includes(architectureId)) return refuse(Refusal.NOT_IN_BOOSTER);
+    if (architectureId) this.architectureLevels = { ...this.architectureLevels, [architectureId]: this.architectureLevels[architectureId] + 1 };
+    this.boosterChoices = null;
+    return ok(architectureId);
+  }
+
+  buy(offerIndex) {
+    const blocked = this.shopBlocked();
+    if (blocked) return blocked;
     const offer = this.offers[offerIndex];
     if (!offer) return refuse(Refusal.UNKNOWN_OFFER);
     if (offer.sold) return refuse(Refusal.ALREADY_SOLD);
@@ -177,12 +210,12 @@ export class Run {
     this.offers = this.offers.map((other, index) => (index === offerIndex ? { ...other, sold: true } : other));
     if (offer.kind === OfferKind.MODULE) this.parc.add(offer.id);
     if (offer.kind === OfferKind.PLUGIN) this.pluginIds = [...this.pluginIds, offer.id];
-    if (offer.kind === OfferKind.ARCHITECTURE) this.architectureLevels = { ...this.architectureLevels, [offer.id]: this.architectureLevels[offer.id] + 1 };
     return ok(offer);
   }
 
   reroll() {
-    if (this.phase !== Phase.SHOP) return refuse(Refusal.WRONG_PHASE);
+    const blocked = this.shopBlocked();
+    if (blocked) return blocked;
     if (this.money < this.rerollPrice) return refuse(Refusal.NOT_ENOUGH_MONEY);
     this.money -= this.rerollPrice;
     this.rerollPrice++;
@@ -191,7 +224,8 @@ export class Run {
   }
 
   removeCard(uid) {
-    if (this.phase !== Phase.SHOP) return refuse(Refusal.WRONG_PHASE);
+    const blocked = this.shopBlocked();
+    if (blocked) return blocked;
     if (!this.card(uid)) return refuse(Refusal.UNKNOWN_CARD);
     if (this.parc.size <= RULES.minParcSize) return refuse(Refusal.PARC_TOO_SMALL);
     const price = this.currentRemovePrice;
@@ -203,7 +237,8 @@ export class Run {
   }
 
   upgradeCard(uid) {
-    if (this.phase !== Phase.SHOP) return refuse(Refusal.WRONG_PHASE);
+    const blocked = this.shopBlocked();
+    if (blocked) return blocked;
     const card = this.card(uid);
     if (!card) return refuse(Refusal.UNKNOWN_CARD);
     const cost = upgradeCost(card.level);
@@ -215,7 +250,8 @@ export class Run {
   }
 
   goToNextContract() {
-    if (this.phase !== Phase.SHOP) return refuse(Refusal.WRONG_PHASE);
+    const blocked = this.shopBlocked();
+    if (blocked) return blocked;
     this.contractIndex++;
     this.offers = [];
     this.startRound();
@@ -230,7 +266,7 @@ export class Run {
       seed: this.seed, rngState: this.rng.state, parc: this.parc.toJSON(), contractIndex: this.contractIndex,
       money: this.money, data: this.data, pluginIds: this.pluginIds, architectureLevels: this.architectureLevels,
       architecturePlays: this.architecturePlays, removePrice: this.removePrice, rerollPrice: this.rerollPrice,
-      offers: this.offers, lastPay: this.lastPay, phase: this.phase, round: this.round.toJSON(),
+      offers: this.offers, boostersLeft: this.boostersLeft, boosterChoices: this.boosterChoices, lastPay: this.lastPay, phase: this.phase, round: this.round.toJSON(),
     };
   }
 

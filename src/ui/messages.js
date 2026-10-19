@@ -11,6 +11,8 @@ const MESSAGES = {
   [Refusal.NO_PLUGIN_SLOT]: () => `${RULES.maxPlugins} Plugins au maximum.`,
   [Refusal.PARC_TOO_SMALL]: () => `Il faut garder ${RULES.minParcSize} modules au moins.`,
   [Refusal.MAX_LEVEL]: () => "Ce module est déjà au niveau maximum.",
+  [Refusal.NO_BOOSTER_LEFT]: () => "Plus de booster dans cette boutique.",
+  [Refusal.BOOSTER_PENDING]: () => "Choisis d'abord un plan dans le booster ouvert.",
 };
 
 export const refusalMessage = (reason, view) => MESSAGES[reason]?.(view) ?? "Action impossible.";

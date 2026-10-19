@@ -30,6 +30,8 @@ export function presentRun(run) {
     preview: run.preview(),
     parc: run.parc.cards,
     offers: run.offers,
+    boostersLeft: run.boostersLeft,
+    boosterChoices: run.boosterChoices,
     lastPay: run.lastPay,
     removePrice: run.currentRemovePrice,
     rerollPrice: run.rerollPrice,

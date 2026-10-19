@@ -65,8 +65,13 @@ function shop(service, random) {
     const cost = upgradeCost(card.level);
     if (cost && run.data >= cost) service.upgradeCard(card.uid);
   }
-  const favorites = Object.entries(run.architecturePlays).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id]) => id);
-  run.offers.forEach((offer, index) => { if (offer.kind === OfferKind.ARCHITECTURE && favorites.includes(offer.id)) service.buyOffer(index); });
+  // Boosters : garder le plan de l'architecture la plus jouée.
+  const plays = (id) => run.architecturePlays[id] ?? 0;
+  while (run.boostersLeft && run.money >= RULES.booster.price + 2) {
+    service.openBooster();
+    const best = [...run.boosterChoices].sort((a, b) => plays(b) - plays(a))[0];
+    service.pickFromBooster(plays(best) ? best : null);
+  }
   run.offers.forEach((offer, index) => { if (offer.kind === OfferKind.PLUGIN) service.buyOffer(index); });
   run.offers.forEach((offer, index) => {
     if (offer.kind === OfferKind.MODULE && run.money >= offer.price + 2 && random() < 0.6) service.buyOffer(index);

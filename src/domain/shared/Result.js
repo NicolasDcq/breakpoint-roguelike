@@ -22,4 +22,7 @@ export const Refusal = Object.freeze({
   PARC_TOO_SMALL: "parc-too-small",
   UNKNOWN_CARD: "unknown-card",
   UNKNOWN_OFFER: "unknown-offer",
+  NO_BOOSTER_LEFT: "no-booster-left",
+  BOOSTER_PENDING: "booster-pending",
+  NOT_IN_BOOSTER: "not-in-booster",
 });

@@ -1,10 +1,10 @@
-// La boutique, entre deux contrats : modules, Plugins, mises à jour d'architecture et services.
+// La boutique, entre deux contrats : modules, Plugins, boosters de plans d'architecture et services.
 
-import { ARCHITECTURE_BY_ID, BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES, architectureBase, upgradeCost } from "../../domain/index.js";
+import { BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES, upgradeCost } from "../../domain/index.js";
+import { BoosterOffers } from "./Booster.jsx";
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { Tooltip } from "../common/Tooltip.jsx";
-import { FX } from "../fx.jsx";
 import { FAMILY_ACCENT, tileClasses } from "../visuals.js";
 import { ModuleFace, ModuleTip } from "../components/ModuleFace.jsx";
 import { PluginCard, PluginTip } from "../components/PluginCard.jsx";
@@ -29,29 +29,6 @@ function ModuleOffers({ view, onBuy }) {
               <span className={priceClass(offer, view.money)}>{priceLabel(offer, view.money, "Acheté")}</span>
             </button>
           </Tooltip>
-        );
-      })}
-    </div>
-  );
-}
-
-function ArchitectureOffers({ view, onBuy }) {
-  return (
-    <div className="shop-modules shop-archs">
-      {view.offers.map((offer, index) => {
-        if (offer.kind !== OfferKind.ARCHITECTURE) return null;
-        const architecture = ARCHITECTURE_BY_ID[offer.id];
-        const level = view.architectureLevels[offer.id];
-        const after = architectureBase(offer.id, level + 1);
-        return (
-          <button key={index} className={`offer module-offer accent-violet arch-offer ${offer.sold ? "sold" : ""}`} disabled={offer.sold} onClick={() => onBuy(index)}>
-            <span className="offer-icon arch-icon" aria-hidden="true">▦</span>
-            <span className="offer-main">
-              <span className="offer-name">{architecture.name} <span className="arch-lv num">niv. {level} → {level + 1}</span></span>
-              <span className="offer-text">{architecture.rule}. {FX(`Base : ${after.compute} Compute, Scale ×${after.scale}.`)}</span>
-            </span>
-            <span className={priceClass(offer, view.money)}>{priceLabel(offer, view.money, "Installée")}</span>
-          </button>
         );
       })}
     </div>
@@ -123,8 +100,8 @@ export function ShopModal({ view, mode, actions }) {
             <div className="shop-col">
               <h3 className="shop-section">Modules · ils rejoignent ton parc</h3>
               <ModuleOffers view={view} onBuy={actions.buy} />
-              <h3 className="shop-section">Mises à jour d'architecture</h3>
-              <ArchitectureOffers view={view} onBuy={actions.buy} />
+              <h3 className="shop-section">Plans d'architecture</h3>
+              <BoosterOffers view={view} onOpen={actions.openBooster} />
             </div>
             <div className="shop-col">
               <h3 className="shop-section">Plugins · {view.pluginIds.length}/{RULES.maxPlugins}</h3>

@@ -52,6 +52,8 @@ export class GameService {
   deploy() { return this.execute((run) => run.deploy()); }
   openShop() { return this.execute((run) => run.openShop()); }
   buyOffer(index) { return this.execute((run) => run.buy(index)); }
+  openBooster() { return this.execute((run) => run.openBooster()); }
+  pickFromBooster(architectureId) { return this.execute((run) => run.pickFromBooster(architectureId)); }
   rerollShop() { return this.execute((run) => run.reroll()); }
   removeCard(uid) { return this.execute((run) => run.removeCard(uid)); }
   upgradeCard(uid) { return this.execute((run) => run.upgradeCard(uid)); }

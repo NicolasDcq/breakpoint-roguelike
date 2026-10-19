@@ -1,5 +1,14 @@
 # État du jeu et décisions
 
+## 19/10 · Boosters de plans d'architecture
+
+Comme les paquets de mises à jour de famille de l'ancien jeu :
+- La boutique a un **arrivage de 2 boosters** (la relance ne les renouvelle pas), à **6 $** chacun.
+- Un booster s'ouvre avec la même animation que les anciens paquets et montre **3 plans** d'architectures différentes, tirées au hasard. On en garde **un** (+1 niveau à cette architecture), ou aucun.
+- Tant qu'un booster ouvert n'est pas choisi, les autres achats attendent.
+- Les mises à jour d'architecture vendues une par une disparaissent.
+- Bot : 38 % de victoires (120 parties), contre 28 % avant. Choisir parmi 3 plans est plus fort qu'acheter un plan imposé. À 7 $, le bot retombe à 29 %. On garde 6 $ en attendant tes essais.
+
 ## 19/10 · Glisser-déposer et fiche de module
 
 - On **glisse** une carte de la main sur une case pour la poser (sur une case prise, l'ancien module retourne en main).
@@ -40,7 +49,7 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 - Par contrat : main de 7, 5 modules posés au plus sur le plateau 4×4, 4 déploiements, 3 défausses. Pas de remélange : une carte jouée ou défaussée revient au contrat suivant. Pioche vide : contrat perdu.
 - Score : l'architecture donne la base (Compute et Scale de départ), puis chaque case s'active dans l'ordre et l'améliore, puis les Plugins de fin.
 - Seuls les modules Calcul produisent du Compute (sauf effet écrit : Régie Pub, Index).
-- Boutique : 4 modules, 2 Plugins (4 au plus), 2 mises à jour d'architecture (3 $), amélioration en ◆ (3 puis 6), retrait (2 $, +1 à chaque fois, 8 modules au moins), relance (1 $, +1).
+- Boutique : 4 modules, 2 Plugins (4 au plus), 2 boosters de plans d'architecture (6 $, 3 plans, 1 gardé), amélioration en ◆ (3 puis 6), retrait (2 $, +1 à chaque fois, 8 modules au moins), relance (1 $, +1).
 - 12 contrats : 150, 220, 270, 420, 560, 730, 950, 1230, 1630, 2130, 2780, 3000. Les contrats C ont une contrainte.
 
 | Architecture | Condition | Base niv. 1 | Par niveau |

@@ -135,18 +135,41 @@ test("un contrat livré paie et ouvre la boutique", () => {
   assert.equal(run.lastPay.pay, RULES.contractPay.A);
   assert.ok(run.openShop().ok);
   assert.equal(run.phase, Phase.SHOP);
-  assert.equal(run.offers.length, 8);
+  assert.equal(run.offers.length, RULES.shop.modules + RULES.shop.plugins);
+  assert.equal(run.boostersLeft, RULES.booster.perShop);
 });
 
-test("la boutique vend les mises à jour d'architecture, et refuse sans argent", () => {
+test("un booster montre 3 plans d'architecture ; on en garde un, ou aucun", () => {
+  const run = Run.start(5);
+  run.phase = Phase.WON;
+  run.openShop();
+  run.money = RULES.booster.price - 1;
+  assert.equal(run.openBooster().reason, Refusal.NOT_ENOUGH_MONEY);
+  run.money = 100;
+  const opened = run.openBooster();
+  assert.ok(opened.ok);
+  assert.equal(new Set(run.boosterChoices).size, RULES.booster.choices);
+  assert.equal(run.buy(0).reason, Refusal.BOOSTER_PENDING, "on choisit avant de continuer ses achats");
+  assert.equal(run.pickFromBooster("inconnue").reason, Refusal.NOT_IN_BOOSTER);
+  const chosen = run.boosterChoices[0];
+  assert.ok(run.pickFromBooster(chosen).ok);
+  assert.equal(run.architectureLevels[chosen], 2);
+  assert.ok(run.openBooster().ok);
+  assert.ok(run.pickFromBooster(null).ok, "on peut passer sans rien prendre");
+  assert.equal(run.openBooster().reason, Refusal.NO_BOOSTER_LEFT);
+  run.reroll();
+  assert.equal(run.boostersLeft, 0, "la relance ne renouvelle pas les boosters");
+});
+
+test("la boutique refuse un achat sans argent, puis un achat déjà fait", () => {
   const run = Run.start(5);
   run.phase = Phase.SHOP;
-  run.offers = [{ kind: OfferKind.ARCHITECTURE, id: "cluster", price: 3, sold: false }];
+  run.offers = [{ kind: OfferKind.MODULE, id: "server", price: 3, sold: false }];
   run.money = 2;
   assert.equal(run.buy(0).reason, Refusal.NOT_ENOUGH_MONEY);
   run.money = 3;
   assert.ok(run.buy(0).ok);
-  assert.equal(run.architectureLevels.cluster, 2);
+  assert.equal(run.parc.size, RULES.startParc.length + 1);
   assert.equal(run.buy(0).reason, Refusal.ALREADY_SOLD);
 });
 

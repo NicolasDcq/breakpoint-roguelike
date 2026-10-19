@@ -11,8 +11,9 @@ export const RULES = Object.freeze({
   maxPlugins: 4,
   removeStartPrice: 2,
   rerollStartPrice: 1,
-  architectureUpdatePrice: 3,
-  shop: { modules: 4, plugins: 2, architectureUpdates: 2 },
+  shop: { modules: 4, plugins: 2 },
+  /** Boosters d'architecture : 2 par boutique (la relance ne les renouvelle pas), 3 plans, 1 gardé. */
+  booster: { perShop: 2, price: 6, choices: 3 },
   /** Coût en ◆ pour passer du niveau N au niveau N+1. */
   cardUpgradeCost: { 1: 3, 2: 6 },
   maxCardLevel: 3,

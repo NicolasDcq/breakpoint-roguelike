@@ -18,6 +18,7 @@ import { SideDetail } from "./components/SideDetail.jsx";
 import { ModuleSheet } from "./components/ModuleSheet.jsx";
 import { ShopModal } from "./screens/ShopModal.jsx";
 import { EndModal, WonModal } from "./screens/ResultModals.jsx";
+import { BoosterOpening } from "./screens/Booster.jsx";
 import { ArchitecturesModal, ConfirmNewRun, ParcModal, PluginModal, RulesModal } from "./screens/InfoModals.jsx";
 
 const RULES_SEEN = "rulesSeen";
@@ -96,6 +97,7 @@ export function App() {
 
   const shopActions = {
     buy: (index) => attempt(game.buyOffer(index), "cash"),
+    openBooster: () => attempt(game.openBooster(), "cash"),
     reroll: () => attempt(game.rerollShop(), "reroll"),
     setMode: setShopMode,
     upgrade: (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) { showToast("Module amélioré."); setShopMode(null); } },
@@ -146,6 +148,13 @@ export function App() {
         </main>
       </div>
       {phaseScreen || null}
+      {!busy && !overlay && view.phase === Phase.SHOP && view.boosterChoices && (
+        <BoosterOpening
+          key={view.boosterChoices.join()}
+          view={view}
+          onPick={(id) => { if (attempt(game.pickFromBooster(id), id ? "upgrade" : "click") && id) showToast(`Plan installé : ${ARCHITECTURE_BY_ID[id].name} niveau ${view.architectureLevels[id] + 1}.`); }}
+        />
+      )}
       {sheetCard && !busy && (
         <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} onClose={() => setSheet(null)} actions={sheetActions} />
       )}
