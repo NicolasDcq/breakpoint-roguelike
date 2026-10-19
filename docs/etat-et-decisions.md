@@ -1,5 +1,9 @@
 # État du jeu et décisions
 
+## 19/10 · Ce qui reste vraiment dans le parc
+
+Fenêtre « Ton parc » pendant un contrat : compteurs (dans la pioche, en main, utilisés), les modules joués ou défaussés sont **grisés**, ceux de la main portent la pastille **« En main »** et ceux du plateau **« Posé »**. Ordre : pioche, puis main et plateau, puis utilisés. La règle est dans le domaine (`Round.whereIs`).
+
 ## 19/10 · Colis de modules, Plugins par rareté, boss à découvrir
 
 Retour de Nicolas sur les parties procédurales : tout montrer d'avance revient à ne pas jouer la partie.

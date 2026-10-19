@@ -617,3 +617,44 @@ button.env-badge {
     height: 22px;
   }
 }
+
+/* Parc : ce qui reste vraiment à piocher */
+.parc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+}
+.parc-legend b {
+  color: #ffb020;
+}
+.parc-legend .used b {
+  color: #8b97b5;
+}
+.parc-cell.place-used .tile {
+  filter: grayscale(1) brightness(.55);
+  opacity: .55;
+}
+.parc-badge {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  z-index: 2;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  background: #ffb020;
+  color: #05070f;
+  font: 800 10px/16px var(--mono);
+  text-transform: uppercase;
+}
+.parc-cell.place-board .parc-badge {
+  background: #2bd96b;
+}
+.parc-modal .parc-grid {
+  row-gap: 18px;
+  padding-top: 10px;
+}
+.parc-modal .parc-cell {
+  min-height: 74px;
+}

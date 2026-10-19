@@ -9,7 +9,7 @@ import { STARTERS } from "../src/domain/catalog/starters.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
-import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PLUGINS, MODULE_IDS } from "../src/domain/index.js";
+import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PLUGINS, MODULE_IDS, CardPlace } from "../src/domain/index.js";
 import { GameService } from "../src/application/GameService.js";
 import { MemoryRunRepository } from "../src/infrastructure/storage/MemoryRunRepository.js";
 import { fixedSeedSource } from "../src/infrastructure/random/RandomSeedSource.js";
@@ -140,6 +140,17 @@ test("une nouvelle partie pioche 7 cartes sans remélange", () => {
   run.discard(run.round.hand.slice(0, 3));
   assert.equal(run.round.drawPile.length, RULES.startParcSize - RULES.handSize - 3);
   assert.equal(run.round.discardPile.length, 3);
+});
+
+test("on sait où est chaque carte du parc : pioche, main, plateau ou utilisée", () => {
+  const run = Run.start(5);
+  const [placed, discarded, kept] = run.round.hand;
+  run.place(placed, 0);
+  run.discard([discarded]);
+  assert.equal(run.round.whereIs(placed), CardPlace.BOARD);
+  assert.equal(run.round.whereIs(discarded), CardPlace.USED);
+  assert.equal(run.round.whereIs(kept), CardPlace.HAND);
+  assert.equal(run.round.whereIs(run.round.drawPile[0]), CardPlace.DRAW);
 });
 
 test("on ne pose pas plus de 5 modules", () => {

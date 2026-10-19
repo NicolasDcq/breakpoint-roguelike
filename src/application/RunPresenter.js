@@ -1,7 +1,7 @@
 // Présentateur : transforme la partie en données simples pour l'affichage.
 // L'interface lit cette vue ; elle ne touche jamais l'agrégat directement.
 
-import { RULES, upgradeCost } from "../domain/index.js";
+import { CardPlace, Phase, RULES, upgradeCost } from "../domain/index.js";
 
 export function presentRun(run) {
   const { round } = run;
@@ -33,6 +33,8 @@ export function presentRun(run) {
     placedCount: round.board.placedCount,
     preview: run.preview(),
     parc: run.parc.cards,
+    /** Où est chaque carte du parc pendant le contrat (tout est en pioche hors contrat). */
+    placeOf: (uid) => (run.phase === Phase.PLAY ? round.whereIs(uid) : CardPlace.DRAW),
     offers: run.offers,
     packsLeft: run.packsLeft,
     openPack: run.openPack,

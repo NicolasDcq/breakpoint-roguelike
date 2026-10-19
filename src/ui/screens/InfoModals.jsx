@@ -1,6 +1,6 @@
 // Fenêtres d'information : règles, architectures, parc, Plugin, nouvelle partie.
 
-import { ARCHITECTURES, CELL_COUNT, GRID_SIZE, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
+import { ARCHITECTURES, CELL_COUNT, CardPlace, GRID_SIZE, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
 import { Modal } from "../common/Modal.jsx";
 import { tileClasses } from "../visuals.js";
 import { ArchitecturePills } from "../components/ArchitectureLine.jsx";
@@ -58,15 +58,29 @@ export function ArchitecturesModal({ view, onClose }) {
   );
 }
 
+const PLACE_LABEL = { [CardPlace.HAND]: "En main", [CardPlace.BOARD]: "Posé" };
+const PLACE_ORDER = { [CardPlace.DRAW]: 0, [CardPlace.HAND]: 1, [CardPlace.BOARD]: 1, [CardPlace.USED]: 2 };
+
 export function ParcModal({ view, onClose }) {
+  // D'abord ce qui reste à piocher, puis la main et le plateau, puis ce qui est déjà utilisé.
+  const cards = view.parc
+    .map((card) => ({ card, place: view.placeOf(card.uid) }))
+    .sort((a, b) => PLACE_ORDER[a.place] - PLACE_ORDER[b.place]);
+  const count = (place) => cards.filter((entry) => entry.place === place).length;
   return (
     <Modal className="rules-modal parc-modal" onClose={onClose}>
       <h2 className="modal-title">Ton parc · {view.parc.length} modules</h2>
-      <p className="dim small">Il reste {view.drawCount} cartes dans la pioche de ce contrat ({view.playedCount} jouées ou défaussées : elles reviennent au contrat suivant).</p>
+      <div className="parc-legend">
+        <span><b className="num">{count(CardPlace.DRAW)}</b> dans la pioche</span>
+        <span><b className="num">{count(CardPlace.HAND) + count(CardPlace.BOARD)}</b> en main</span>
+        <span className="used"><b className="num">{count(CardPlace.USED)}</b> utilisés</span>
+      </div>
+      <p className="dim small">Les modules grisés ont été joués ou défaussés : ils reviennent au contrat suivant.</p>
       <div className="parc-grid">
-        {view.parc.map((card) => (
-          <div key={card.uid} className="slot drawer-slot filled parc-cell">
+        {cards.map(({ card, place }) => (
+          <div key={card.uid} className={`slot drawer-slot filled parc-cell place-${place}`}>
             <div className={tileClasses(card)}><ModuleFace card={card} /></div>
+            {PLACE_LABEL[place] && <span className="parc-badge">{PLACE_LABEL[place]}</span>}
           </div>
         ))}
       </div>

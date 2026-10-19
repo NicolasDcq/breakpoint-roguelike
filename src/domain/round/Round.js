@@ -4,6 +4,8 @@
 import { Board } from "../board/Board.js";
 import { ok, refuse, Refusal } from "../shared/Result.js";
 
+export const CardPlace = Object.freeze({ DRAW: "draw", HAND: "hand", BOARD: "board", USED: "used" });
+
 export class Round {
   constructor({ score = 0, deploysLeft, discardsLeft, drawPile, discardPile = [], hand = [], board = Board.empty() }) {
     this.score = score;
@@ -26,6 +28,14 @@ export class Round {
     while (this.hand.length + this.board.placedCount < handSize && this.drawPile.length) {
       this.hand.push(this.drawPile.pop());
     }
+  }
+
+  /** Où est cette carte pendant le contrat : pioche, main, plateau, ou déjà utilisée. */
+  whereIs(uid) {
+    if (this.hand.includes(uid)) return CardPlace.HAND;
+    if (this.board.cells.includes(uid)) return CardPlace.BOARD;
+    if (this.discardPile.includes(uid)) return CardPlace.USED;
+    return CardPlace.DRAW;
   }
 
   get isStuck() {
