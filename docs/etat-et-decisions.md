@@ -1,5 +1,11 @@
 # État du jeu et décisions
 
+## 19/10 · Plans lisibles d'un coup d'œil
+
+Le nom d'une architecture ne parle qu'aux joueurs qui connaissent le jeu. Chaque plan **dessine** maintenant la pose à faire : de petites tuiles de modules (même module = même icône, couleur de la famille ; « + » entre deux groupes), avec la phrase courte en dessous (« 3 fois le même module »).
+- Carte de booster : bandeau (niveau ➜ niveau, nom), dessin, phrase, gain (« +20 ⚡ · +2 × ») et nouvelle base.
+- Même dessin dans la liste des architectures.
+
 ## 19/10 · Boosters de plans d'architecture
 
 Comme les paquets de mises à jour de famille de l'ancien jeu :

@@ -4,6 +4,7 @@ import { ARCHITECTURES, CELL_COUNT, GRID_SIZE, PLUGINS, RULES, architectureBase 
 import { Modal } from "../common/Modal.jsx";
 import { tileClasses } from "../visuals.js";
 import { ArchitecturePills } from "../components/ArchitectureLine.jsx";
+import { ArchitectureDiagram, ARCHITECTURE_HINTS } from "../components/ArchitectureDiagram.jsx";
 import { ModuleFace } from "../components/ModuleFace.jsx";
 import { PluginCard } from "../components/PluginCard.jsx";
 
@@ -44,7 +45,8 @@ export function ArchitecturesModal({ view, onClose }) {
           return (
             <li key={architecture.id} className={current === architecture.id ? "current" : ""}>
               <span className="arch-name">{architecture.name} <i className="num">niv. {level}</i></span>
-              <span className="arch-rule">{architecture.rule}{plays ? ` · jouée ${plays} fois` : ""}</span>
+              <span className="arch-pose"><ArchitectureDiagram id={architecture.id} size={14} /></span>
+              <span className="arch-rule">{ARCHITECTURE_HINTS[architecture.id]}{plays ? ` · jouée ${plays} fois` : ""}</span>
               <ArchitecturePills {...architectureBase(architecture.id, level)} />
             </li>
           );

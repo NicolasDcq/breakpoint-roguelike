@@ -6,6 +6,7 @@ import { ARCHITECTURE_BY_ID, RULES, architectureBase } from "../../domain/index.
 import { useGame } from "../GameContext.jsx";
 import { fmtDec } from "../format.js";
 import { ARCHITECTURE_ACCENT } from "../visuals.js";
+import { ArchitectureDiagram, ARCHITECTURE_HINTS } from "../components/ArchitectureDiagram.jsx";
 
 /** Bord en dents de scie d'un paquet. */
 function zigzagClip(width, height, teeth) {
@@ -132,12 +133,14 @@ export function BoosterOpening({ view, onPick }) {
                     <span className="pc-back"><i>BP</i></span>
                     <span className="pc-face">
                       <span className="pc-shine" />
-                      <span className="pc-kind">PLAN · ARCHITECTURE</span>
-                      <span className="pc-glyph">▦</span>
-                      <b className="pc-name">{architecture.name}</b>
-                      <span className="pc-lv num">NIV. {level} ➜ {level + 1}</span>
-                      <span className="pc-effect">Base : {after.compute} ⚡ × {fmtDec(after.scale)}</span>
-                      <span className="pc-scope">{architecture.rule}</span>
+                      <span className="pc-band">
+                        <span className="pc-kind">PLAN · NIV. {level} ➜ {level + 1}</span>
+                        <b className="pc-name">{architecture.name}</b>
+                      </span>
+                      <ArchitectureDiagram id={id} />
+                      <span className="pc-hint">{ARCHITECTURE_HINTS[id]}</span>
+                      <span className="pc-gain num">+{architecture.perLevel[0]} ⚡ · +{architecture.perLevel[1]} ×</span>
+                      <span className="pc-base">Base : {after.compute} ⚡ × {fmtDec(after.scale)}</span>
                     </span>
                   </span>
                 </button>

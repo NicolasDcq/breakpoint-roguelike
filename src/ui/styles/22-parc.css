@@ -347,3 +347,166 @@ button.discard-btn.confirm {
 .hand-row.discarding .drawer-slot.picked .tile {
   box-shadow: 0 0 0 3px #ff5a6e, 0 0 16px rgba(255, 90, 110, .6);
 }
+
+/* Dessin d'une architecture : petites tuiles de modules */
+.arch-diagram {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.arch-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 6px;
+  background: rgba(5, 7, 15, .35);
+}
+.arch-group + .arch-group::before {
+  content: "+";
+  align-self: center;
+  margin: 0 2px 0 -4px;
+  font: 800 12px var(--mono);
+  color: #eef2ff;
+}
+.arch-mini {
+  display: grid;
+  place-items: center;
+  width: var(--mini, 26px);
+  height: var(--mini, 26px);
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  background: var(--acc, #5fe0ff);
+  color: #05070f;
+}
+.arch-mini.accent-cyan { --acc: #5fe0ff; }
+.arch-mini.accent-violet { --acc: #b99bff; }
+.arch-mini.accent-pink { --acc: #ff7cc6; }
+.arch-mini.accent-amber { --acc: #ffcf4a; }
+.arch-mini.accent-green { --acc: #2bd96b; }
+
+/* Cartes des boosters : bandeau (niveau + nom), dessin de la pose, gain */
+.pack-card.arch-card {
+  width: 178px;
+  height: 252px;
+}
+.arch-card .pc-face {
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 0 8px 10px;
+  background: #141c38;
+}
+.pc-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: calc(100% + 16px);
+  margin: 0 -8px 2px;
+  padding: 8px 6px 7px;
+  border-bottom: 3px solid var(--ink);
+  background: var(--acc);
+  color: var(--ink);
+}
+.arch-card .pc-name {
+  margin: 0;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.05;
+}
+.arch-card .arch-diagram {
+  --mini: 24px;
+  gap: 4px;
+  min-height: 56px;
+  align-content: center;
+}
+.arch-card .arch-mini svg {
+  width: 15px;
+  height: 15px;
+}
+.pc-hint {
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: .9;
+}
+.pc-gain {
+  margin-top: auto;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: #ffb020;
+  color: #05070f;
+  font-size: 12px;
+  font-weight: 800;
+}
+.pc-base {
+  font-size: 10.5px;
+  opacity: .75;
+}
+@media (max-width: 640px) {
+  .pack-card.arch-card {
+    width: 31vw;
+    max-width: 128px;
+    height: 226px;
+  }
+  .arch-card .pc-face {
+    gap: 5px;
+    padding: 0 4px 7px;
+  }
+  .pc-band {
+    width: calc(100% + 8px);
+    margin: 0 -4px 1px;
+    padding: 6px 3px 5px;
+  }
+  .arch-card .pc-kind {
+    font-size: 7.5px;
+  }
+  .arch-card .pc-name {
+    font-size: 13px;
+  }
+  .arch-card .arch-diagram {
+    --mini: 15px;
+    gap: 3px;
+    min-height: 44px;
+  }
+  .arch-card .arch-group {
+    gap: 1px;
+    padding: 1px;
+  }
+  .arch-card .arch-mini {
+    border-width: 1.5px;
+    border-radius: 4px;
+  }
+  .arch-card .arch-mini svg {
+    width: 10px;
+    height: 10px;
+  }
+  .arch-card .pc-hint {
+    display: block;
+    font-size: 9.5px;
+  }
+  .arch-card .pc-gain {
+    padding: 0 4px;
+    font-size: 10px;
+  }
+  .arch-card .pc-base {
+    display: none;
+  }
+}
+
+/* Liste des architectures */
+.arch-list li {
+  grid-template-areas: "name pills" "pose pills" "rule pills";
+}
+.arch-list .arch-pose {
+  grid-area: pose;
+  justify-self: start;
+  margin: 3px 0;
+}
+.arch-list .arch-diagram {
+  justify-content: flex-start;
+}
