@@ -16,7 +16,7 @@ function LevelCard({ label, card, className = "" }) {
   );
 }
 
-export function ModuleSheet({ card, place, view, desktop, marked, onClose, actions }) {
+export function ModuleSheet({ card, place, view, desktop, onClose, actions }) {
   const module = MODULES[card.moduleId];
   const accent = FAMILY_ACCENT[module.family];
   const nextLevel = card.level < RULES.maxCardLevel ? card.level + 1 : null;
@@ -75,11 +75,6 @@ export function ModuleSheet({ card, place, view, desktop, marked, onClose, actio
             </button>
           )}
           <div className="mm-row">
-            {!onBoard && (
-              <button className="ghost mm-sell" disabled={!view.discardsLeft} onClick={() => actions.toggleDiscard(card.uid)}>
-                {marked ? "Ne plus défausser" : "À défausser"}
-              </button>
-            )}
             <button className="mm-back" onClick={onClose}>Retour au plateau</button>
           </div>
         </footer>

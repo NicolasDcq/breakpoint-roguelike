@@ -6,7 +6,7 @@
 - On glisse un module posé sur une autre case pour le déplacer ; sur une case prise, les deux **échangent** leur place (`Run.moveCard`).
 - On glisse un module posé vers la main pour le **reprendre**.
 - **Toucher** une tuile (main ou plateau) ouvre sa **fiche** (style de l'ancien jeu) : ce qu'il fait, son prochain niveau, sa famille. Depuis la fiche : « Poser sur la case N », « Reprendre en main », « À défausser ».
-- La défausse se prépare depuis la fiche (cartes marquées en orange), puis le bouton « Défausser ».
+- Défausse en deux temps : on appuie sur « Défausser », on touche les cartes à jeter (entourées de rouge), le bouton devient « Confirmer (n) », et la défausse n'a lieu qu'à la confirmation. « Confirmer » sans carte choisie annule. Pendant ce temps, toucher une carte la choisit au lieu d'ouvrir sa fiche.
 
 ## 19/10 · Plateau 4×4
 

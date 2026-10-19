@@ -27,6 +27,7 @@ export function App() {
   const view = useGameView();
   const mobile = useMediaQuery(MOBILE_QUERY);
   const [marked, setMarked] = useState([]);
+  const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
   const [overlay, setOverlay] = useState(() => (preferences.get(RULES_SEEN) === "1" ? null : { name: "rules" }));
   const [shopMode, setShopMode] = useState(null);
@@ -57,7 +58,11 @@ export function App() {
 
   const { drag, dragProps } = useTileDrag({
     locked: busy,
-    onTap: (source) => { sound.play("click"); setSheet(source); },
+    onTap: (source) => {
+      if (discarding) { if (source.kind === "hand") toggleDiscard(source.uid); return; }
+      sound.play("click");
+      setSheet(source);
+    },
     onDrop: (source, target) => {
       if (!target) return;
       if (source.kind === "hand" && target.kind === "cell") placeCard(source.uid, target.cell);
@@ -69,20 +74,25 @@ export function App() {
   const sheetActions = {
     place: (uid, cell) => { if (placeCard(uid, cell)) setSheet(null); },
     takeBack: (cell) => { if (attempt(game.takeBack(cell))) setSheet(null); },
-    toggleDiscard: (uid) => { toggleDiscard(uid); setSheet(null); },
   };
   const sheetCard = sheet && (sheet.kind === "hand" ? view.hand : view.board).find((card) => card?.uid === sheet.uid);
   const sheetPlace = sheetCard && sheet.kind === "cell" ? { kind: "cell", cell: view.board.findIndex((card) => card?.uid === sheet.uid) } : { kind: "hand" };
 
-  const discard = () => { if (attempt(game.discardCards(marked), "reroll")) setMarked([]); };
+  /** Défausser en deux temps : on entre dans le mode, on choisit, puis on confirme. */
+  const stopDiscarding = () => { setDiscarding(false); setMarked([]); };
+  const discard = () => {
+    if (!discarding) { sound.play("click"); setSheet(null); setDiscarding(true); return; }
+    if (!marked.length) { stopDiscarding(); return; } // rien de choisi : on annule
+    if (attempt(game.discardCards(marked), "reroll")) stopDiscarding();
+  };
 
   const deploy = async () => {
-    setMarked([]);
+    stopDiscarding();
     const result = await play();
     if (result) showToast(`${ARCHITECTURE_BY_ID[result.architecture.id].name} · +${fmt(result.score)} Performance (${fmt(result.compute)} × ${fmtDec(result.scale)})`);
   };
 
-  const newRun = () => { game.newRun(); setMarked([]); setShopMode(null); close(); };
+  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); close(); };
 
   const shopActions = {
     buy: (index) => attempt(game.buyOffer(index), "cash"),
@@ -91,7 +101,7 @@ export function App() {
     upgrade: (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) { showToast("Module amélioré."); setShopMode(null); } },
     remove: (uid) => { if (attempt(game.removeCard(uid), "sell")) { showToast("Module retiré du parc."); setShopMode(null); } },
     showParc: () => open("parc"),
-    next: () => { attempt(game.nextContract()); setMarked([]); },
+    next: () => { attempt(game.nextContract()); stopDiscarding(); },
   };
 
   const phaseScreen = !busy && !overlay && {
@@ -101,7 +111,7 @@ export function App() {
     [Phase.VICTORY]: <EndModal view={view} onNewRun={newRun} />,
   }[view.phase];
 
-  const side = <SideDetail marked={marked} desktop={!mobile} />;
+  const side = <SideDetail marked={marked} discarding={discarding} desktop={!mobile} />;
 
   return (
     <div className={`app ${view.contract.boss ? "boss-mode" : ""} ${mobile ? "is-mobile" : ""}`}>
@@ -111,6 +121,7 @@ export function App() {
           view={view}
           animation={animation}
           selectionCount={marked.length}
+          discarding={discarding}
           onDiscard={discard}
           onDeploy={deploy}
           onParc={() => open("parc")}
@@ -129,14 +140,14 @@ export function App() {
               <span className="dim small board-hint">Les modules s’activent dans l’ordre des numéros. Glisse-les pour les poser ou les réorganiser.</span>
               <FamilyBar board={view.board} />
             </div>
-            <BoardView view={view} marked={marked} animation={animation} locked={busy} drag={drag} dragProps={dragProps} />
+            <BoardView view={view} marked={marked} discarding={discarding} animation={animation} locked={busy} drag={drag} dragProps={dragProps} />
           </section>
           {mobile && side}
         </main>
       </div>
       {phaseScreen || null}
       {sheetCard && !busy && (
-        <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} marked={marked.includes(sheetCard.uid)} onClose={() => setSheet(null)} actions={sheetActions} />
+        <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} onClose={() => setSheet(null)} actions={sheetActions} />
       )}
       {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
       {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}

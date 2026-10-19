@@ -14,7 +14,7 @@ function ParcIcon() {
   );
 }
 
-export function ScorePanel({ view, animation, selectionCount, onDiscard, onDeploy, onParc, onArchitectures, onSkip, onSpeed }) {
+export function ScorePanel({ view, animation, selectionCount, discarding, onDiscard, onDeploy, onParc, onArchitectures, onSkip, onSpeed }) {
   const running = Boolean(animation);
   const totals = animation?.formula ?? view.preview;
   const computeText = fmt(Math.round(totals.compute));
@@ -69,15 +69,15 @@ export function ScorePanel({ view, animation, selectionCount, onDiscard, onDeplo
               )}
               {!view.placedCount && <span className="dim">Choisis des modules dans ta main et pose-les sur le plateau.</span>}
             </span>
-            <button className="shop-btn discard-btn" onClick={onDiscard} disabled={!view.discardsLeft || !selectionCount}>
-              Défausser{selectionCount ? ` (${selectionCount})` : ""}
+            <button className={`shop-btn discard-btn ${discarding ? "confirm" : ""}`} onClick={onDiscard} disabled={!view.discardsLeft && !discarding} aria-pressed={discarding}>
+              {discarding ? `Confirmer${selectionCount ? ` (${selectionCount})` : ""}` : "Défausser"}
             </button>
             <button className="fusion-btn ready parc-btn" onClick={onParc} aria-label={`Parc : ${view.drawCount} cartes dans la pioche`}>
               <ParcIcon />
               <span className="fusion-label">Parc</span>
               <span className="fusion-badge num">{view.drawCount}</span>
             </button>
-            <button className={`deploy ${enough ? "hot" : ""}`} disabled={!view.placedCount} onClick={onDeploy}>
+            <button className={`deploy ${enough ? "hot" : ""}`} disabled={!view.placedCount || discarding} onClick={onDeploy}>
               <span>Déployer</span>
             </button>
           </>

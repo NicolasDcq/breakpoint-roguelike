@@ -327,3 +327,23 @@ button.fu-parc {
     height: min(calc(100cqh - var(--drawer-h) - 8px), calc(100cqw * .92));
   }
 }
+
+/* Défausse en deux temps */
+button.discard-btn.confirm {
+  background: #ff5a6e;
+  color: #05070f;
+  animation: discard-pulse 1.2s ease-in-out infinite;
+}
+@keyframes discard-pulse {
+  50% { filter: brightness(1.15); }
+}
+.hand-row.discarding {
+  box-shadow: inset 0 0 0 2px #ff5a6e, 0 5px 0 #05070f;
+}
+.hand-row.discarding .drawer-label {
+  color: #ff9aa6;
+  opacity: 1;
+}
+.hand-row.discarding .drawer-slot.picked .tile {
+  box-shadow: 0 0 0 3px #ff5a6e, 0 0 16px rgba(255, 90, 110, .6);
+}

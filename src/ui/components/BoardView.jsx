@@ -19,11 +19,15 @@ function Popups({ pops, className = "" }) {
 
 const isSource = (drag, kind, uid) => drag?.source.kind === kind && drag.source.uid === uid;
 
-function Hand({ view, marked, locked, drag, dragProps }) {
+function Hand({ view, marked, discarding, locked, drag, dragProps }) {
   const over = drag?.over?.kind === "hand" && drag.source.kind === "cell";
   return (
-    <div className={`drawer-row hand-row ${over ? "drop-over" : ""}`} data-drop="hand">
-      <span className="drawer-label">Main · {view.hand.length} · pioche {view.drawCount} · posés {view.placedCount}/{view.limits.maxPlaced}</span>
+    <div className={`drawer-row hand-row ${over ? "drop-over" : ""} ${discarding ? "discarding" : ""}`} data-drop="hand">
+      <span className="drawer-label">
+        {discarding
+          ? `Défausse : touche les cartes à jeter (${marked.length}), puis Confirmer`
+          : `Main · ${view.hand.length} · pioche ${view.drawCount} · posés ${view.placedCount}/${view.limits.maxPlaced}`}
+      </span>
       <div className="drawer-cells" style={{ "--hand": Math.max(view.hand.length, 1) }}>
         {view.hand.map((card) => (
           <div key={card.uid} className={`slot drawer-slot filled ${marked.includes(card.uid) ? "picked" : ""}`}>
@@ -46,7 +50,7 @@ function Hand({ view, marked, locked, drag, dragProps }) {
   );
 }
 
-export function BoardView({ view, marked, animation, locked, drag, dragProps }) {
+export function BoardView({ view, marked, discarding, animation, locked, drag, dragProps }) {
   const blockedCell = BOSSES[view.contract.boss]?.blockedCell;
   const highlight = animation?.highlight ?? (view.placedCount && view.preview.architecture.id !== "monolithe" ? view.preview.architecture.members : []);
   const activeCell = animation?.firing?.cell ?? null;
@@ -55,7 +59,7 @@ export function BoardView({ view, marked, animation, locked, drag, dragProps }) 
   const handFull = drag?.source.kind === "hand" && view.placedCount >= view.limits.maxPlaced;
   return (
     <div className={`board ${locked ? "running" : ""}`} style={{ "--grid": GRID_SIZE }}>
-      <Hand view={view} marked={marked} locked={locked} drag={drag} dragProps={dragProps} />
+      <Hand view={view} marked={marked} discarding={discarding} locked={locked} drag={drag} dragProps={dragProps} />
       <svg className="trace" viewBox={`0 0 ${TRACE_WIDTH} ${TRACE_HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
         <path className="trace-bus" d={busPath()} />
         {returnPaths().map((path) => <path key={path} className="trace-return" d={path} />)}
