@@ -1,25 +1,11 @@
-// Détail de la carte choisie dans la main (panneau latéral, ou bulle sur téléphone).
+// Aide du plateau (ordinateur) et rappel des cartes marquées pour la défausse.
 
-import { FAMILIES, MODULES } from "../../domain/index.js";
-import { EffectLines } from "./EffectLines.jsx";
-
-export function SideDetail({ view, selection, desktop = false }) {
-  const card = selection.length === 1 ? view.hand.find((other) => other.uid === selection[0]) : null;
+export function SideDetail({ marked, desktop = false }) {
   let content = null;
-  if (card) {
-    const module = MODULES[card.moduleId];
-    content = (
-      <>
-        <p><b>{module.name}</b> <span className="dim">· {FAMILIES[module.family].name} · niveau {card.level}</span></p>
-        <EffectLines moduleId={card.moduleId} level={card.level} />
-        <p className="dim small">Touche une case vide pour le poser. La case 1 s'active en premier.</p>
-      </>
-    );
-  } else if (selection.length > 1) {
-    content = <p><b>{selection.length} cartes choisies.</b> Défausse-les pour en piocher d'autres.</p>;
-  }
-  if (!content && desktop) {
-    content = <p className="dim">Touche une carte de ta main pour voir son effet, puis une case pour la poser. Touche un module posé pour le reprendre. Choisis plusieurs cartes pour les défausser.</p>;
+  if (marked.length) {
+    content = <p><b>{marked.length} carte{marked.length > 1 ? "s" : ""} à défausser.</b> Touche « Défausser » pour en piocher d’autres.</p>;
+  } else if (desktop) {
+    content = <p className="dim">Glisse une carte de ta main sur une case pour la poser. Glisse un module posé pour le déplacer, ou vers ta main pour le reprendre. Touche une tuile pour voir sa fiche.</p>;
   }
   return <aside className="side">{content && <div className="hint side-detail">{content}</div>}</aside>;
 }

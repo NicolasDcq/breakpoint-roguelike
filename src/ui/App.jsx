@@ -8,12 +8,14 @@ import { fmt, fmtDec } from "./format.js";
 import { MOBILE_QUERY, useMediaQuery } from "./hooks/useMediaQuery.js";
 import { useToast } from "./hooks/useToast.js";
 import { useDeployAnimation } from "./hooks/useDeployAnimation.js";
+import { useTileDrag } from "./hooks/useTileDrag.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { ScorePanel } from "./components/ScorePanel.jsx";
 import { PluginRail } from "./components/PluginRail.jsx";
 import { BoardView } from "./components/BoardView.jsx";
 import { FamilyBar } from "./components/FamilyBar.jsx";
 import { SideDetail } from "./components/SideDetail.jsx";
+import { ModuleSheet } from "./components/ModuleSheet.jsx";
 import { ShopModal } from "./screens/ShopModal.jsx";
 import { EndModal, WonModal } from "./screens/ResultModals.jsx";
 import { ArchitecturesModal, ConfirmNewRun, ParcModal, PluginModal, RulesModal } from "./screens/InfoModals.jsx";
@@ -24,7 +26,8 @@ export function App() {
   const { game, sound, preferences } = useGame();
   const view = useGameView();
   const mobile = useMediaQuery(MOBILE_QUERY);
-  const [selection, setSelection] = useState([]);
+  const [marked, setMarked] = useState([]);
+  const [sheet, setSheet] = useState(null);
   const [overlay, setOverlay] = useState(() => (preferences.get(RULES_SEEN) === "1" ? null : { name: "rules" }));
   const [shopMode, setShopMode] = useState(null);
   const [toast, showToast] = useToast();
@@ -40,28 +43,46 @@ export function App() {
     return result.ok;
   };
 
-  const toggleCard = (uid) => {
-    if (busy) return;
+  const toggleDiscard = (uid) => {
     sound.play("click");
-    setSelection((current) => (current.includes(uid) ? current.filter((other) => other !== uid) : [...current, uid]));
+    setMarked((current) => (current.includes(uid) ? current.filter((other) => other !== uid) : [...current, uid]));
   };
 
-  const touchCell = (cell) => {
-    if (busy) return;
-    if (view.board[cell]) { attempt(game.takeBack(cell)); setSelection([]); return; }
-    if (selection.length === 1) { if (attempt(game.placeCard(selection[0], cell), "upgrade")) setSelection([]); }
-    else if (selection.length > 1) showToast("Choisis une seule carte pour la poser.");
+  const placeCard = (uid, cell) => {
+    if (view.board[cell] && !attempt(game.takeBack(cell))) return false;
+    if (!attempt(game.placeCard(uid, cell), "upgrade")) return false;
+    setMarked((current) => current.filter((other) => other !== uid));
+    return true;
   };
 
-  const discard = () => { if (attempt(game.discardCards(selection), "reroll")) setSelection([]); };
+  const { drag, dragProps } = useTileDrag({
+    locked: busy,
+    onTap: (source) => { sound.play("click"); setSheet(source); },
+    onDrop: (source, target) => {
+      if (!target) return;
+      if (source.kind === "hand" && target.kind === "cell") placeCard(source.uid, target.cell);
+      if (source.kind === "cell" && target.kind === "cell") attempt(game.moveCard(source.cell, target.cell));
+      if (source.kind === "cell" && target.kind === "hand") attempt(game.takeBack(source.cell));
+    },
+  });
+
+  const sheetActions = {
+    place: (uid, cell) => { if (placeCard(uid, cell)) setSheet(null); },
+    takeBack: (cell) => { if (attempt(game.takeBack(cell))) setSheet(null); },
+    toggleDiscard: (uid) => { toggleDiscard(uid); setSheet(null); },
+  };
+  const sheetCard = sheet && (sheet.kind === "hand" ? view.hand : view.board).find((card) => card?.uid === sheet.uid);
+  const sheetPlace = sheetCard && sheet.kind === "cell" ? { kind: "cell", cell: view.board.findIndex((card) => card?.uid === sheet.uid) } : { kind: "hand" };
+
+  const discard = () => { if (attempt(game.discardCards(marked), "reroll")) setMarked([]); };
 
   const deploy = async () => {
-    setSelection([]);
+    setMarked([]);
     const result = await play();
     if (result) showToast(`${ARCHITECTURE_BY_ID[result.architecture.id].name} · +${fmt(result.score)} Performance (${fmt(result.compute)} × ${fmtDec(result.scale)})`);
   };
 
-  const newRun = () => { game.newRun(); setSelection([]); setShopMode(null); close(); };
+  const newRun = () => { game.newRun(); setMarked([]); setShopMode(null); close(); };
 
   const shopActions = {
     buy: (index) => attempt(game.buyOffer(index), "cash"),
@@ -70,7 +91,7 @@ export function App() {
     upgrade: (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) { showToast("Module amélioré."); setShopMode(null); } },
     remove: (uid) => { if (attempt(game.removeCard(uid), "sell")) { showToast("Module retiré du parc."); setShopMode(null); } },
     showParc: () => open("parc"),
-    next: () => { attempt(game.nextContract()); setSelection([]); },
+    next: () => { attempt(game.nextContract()); setMarked([]); },
   };
 
   const phaseScreen = !busy && !overlay && {
@@ -80,7 +101,7 @@ export function App() {
     [Phase.VICTORY]: <EndModal view={view} onNewRun={newRun} />,
   }[view.phase];
 
-  const side = <SideDetail view={view} selection={selection} desktop={!mobile} />;
+  const side = <SideDetail marked={marked} desktop={!mobile} />;
 
   return (
     <div className={`app ${view.contract.boss ? "boss-mode" : ""} ${mobile ? "is-mobile" : ""}`}>
@@ -89,7 +110,7 @@ export function App() {
         <ScorePanel
           view={view}
           animation={animation}
-          selectionCount={selection.length}
+          selectionCount={marked.length}
           onDiscard={discard}
           onDeploy={deploy}
           onParc={() => open("parc")}
@@ -105,15 +126,18 @@ export function App() {
           <section className="board-col">
             <div className="board-head">
               <h2>Architecture</h2>
-              <span className="dim small board-hint">Les modules s’activent dans l’ordre des numéros. Touche une carte de ta main, puis une case.</span>
+              <span className="dim small board-hint">Les modules s’activent dans l’ordre des numéros. Glisse-les pour les poser ou les réorganiser.</span>
               <FamilyBar board={view.board} />
             </div>
-            <BoardView view={view} selection={selection} animation={animation} locked={busy} onCell={touchCell} onToggle={toggleCard} />
+            <BoardView view={view} marked={marked} animation={animation} locked={busy} drag={drag} dragProps={dragProps} />
           </section>
           {mobile && side}
         </main>
       </div>
       {phaseScreen || null}
+      {sheetCard && !busy && (
+        <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} marked={marked.includes(sheetCard.uid)} onClose={() => setSheet(null)} actions={sheetActions} />
+      )}
       {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
       {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}
       {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}

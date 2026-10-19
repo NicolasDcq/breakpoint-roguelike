@@ -105,6 +105,11 @@ export class Run {
     return this.round.place(uid, cell, this.limits.maxPlaced);
   }
 
+  moveCard(from, to) {
+    if (this.phase !== Phase.PLAY) return refuse(Refusal.WRONG_PHASE);
+    return this.round.move(from, to);
+  }
+
   unplace(cell) {
     if (this.phase !== Phase.PLAY) return refuse(Refusal.WRONG_PHASE);
     return this.round.unplace(cell);

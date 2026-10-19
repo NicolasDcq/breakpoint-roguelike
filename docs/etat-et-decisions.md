@@ -1,5 +1,13 @@
 # État du jeu et décisions
 
+## 19/10 · Glisser-déposer et fiche de module
+
+- On **glisse** une carte de la main sur une case pour la poser (sur une case prise, l'ancien module retourne en main).
+- On glisse un module posé sur une autre case pour le déplacer ; sur une case prise, les deux **échangent** leur place (`Run.moveCard`).
+- On glisse un module posé vers la main pour le **reprendre**.
+- **Toucher** une tuile (main ou plateau) ouvre sa **fiche** (style de l'ancien jeu) : ce qu'il fait, son prochain niveau, sa famille. Depuis la fiche : « Poser sur la case N », « Reprendre en main », « À défausser ».
+- La défausse se prépare depuis la fiche (cartes marquées en orange), puis le bouton « Défausser ».
+
 ## 19/10 · Plateau 4×4
 
 Pour gagner de la place : le plateau passe en 4×4 (16 cases). La taille vient d'une seule constante (`GRID_SIZE` dans `domain/board/grid.js`) ; le dessin et les styles la suivent (`--grid`).

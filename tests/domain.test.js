@@ -112,6 +112,19 @@ test("on ne pose pas plus de 5 modules", () => {
   assert.deepEqual(run.place(hand[5], 5), { ok: false, reason: Refusal.BOARD_FULL });
 });
 
+test("on déplace un module posé, et deux modules échangent leur place", () => {
+  const run = Run.start(5);
+  const [first, second] = run.round.hand;
+  run.place(first, 0);
+  run.place(second, 1);
+  assert.ok(run.moveCard(0, 7).ok);
+  assert.equal(run.round.board.at(7), first);
+  assert.equal(run.round.board.at(0), null);
+  assert.ok(run.moveCard(7, 1).ok);
+  assert.equal(run.round.board.at(1), first);
+  assert.equal(run.round.board.at(7), second);
+});
+
 test("un contrat livré paie et ouvre la boutique", () => {
   const run = Run.start(5);
   run.round.score = run.contract.target - 1;

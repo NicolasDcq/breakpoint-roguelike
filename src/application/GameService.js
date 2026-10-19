@@ -47,6 +47,7 @@ export class GameService {
 
   placeCard(uid, cell) { return this.execute((run) => run.place(uid, cell)); }
   takeBack(cell) { return this.execute((run) => run.unplace(cell)); }
+  moveCard(from, to) { return this.execute((run) => run.moveCard(from, to)); }
   discardCards(uids) { return this.execute((run) => run.discard(uids)); }
   deploy() { return this.execute((run) => run.deploy()); }
   openShop() { return this.execute((run) => run.openShop()); }

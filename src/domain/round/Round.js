@@ -41,6 +41,16 @@ export class Round {
     return ok();
   }
 
+  /** Déplace un module posé ; si la case d'arrivée est prise, les deux échangent leur place. */
+  move(from, to) {
+    const uid = this.board.at(from);
+    if (!uid) return refuse(Refusal.NOTHING_SELECTED);
+    if (from === to) return ok();
+    const other = this.board.at(to);
+    this.board = this.board.with(from, other).with(to, uid);
+    return ok();
+  }
+
   unplace(cell) {
     const uid = this.board.at(cell);
     if (!uid) return refuse(Refusal.NOTHING_SELECTED);
