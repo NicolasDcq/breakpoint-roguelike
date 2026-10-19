@@ -1,4 +1,4 @@
-// Le plateau : 25 cases (5×5), chacune vide (null) ou occupée par une carte (son uid).
+// Le plateau : 16 cases (4×4), chacune vide (null) ou occupée par une carte (son uid).
 // Objet valeur : chaque changement rend un nouveau plateau.
 
 import { CELL_COUNT } from "./grid.js";

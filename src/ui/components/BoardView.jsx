@@ -1,8 +1,8 @@
-// Le plateau 5×5 et, en dessous (ou à droite), la main.
+// Le plateau et, en dessous (ou à droite), la main.
 // Toucher une carte de la main la choisit ; toucher une case vide l'y pose ;
 // toucher un module posé le reprend.
 
-import { BOSSES, CELLS, MODULES } from "../../domain/index.js";
+import { BOSSES, CELLS, GRID_SIZE, MODULES } from "../../domain/index.js";
 import { Tooltip } from "../common/Tooltip.jsx";
 import { tileClasses } from "../visuals.js";
 import { TRACE_HEIGHT, TRACE_WIDTH, busPath, returnPaths, slotX, slotY } from "./boardGeometry.js";
@@ -52,7 +52,7 @@ export function BoardView({ view, selection, animation, locked, onCell, onToggle
   const activeCell = animation?.firing?.cell ?? null;
   const pops = animation?.pops ?? [];
   return (
-    <div className={`board ${locked ? "running" : ""}`}>
+    <div className={`board ${locked ? "running" : ""}`} style={{ "--grid": GRID_SIZE }}>
       <Hand view={view} selection={selection} locked={locked} onToggle={onToggle} />
       <svg className="trace" viewBox={`0 0 ${TRACE_WIDTH} ${TRACE_HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
         <path className="trace-bus" d={busPath()} />

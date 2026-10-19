@@ -317,3 +317,13 @@ button.fu-parc {
     padding-bottom: 64px;
   }
 }
+
+/* Plateau 4×4 sur téléphone : il est plus carré, la main récupère la place gagnée. */
+@media (max-width: 1180px) {
+  .app.is-mobile {
+    --drawer-h: 104px;
+  }
+  .app.is-mobile .board {
+    height: min(calc(100cqh - var(--drawer-h) - 8px), calc(100cqw * .92));
+  }
+}

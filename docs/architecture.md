@@ -20,7 +20,7 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 | `shared/` | `Rng` (hasard à graine), `Result` (réussi / refusé avec un code), `levels` (valeur selon le niveau) |
 | `catalog/` | données du jeu : familles, modules, Plugins, contrats, contraintes de boss, architectures, `rules.js` (tous les chiffres réglables) |
 | `parc/` | `Card` (objet valeur) et `Parc` (la collection du joueur) |
-| `board/` | géométrie 5×5 (`grid.js`, taille réglable avec `GRID_SIZE`) et `Board` (objet valeur) |
+| `board/` | géométrie 4×4 (`grid.js`, taille réglable avec `GRID_SIZE`) et `Board` (objet valeur) |
 | `round/` | `Round` : un contrat en cours (pioche, main, plateau, essais) |
 | `scoring/` | `ScoringEngine` (calcul pur d'un déploiement) et `ActivationContext` (ce qu'un module a le droit de faire) |
 | `shop/` | service de boutique : tirage des offres, prix du retrait |

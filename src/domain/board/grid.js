@@ -1,7 +1,7 @@
-// Géométrie du plateau 5×5. Les cases sont numérotées de 0 à 24, ligne par ligne :
+// Géométrie du plateau 4×4. Les cases sont numérotées de 0 à 15, ligne par ligne :
 // elles s'activent dans cet ordre.
 
-export const GRID_SIZE = 5;
+export const GRID_SIZE = 4;
 export const CELL_COUNT = GRID_SIZE * GRID_SIZE;
 export const CELLS = Array.from({ length: CELL_COUNT }, (_, cell) => cell);
 

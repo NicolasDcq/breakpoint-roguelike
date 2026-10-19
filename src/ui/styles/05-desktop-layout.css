@@ -74,7 +74,7 @@
   .board .slots {
     height: 100%;
     min-height: 0;
-    grid-template-rows: repeat(5, minmax(92px, 1fr));
+    grid-template-rows: repeat(var(--grid, 5), minmax(92px, 1fr));
   }
   .drawer-row {
     left: 100%;

@@ -1,6 +1,6 @@
 // Fenêtres d'information : règles, architectures, parc, Plugin, nouvelle partie.
 
-import { ARCHITECTURES, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
+import { ARCHITECTURES, CELL_COUNT, GRID_SIZE, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
 import { Modal } from "../common/Modal.jsx";
 import { tileClasses } from "../visuals.js";
 import { ArchitecturePills } from "../components/ArchitectureLine.jsx";
@@ -13,7 +13,7 @@ export function RulesModal({ onClose }) {
       <h2 className="modal-title">Comment jouer</h2>
       <ol className="rules">
         <li><b>Ton parc est ton paquet de cartes</b> ({RULES.startParc.length} modules au départ). À chaque contrat, tu pioches une main de {RULES.handSize} modules.</li>
-        <li><b>Pose jusqu’à {RULES.maxPlaced} modules</b> sur le plateau 5×5, puis déploie. Ils s’activent dans l’ordre des numéros (1 → 25) ; l’ordre et les voisins comptent.</li>
+        <li><b>Pose jusqu’à {RULES.maxPlaced} modules</b> sur le plateau {GRID_SIZE}×{GRID_SIZE}, puis déploie. Ils s’activent dans l’ordre des numéros (1 → {CELL_COUNT}) ; l’ordre et les voisins comptent.</li>
         <li><b>Performance = Compute ⚡ × Scale.</b> L’architecture formée par les modules posés donne la base, puis chaque module l’améliore. Les déploiements s’additionnent jusqu’à l’objectif.</li>
         <li><b>Architectures</b>, comme les mains au poker : 2 identiques font une Redondance, 3 un Cluster, 3 + 2 une Haute dispo, les 5 familles un Full-stack…</li>
         <li><b>Seuls les modules Calcul produisent du Compute.</b> Les autres apportent Scale, Data, $ ou réactivations, sauf si leur effet dit autre chose.</li>

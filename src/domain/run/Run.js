@@ -66,7 +66,7 @@ export class Run {
     return this.parc.find(uid);
   }
 
-  /** Les 25 cases avec leur carte (ou null). */
+  /** Les 16 cases avec leur carte (ou null). */
   cardsOn(board = this.round.board) {
     return board.cells.map((uid) => (uid ? this.card(uid) : null));
   }

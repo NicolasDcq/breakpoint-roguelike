@@ -16,7 +16,7 @@ const hasOutput = (output) => output.compute || output.scale || output.data || o
 
 /**
  * @param {object} input
- * @param {(object|null)[]} input.cards   les 25 cases : une carte ou null
+ * @param {(object|null)[]} input.cards   les 16 cases : une carte ou null
  * @param {string[]} input.pluginIds
  * @param {string|null} input.bossId
  * @param {number} input.dataStock

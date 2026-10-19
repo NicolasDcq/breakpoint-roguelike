@@ -420,7 +420,7 @@ p {
 }
 .rail-slots {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--slots, 5), minmax(0, 1fr));
   gap: 12px;
 }
 .joker-wrap {
@@ -785,8 +785,8 @@ p {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  grid-template-rows: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--grid, 5), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--grid, 5), minmax(0, 1fr));
   aspect-ratio: 2.35 / 1;
   min-height: 290px;
 }
@@ -2680,7 +2680,7 @@ body.is-dragging * {
   }
   .chip-row {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--slots, 5), minmax(0, 1fr));
     gap: 6px;
   }
   .joker-chip {
@@ -4045,7 +4045,7 @@ button.shop-btn:disabled {
   .slots {
     aspect-ratio: auto;
     min-height: 0;
-    grid-template-rows: repeat(5, 124px);
+    grid-template-rows: repeat(var(--grid, 5), 124px);
   }
   .slot {
     padding: 6px 0;
@@ -4956,7 +4956,7 @@ button.shop-btn:disabled {
   }
   .slots {
     aspect-ratio: auto;
-    grid-template-rows: repeat(5, 58px);
+    grid-template-rows: repeat(var(--grid, 5), 58px);
   }
   .slot {
     padding: 3px 0;

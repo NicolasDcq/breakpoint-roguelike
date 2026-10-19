@@ -3,8 +3,8 @@
     {
       "seed": 1,
       "phase": "lost",
-      "contractIndex": 9,
-      "chain": "fbc05212d9775239"
+      "contractIndex": 8,
+      "chain": "d949f8308c371782"
     },
     {
       "seed": 2,
@@ -16,7 +16,7 @@
       "seed": 3,
       "phase": "lost",
       "contractIndex": 8,
-      "chain": "cf3496b7b23ff8d2"
+      "chain": "6e032497fba151f1"
     },
     {
       "seed": 4,
@@ -28,25 +28,25 @@
       "seed": 5,
       "phase": "lost",
       "contractIndex": 9,
-      "chain": "c8d85763b054a3e9"
+      "chain": "06d6516b209cccaf"
     },
     {
       "seed": 6,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "bd29e07f9e1c8497"
+      "chain": "363cfa91538f2190"
     },
     {
       "seed": 7,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "732d55374d1cad85"
+      "chain": "579f553b0c5c26f5"
     },
     {
       "seed": 8,
       "phase": "victory",
       "contractIndex": 11,
-      "chain": "b8370466dcb5d8d9"
+      "chain": "6ecb4e7b88df0dcb"
     },
     {
       "seed": 9,
@@ -58,7 +58,7 @@
       "seed": 10,
       "phase": "lost",
       "contractIndex": 9,
-      "chain": "6a4eba482cf44ab8"
+      "chain": "46904356efe1805a"
     },
     {
       "seed": 11,

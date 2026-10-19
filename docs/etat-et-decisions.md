@@ -1,5 +1,12 @@
 # État du jeu et décisions
 
+## 19/10 · Plateau 4×4
+
+Pour gagner de la place : le plateau passe en 4×4 (16 cases). La taille vient d'une seule constante (`GRID_SIZE` dans `domain/board/grid.js`) ; le dessin et les styles la suivent (`--grid`).
+- Sur téléphone, la main récupère la place gagnée : ses cartes sont plus grandes et lisibles.
+- Panne du boss V2C : case 6.
+- Bot : 28 % de victoires (60 parties). Parties de référence régénérées.
+
 ## 19/10 · Retour du plateau 5×5 et du design de l'ancien jeu
 
 À la demande de Nicolas : on garde le fonctionnement du Parc, mais sur l'ancien plateau 5×5 et avec le design de `main-old`.
@@ -22,7 +29,7 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 
 ### Règles actuelles
 - Parc de départ : 20 modules (4 Serveurs, 3 Bases, 3 Microservices, 2 CDN, 2 SaaS, Pare-feu, Analytics, 2 Caches, Worker, File).
-- Par contrat : main de 7, 5 modules posés au plus sur le plateau 5×5, 4 déploiements, 3 défausses. Pas de remélange : une carte jouée ou défaussée revient au contrat suivant. Pioche vide : contrat perdu.
+- Par contrat : main de 7, 5 modules posés au plus sur le plateau 4×4, 4 déploiements, 3 défausses. Pas de remélange : une carte jouée ou défaussée revient au contrat suivant. Pioche vide : contrat perdu.
 - Score : l'architecture donne la base (Compute et Scale de départ), puis chaque case s'active dans l'ordre et l'améliore, puis les Plugins de fin.
 - Seuls les modules Calcul produisent du Compute (sauf effet écrit : Régie Pub, Index).
 - Boutique : 4 modules, 2 Plugins (4 au plus), 2 mises à jour d'architecture (3 $), amélioration en ◆ (3 puis 6), retrait (2 $, +1 à chaque fois, 8 modules au moins), relance (1 $, +1).

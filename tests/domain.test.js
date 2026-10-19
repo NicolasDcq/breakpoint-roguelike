@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Rng } from "../src/domain/shared/Rng.js";
-import { CELL_COUNT, neighborCells } from "../src/domain/board/grid.js";
+import { CELL_COUNT, GRID_SIZE, neighborCells } from "../src/domain/board/grid.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
@@ -31,10 +31,10 @@ test("le hasard à graine se rejoue à l'identique", () => {
 
 test("les voisins d'une case sont haut, bas, gauche, droite", () => {
   const sorted = (cells) => [...cells].sort((a, b) => a - b);
-  assert.deepEqual(sorted(neighborCells(12)), [7, 11, 13, 17]);
-  assert.deepEqual(sorted(neighborCells(0)), [1, 5]);
-  assert.deepEqual(sorted(neighborCells(4)), [3, 9]);
-  assert.deepEqual(sorted(neighborCells(5)), [0, 6, 10]);
+  assert.deepEqual(sorted(neighborCells(5)), [1, 4, 6, 9]);
+  assert.deepEqual(sorted(neighborCells(0)), [1, 4]);
+  assert.deepEqual(sorted(neighborCells(3)), [2, 7]);
+  assert.deepEqual(sorted(neighborCells(4)), [0, 5, 8]);
 });
 
 test("chaque architecture est reconnue, de la plus forte à la plus faible", () => {
@@ -75,9 +75,9 @@ test("un plateau vide ne marque rien", () => {
   assert.equal(score(Array(CELL_COUNT).fill(null)).score, 0);
 });
 
-test("la panne du boss empêche la case du centre de s'activer", () => {
+test("la panne du boss empêche la case 6 de s'activer", () => {
   const cells = Array(CELL_COUNT).fill(null);
-  cells[12] = cards("server")[0];
+  cells[5] = cards("server")[0];
   const result = score(cells, { bossId: "broken" });
   assert.equal(result.events[0].failure, "Panne");
   assert.equal(result.compute, 5);
@@ -182,16 +182,16 @@ test("le service reprend la partie sauvegardée", () => {
 
 test("le Serverless compte les cases vides autour de lui", () => {
   const cells = Array(CELL_COUNT).fill(null);
-  cells[12] = cards("lambda")[0];
-  cells[13] = cards("server")[0];
+  cells[5] = cards("lambda")[0];
+  cells[6] = cards("server")[0];
   const result = score(cells);
   assert.equal(result.compute, 5 + (5 + 3 * 3) + 8);
 });
 
-test("le DNS réactive la case juste en dessous (5 cases plus loin)", () => {
+test("le DNS réactive la case juste en dessous (une rangée plus loin)", () => {
   const cells = Array(CELL_COUNT).fill(null);
   cells[0] = cards("dns")[0];
-  cells[5] = cards("server")[0];
+  cells[GRID_SIZE] = cards("server")[0];
   const result = score(cells);
   assert.equal(result.compute, 5 + 8 + 8);
 });

@@ -4,7 +4,7 @@
 
 const DEFINITIONS = {
   fewDeploys: { rule: "Client pressé : 3 déploiements seulement.", deploys: 3 },
-  broken: { rule: "Panne : la case 13, au centre, ne s'active pas.", blockedCell: 12, blockedLabel: "Panne" },
+  broken: { rule: "Panne : la case 6 ne s'active pas.", blockedCell: 5, blockedLabel: "Panne" },
   noServer: { rule: "Panne de courant : les Serveurs ne produisent rien.", blockedModule: "server", blockedLabel: "Coupure" },
   fewModules: { rule: "Budget serré : 3 modules posés au maximum.", maxPlaced: 3 },
 };
