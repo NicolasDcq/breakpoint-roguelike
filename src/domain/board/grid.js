@@ -1,7 +1,7 @@
-// Géométrie du plateau 3×3. Les cases sont numérotées de 0 à 8, ligne par ligne :
+// Géométrie du plateau 5×5. Les cases sont numérotées de 0 à 24, ligne par ligne :
 // elles s'activent dans cet ordre.
 
-export const GRID_SIZE = 3;
+export const GRID_SIZE = 5;
 export const CELL_COUNT = GRID_SIZE * GRID_SIZE;
 export const CELLS = Array.from({ length: CELL_COUNT }, (_, cell) => cell);
 
@@ -18,7 +18,7 @@ export function neighborCells(cell) {
   ].filter(inside);
 }
 
-/** La case décalée de `offset` (par exemple +3 = juste en dessous), ou -1 hors du plateau. */
+/** La case décalée de `offset` (par exemple +GRID_SIZE = juste en dessous), ou -1 hors du plateau. */
 export function offsetCell(cell, offset) {
   const target = cell + offset;
   return inside(target) ? target : -1;

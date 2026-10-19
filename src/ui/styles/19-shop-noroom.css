@@ -1,0 +1,16 @@
+/* Boutique : plus de place pour un nouveau module (plateau et tiroir pleins). */
+
+.shop-noroom {
+  grid-column: 1 / -1;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 181, 71, .55);
+  border-radius: var(--r-sm);
+  background: #ffb5471a;
+  color: #ffd9a0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.shop-modules.no-room .offer-wrap {
+  opacity: .45;
+}

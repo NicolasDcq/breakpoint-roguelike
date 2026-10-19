@@ -5,6 +5,7 @@
 // Ajouter un module = ajouter une entrée ici, sans toucher au moteur.
 
 import { atLevel, frNumber } from "../shared/levels.js";
+import { GRID_SIZE } from "../board/grid.js";
 
 /** Une ligne d'effet affichée sur la carte. kind : compute | scale | data | money | retrigger | boost. */
 export const line = (kind, value, text, condition = null) => ({ kind, value, text, condition });
@@ -57,9 +58,9 @@ const DEFINITIONS = {
     name: "Serverless", family: "calcul", price: 3, producer: true,
     lines: (level) => [
       line("compute", `+${atLevel([5, 7, 9], level)} ⚡`, `Produit +${atLevel([5, 7, 9], level)} Compute.`),
-      line("compute", `+${atLevel([3, 4, 6], level)} ⚡`, `+${atLevel([3, 4, 6], level)} Compute par case vide du plateau.`),
+      line("compute", `+${atLevel([3, 4, 6], level)} ⚡`, `+${atLevel([3, 4, 6], level)} Compute par case vide autour de lui.`),
     ],
-    effect: (ctx, level) => ctx.addCompute(atLevel([5, 7, 9], level) + atLevel([3, 4, 6], level) * ctx.emptyCellCount()),
+    effect: (ctx, level) => ctx.addCompute(atLevel([5, 7, 9], level) + atLevel([3, 4, 6], level) * ctx.emptyNeighborCount()),
   },
   database: {
     name: "Base de données", shortName: "Base", family: "stockage", price: 3, producer: true,
@@ -86,8 +87,8 @@ const DEFINITIONS = {
     name: "DNS", family: "reseau", price: 4, producer: false,
     lines: (level) => [line("retrigger", level === 3 ? "↺ ×2" : "↺", level === 1 ? "Réactive la case juste en dessous." : `Réactive${level === 3 ? " 2 fois" : ""} les cases juste au-dessus et juste en dessous.`)],
     effect: (ctx, level) => {
-      const targets = [ctx.cellOffset(+3)];
-      if (level > 1) targets.push(ctx.cellOffset(-3));
+      const targets = [ctx.cellOffset(+GRID_SIZE)];
+      if (level > 1) targets.push(ctx.cellOffset(-GRID_SIZE));
       ctx.retrigger(targets.filter((cell) => cell >= 0), level === 3 ? 2 : 1);
     },
   },

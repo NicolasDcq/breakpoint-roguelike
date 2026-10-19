@@ -2,11 +2,11 @@
 
 Roguelike deckbuilder en français, jouable dans le navigateur (d'abord sur téléphone), sur le thème de l'infrastructure informatique.
 
-Ton **parc** de modules est ton paquet de cartes. À chaque contrat, tu pioches une main, tu poses jusqu'à 5 modules sur un plateau 3×3 et tu déploies. Les modules posés forment une **architecture** (Redondance, Cluster, Full-stack…), comme une main au poker : elle donne la base du score, puis chaque module l'améliore.
+Ton **parc** de modules est ton paquet de cartes. À chaque contrat, tu pioches une main, tu poses jusqu'à 5 modules sur le plateau 5×5 et tu déploies. Les modules posés forment une **architecture** (Redondance, Cluster, Full-stack…), comme une main au poker : elle donne la base du score, puis chaque module l'améliore.
 
 **Jouer : https://breakpoint-roguelike.vercel.app/**
 
-L'ancienne version (plateau 5×5, fusions, entreprises, tutoriel) est gardée sur la branche `main-old`.
+L'ancienne version (fusions, entreprises, tutoriel) est gardée sur la branche `main-old` ; son plateau et son design ont été repris.
 
 ## Démarrer
 

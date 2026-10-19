@@ -10,6 +10,6 @@ export { PLUGINS } from "./catalog/plugins.js";
 export { CONTRACTS } from "./catalog/contracts.js";
 export { BOSSES } from "./catalog/bosses.js";
 export { ARCHITECTURES, ARCHITECTURE_BY_ID, architectureBase } from "./catalog/architectures.js";
-export { CELLS } from "./board/grid.js";
+export { CELLS, GRID_SIZE, CELL_COUNT, neighborCells } from "./board/grid.js";
 export { Board } from "./board/Board.js";
 export { frNumber } from "./shared/levels.js";

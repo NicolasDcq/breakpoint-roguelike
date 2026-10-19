@@ -1,5 +1,18 @@
 # État du jeu et décisions
 
+## 19/10 · Retour du plateau 5×5 et du design de l'ancien jeu
+
+À la demande de Nicolas : on garde le fonctionnement du Parc, mais sur l'ancien plateau 5×5 et avec le design de `main-old`.
+- Plateau 5×5, cases 1 à 25, pistes et numéros comme avant. Toutes les cases sont ouvertes ; on pose toujours 5 modules au plus.
+- La main prend la place du tiroir de pièces détachées (sous le plateau sur téléphone, à droite sur ordinateur).
+- L'architecture (la base) s'affiche en haut du panneau de score ; le bouton Fusion devient « Parc » (avec le nombre de cartes dans la pioche), le bouton Boutique devient « Défausser ».
+- Boutique, fenêtres, Plugins (cartes et puces), barre du haut : styles de l'ancien jeu repris tels quels (`src/ui/styles/00` à `21`), plus `22-parc.css` pour les nouveautés.
+- Règles adaptées au 5×5 :
+  - le Serverless compte les cases vides **autour de lui** (et plus celles du plateau entier, qui seraient 20) ;
+  - le DNS réactive les cases juste au-dessus et au-dessous (5 cases plus loin) ;
+  - la panne du boss V2C touche la case 13, au centre.
+- Bot : 27 % de victoires (60 parties), comme avant. Parties de référence régénérées.
+
 ## 19/10 · Le Parc devient le jeu principal
 
 L'ancien jeu (plateau 5×5, fusions, hybrides, entreprises, tutoriel) est gardé sur la branche `main-old`. `main` repart du prototype « Le Parc », validé en jeu, réécrit en architecture hexagonale (voir `architecture.md`).
@@ -9,7 +22,7 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 
 ### Règles actuelles
 - Parc de départ : 20 modules (4 Serveurs, 3 Bases, 3 Microservices, 2 CDN, 2 SaaS, Pare-feu, Analytics, 2 Caches, Worker, File).
-- Par contrat : main de 7, 5 modules posés au plus, 4 déploiements, 3 défausses. Pas de remélange : une carte jouée ou défaussée revient au contrat suivant. Pioche vide : contrat perdu.
+- Par contrat : main de 7, 5 modules posés au plus sur le plateau 5×5, 4 déploiements, 3 défausses. Pas de remélange : une carte jouée ou défaussée revient au contrat suivant. Pioche vide : contrat perdu.
 - Score : l'architecture donne la base (Compute et Scale de départ), puis chaque case s'active dans l'ordre et l'améliore, puis les Plugins de fin.
 - Seuls les modules Calcul produisent du Compute (sauf effet écrit : Régie Pub, Index).
 - Boutique : 4 modules, 2 Plugins (4 au plus), 2 mises à jour d'architecture (3 $), amélioration en ◆ (3 puis 6), retrait (2 $, +1 à chaque fois, 8 modules au moins), relance (1 $, +1).

@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Rng } from "../src/domain/shared/Rng.js";
-import { neighborCells } from "../src/domain/board/grid.js";
+import { CELL_COUNT, neighborCells } from "../src/domain/board/grid.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
@@ -16,7 +16,7 @@ let uid = 0;
 const cards = (...ids) => ids.map((id) => createCard(`t${++uid}`, id));
 const board = (...ids) => {
   const placed = cards(...ids);
-  return [...placed, ...Array(9 - placed.length).fill(null)];
+  return [...placed, ...Array(CELL_COUNT - placed.length).fill(null)];
 };
 const score = (cells, extra = {}) => scoreDeployment({
   cards: cells, pluginIds: [], dataStock: 0, money: 0, parcSize: 20,
@@ -30,9 +30,11 @@ test("le hasard à graine se rejoue à l'identique", () => {
 });
 
 test("les voisins d'une case sont haut, bas, gauche, droite", () => {
-  assert.deepEqual(neighborCells(4).sort(), [1, 3, 5, 7]);
-  assert.deepEqual(neighborCells(0).sort(), [1, 3]);
-  assert.deepEqual(neighborCells(5).sort(), [2, 4, 8]);
+  const sorted = (cells) => [...cells].sort((a, b) => a - b);
+  assert.deepEqual(sorted(neighborCells(12)), [7, 11, 13, 17]);
+  assert.deepEqual(sorted(neighborCells(0)), [1, 5]);
+  assert.deepEqual(sorted(neighborCells(4)), [3, 9]);
+  assert.deepEqual(sorted(neighborCells(5)), [0, 6, 10]);
 });
 
 test("chaque architecture est reconnue, de la plus forte à la plus faible", () => {
@@ -70,12 +72,12 @@ test("seuls les modules Calcul produisent du Compute", () => {
 });
 
 test("un plateau vide ne marque rien", () => {
-  assert.equal(score(Array(9).fill(null)).score, 0);
+  assert.equal(score(Array(CELL_COUNT).fill(null)).score, 0);
 });
 
-test("la panne du boss empêche la case 5 de s'activer", () => {
-  const cells = Array(9).fill(null);
-  cells[4] = cards("server")[0];
+test("la panne du boss empêche la case du centre de s'activer", () => {
+  const cells = Array(CELL_COUNT).fill(null);
+  cells[12] = cards("server")[0];
   const result = score(cells, { bossId: "broken" });
   assert.equal(result.events[0].failure, "Panne");
   assert.equal(result.compute, 5);
@@ -176,6 +178,22 @@ test("le service reprend la partie sauvegardée", () => {
   const again = new GameService({ repository: first.repository, seeds: fixedSeedSource(99) });
   assert.equal(again.getView().seed, 21);
   assert.equal(again.getView().placedCount, 1);
+});
+
+test("le Serverless compte les cases vides autour de lui", () => {
+  const cells = Array(CELL_COUNT).fill(null);
+  cells[12] = cards("lambda")[0];
+  cells[13] = cards("server")[0];
+  const result = score(cells);
+  assert.equal(result.compute, 5 + (5 + 3 * 3) + 8);
+});
+
+test("le DNS réactive la case juste en dessous (5 cases plus loin)", () => {
+  const cells = Array(CELL_COUNT).fill(null);
+  cells[0] = cards("dns")[0];
+  cells[5] = cards("server")[0];
+  const result = score(cells);
+  assert.equal(result.compute, 5 + 8 + 8);
 });
 
 test("le plateau est un objet valeur", () => {

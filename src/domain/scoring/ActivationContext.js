@@ -22,7 +22,7 @@ export function createActivationContext({ cell, depth, cards, state, output, pen
     // Ce que le module voit du plateau.
     neighbors: () => neighborCells(cell).filter(filled).map((index) => cards[index]),
     placedCards: () => state.result.placed,
-    emptyCellCount: () => cards.filter((card) => card === null).length,
+    emptyNeighborCount: () => neighborCells(cell).filter((index) => !filled(index)).length,
     dataStock: () => state.stock.data,
     cellOffset: (offset) => {
       const target = offsetCell(cell, offset);

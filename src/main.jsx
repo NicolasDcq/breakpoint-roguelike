@@ -1,7 +1,7 @@
 // Point d'entrée et racine de composition : on branche ici les adaptateurs
 // (sauvegarde, hasard, son, préférences) sur le service applicatif et l'interface.
 
-import "./ui/styles/parc.css";
+import "./ui/styles/index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { GameService } from "./application/GameService.js";

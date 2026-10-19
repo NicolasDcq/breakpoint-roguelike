@@ -20,7 +20,7 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 | `shared/` | `Rng` (hasard à graine), `Result` (réussi / refusé avec un code), `levels` (valeur selon le niveau) |
 | `catalog/` | données du jeu : familles, modules, Plugins, contrats, contraintes de boss, architectures, `rules.js` (tous les chiffres réglables) |
 | `parc/` | `Card` (objet valeur) et `Parc` (la collection du joueur) |
-| `board/` | géométrie 3×3 (`grid.js`) et `Board` (objet valeur) |
+| `board/` | géométrie 5×5 (`grid.js`, taille réglable avec `GRID_SIZE`) et `Board` (objet valeur) |
 | `round/` | `Round` : un contrat en cours (pioche, main, plateau, essais) |
 | `scoring/` | `ScoringEngine` (calcul pur d'un déploiement) et `ActivationContext` (ce qu'un module a le droit de faire) |
 | `shop/` | service de boutique : tirage des offres, prix du retrait |
@@ -43,10 +43,12 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 ### `src/ui/` : l'interface React
 
 - `App.jsx` : l'écran de jeu ; il lit la vue et appelle le service.
-- `components/` : morceaux d'écran réutilisés (`ModuleTile` sert au plateau, à la main, au parc et à la boutique).
-- `screens/` : écrans posés par-dessus (boutique, contrat livré, fin, parc, architectures, règles).
-- `hooks/` : animation de déploiement, messages brefs.
-- `visuals.js` : couleurs, icônes et textes courts ; `messages.js` : textes des refus.
+- `components/` : morceaux d'écran (barre du haut, panneau de score, rail des Plugins, plateau et main). `ModuleFace` dessine une tuile de module partout (plateau, main, parc, boutique).
+- `screens/` : fenêtres (boutique, contrat livré, fin, parc, architectures, règles, nouvelle partie).
+- `common/` : fenêtre, infobulle, icônes des modules (repris de l'ancien jeu).
+- `hooks/` : animation de déploiement (vitesse, « Passer »), messages brefs, détection du téléphone.
+- `styles/` : feuilles de l'ancien jeu (`00` à `21`) et `22-parc.css` pour la main, l'architecture et la boutique.
+- `visuals.js` : couleurs, icônes et textes courts ; `messages.js` : textes des refus ; `format.js` et `fx.jsx` : nombres et pastilles.
 
 ## Les principes appliqués
 

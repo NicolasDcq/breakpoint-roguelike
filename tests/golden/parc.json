@@ -3,62 +3,62 @@
     {
       "seed": 1,
       "phase": "lost",
-      "contractIndex": 8,
-      "chain": "d949f8308c371782"
+      "contractIndex": 9,
+      "chain": "fbc05212d9775239"
     },
     {
       "seed": 2,
       "phase": "lost",
-      "contractIndex": 10,
-      "chain": "f1d17fafeaeb3392"
+      "contractIndex": 11,
+      "chain": "549c693820e83c82"
     },
     {
       "seed": 3,
       "phase": "lost",
       "contractIndex": 8,
-      "chain": "78401a8523f53979"
+      "chain": "cf3496b7b23ff8d2"
     },
     {
       "seed": 4,
       "phase": "victory",
       "contractIndex": 11,
-      "chain": "d48a9a1208ca7804"
+      "chain": "dd8044f3d54ad1ee"
     },
     {
       "seed": 5,
       "phase": "lost",
       "contractIndex": 9,
-      "chain": "06d6516b209cccaf"
+      "chain": "c8d85763b054a3e9"
     },
     {
       "seed": 6,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "5d6c7c60144c93e7"
+      "chain": "bd29e07f9e1c8497"
     },
     {
       "seed": 7,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "579f553b0c5c26f5"
+      "chain": "732d55374d1cad85"
     },
     {
       "seed": 8,
       "phase": "victory",
       "contractIndex": 11,
-      "chain": "cf91ff630c61bb8a"
+      "chain": "b8370466dcb5d8d9"
     },
     {
       "seed": 9,
       "phase": "victory",
       "contractIndex": 11,
-      "chain": "35c28cc514fb8ed9"
+      "chain": "a8394a9a33b4343d"
     },
     {
       "seed": 10,
       "phase": "lost",
       "contractIndex": 9,
-      "chain": "46904356efe1805a"
+      "chain": "6a4eba482cf44ab8"
     },
     {
       "seed": 11,

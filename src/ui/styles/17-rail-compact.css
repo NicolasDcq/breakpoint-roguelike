@@ -1,0 +1,43 @@
+/* Ordinateur : Plugins équipés en version compacte. */
+
+@media (min-width: 1181px) {
+  .rail-slots .joker.v-rail {
+    height: auto !important;
+    min-height: 0;
+  }
+  .rail-slots .joker.v-rail .joker-text {
+    display: none;
+  }
+  .rail-slots .joker.v-rail .joker-body {
+    padding-bottom: 6px;
+  }
+  .rail-slots .joker-wrap {
+    align-self: start;
+  }
+  .rail-slots .joker-empty {
+    min-height: 0 !important;
+    height: 100%;
+  }
+  .rail-slots {
+    align-items: stretch;
+  }
+  .rail-slots .joker.v-rail .joker-actions {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    top: 8px;
+    height: 44px;
+    padding: 0;
+    gap: 4px;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .rail-slots .joker.v-rail:hover .joker-actions,
+  .rail-slots .joker.v-rail:focus-within .joker-actions {
+    pointer-events: auto;
+  }
+  .rail-slots .joker.v-rail .joker-actions button {
+    height: 100%;
+    padding: 0 8px;
+  }
+}

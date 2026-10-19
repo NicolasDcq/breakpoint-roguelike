@@ -2,7 +2,12 @@
 // Stratégie : essayer les combinaisons de la main, défausser pour viser une architecture,
 // acheter les mises à jour des architectures les plus jouées.
 
-import { Board, CELLS, Phase, RULES, upgradeCost, OfferKind } from "../../src/domain/index.js";
+import { Board, Phase, RULES, upgradeCost, OfferKind } from "../../src/domain/index.js";
+import { GRID_SIZE } from "../../src/domain/board/grid.js";
+
+// Pour aller vite, le bot cherche ses places dans le coin 3×3 en haut à gauche du plateau :
+// 5 modules y tiennent, avec tous leurs voisinages possibles.
+const CANDIDATE_CELLS = [0, 1, 2].flatMap((row) => [0, 1, 2].map((column) => row * GRID_SIZE + column));
 
 function* subsets(items, maxSize, start = 0, current = []) {
   if (current.length) yield current;
@@ -15,7 +20,7 @@ function arrange(run, uids) {
   let board = Board.empty();
   for (const uid of uids) {
     let best = null;
-    for (const cell of CELLS) {
+    for (const cell of CANDIDATE_CELLS) {
       if (!board.isFree(cell)) continue;
       const candidate = board.with(cell, uid);
       const score = run.preview(candidate).score;
