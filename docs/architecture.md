@@ -1,0 +1,68 @@
+# Architecture du code
+
+Le jeu suit l'architecture hexagonale (aussi appelée Clean Architecture). Le domaine est au centre et ne connaît rien du monde extérieur. Les dépendances vont toujours vers le centre.
+
+```
+ui (React)  →  application  →  domain
+                    ↑
+             infrastructure (adaptateurs des ports)
+main.jsx branche le tout (racine de composition)
+```
+
+## Les couches
+
+### `src/domain/` : les règles
+
+Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout le hasard passe par `Rng`, qui a une graine.
+
+| Dossier | Rôle |
+|---|---|
+| `shared/` | `Rng` (hasard à graine), `Result` (réussi / refusé avec un code), `levels` (valeur selon le niveau) |
+| `catalog/` | données du jeu : familles, modules, Plugins, contrats, contraintes de boss, architectures, `rules.js` (tous les chiffres réglables) |
+| `parc/` | `Card` (objet valeur) et `Parc` (la collection du joueur) |
+| `board/` | géométrie 3×3 (`grid.js`) et `Board` (objet valeur) |
+| `round/` | `Round` : un contrat en cours (pioche, main, plateau, essais) |
+| `scoring/` | `ScoringEngine` (calcul pur d'un déploiement) et `ActivationContext` (ce qu'un module a le droit de faire) |
+| `shop/` | service de boutique : tirage des offres, prix du retrait |
+| `run/` | `Run` : la racine de l'agrégat. Toute commande passe par elle et rend un `Result` |
+
+`domain/index.js` est la porte d'entrée : les autres couches n'importent que ce fichier (sauf les tests, qui testent aussi les pièces internes).
+
+### `src/application/` : les cas d'usage
+
+- `GameService` : les actions du joueur (poser, reprendre, défausser, déployer, ouvrir la boutique, acheter, relancer, retirer, améliorer, contrat suivant, nouvelle partie). Chaque action réussie est sauvegardée, puis l'interface est prévenue.
+- `RunPresenter` : transforme la partie en une vue simple pour l'interface. L'interface ne touche jamais l'agrégat.
+- `ports/` : les contrats que l'infrastructure doit remplir (`RunRepository`, `SeedSource`, `PreferenceStore`).
+
+### `src/infrastructure/` : les adaptateurs
+
+- `storage/` : `LocalStorageRunRepository`, `LocalPreferenceStore` (navigateur) et `MemoryRunRepository` (tests, bot) ;
+- `random/` : graines au hasard, ou fixes pour les tests ;
+- `audio/` : sons chiptune (Web Audio), et un adaptateur muet.
+
+### `src/ui/` : l'interface React
+
+- `App.jsx` : l'écran de jeu ; il lit la vue et appelle le service.
+- `components/` : morceaux d'écran réutilisés (`ModuleTile` sert au plateau, à la main, au parc et à la boutique).
+- `screens/` : écrans posés par-dessus (boutique, contrat livré, fin, parc, architectures, règles).
+- `hooks/` : animation de déploiement, messages brefs.
+- `visuals.js` : couleurs, icônes et textes courts ; `messages.js` : textes des refus.
+
+## Les principes appliqués
+
+- **SOLID**
+  - *Responsabilité unique* : chaque fichier a un seul rôle (calculer un score, tenir la pioche, sauvegarder…).
+  - *Ouvert / fermé* : ajouter un module, un Plugin, un boss ou une architecture = ajouter une entrée au catalogue. Le moteur ne change pas. Les Plugins agissent par « crochets » (`multiplier`, `afterActivation`, `onRetrigger`, `atEnd`, `contractInterest`).
+  - *Inversion des dépendances* : le service dépend des ports, pas de `localStorage`. `main.jsx` choisit les adaptateurs.
+  - *Ségrégation des interfaces* : un module ne voit que son `ActivationContext`, pas le moteur.
+- **DDD** : agrégat `Run` (seule porte pour changer l'état), entités `Round` et `Parc`, objets valeur `Card` et `Board`, service de domaine `Shop`, langage du jeu dans le code (parc, contrat, architecture, déploiement).
+- **DRY** : les chiffres sont dans `catalog/rules.js` et le catalogue ; les effets communs des modules sont fabriqués par des fonctions (`simpleCompute`, `costlyCompute`, `scalePerFamily`) ; le bot sert à la fois à l'équilibrage et au test de non-régression.
+
+## Ajouter du contenu
+
+- **Un module** : une entrée dans `domain/catalog/modules.js` (famille, prix, `lines`, `effect`).
+- **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets, et une icône dans `ui/visuals.js`.
+- **Une architecture** : une entrée dans `domain/catalog/architectures.js`, à sa place dans l'ordre de force.
+- **Un boss** : une entrée dans `domain/catalog/bosses.js`, et son identifiant sur un contrat.
+
+Puis : `npm test`. Si les parties de référence changent et que c'est voulu, `npm run golden`.
