@@ -2,7 +2,7 @@
 // Stratégie : essayer les combinaisons de la main, défausser pour viser une architecture,
 // acheter les mises à jour des architectures les plus jouées.
 
-import { Board, Phase, RULES, upgradeCost, OfferKind } from "../../src/domain/index.js";
+import { Board, PACKS, Phase, RULES, upgradeCost, OfferKind } from "../../src/domain/index.js";
 import { GRID_SIZE } from "../../src/domain/board/grid.js";
 
 // Pour aller vite, le bot cherche ses places dans le coin 3×3 en haut à gauche du plateau :
@@ -65,17 +65,18 @@ function shop(service, random) {
     const cost = upgradeCost(card.level);
     if (cost && run.data >= cost) service.upgradeCard(card.uid);
   }
-  // Boosters : garder le plan de l'architecture la plus jouée.
+  // Arrivage : un plan pour l'architecture la plus jouée ; un module qu'on a déjà (pour les doubles).
   const plays = (id) => run.architecturePlays[id] ?? 0;
-  while (run.boostersLeft && run.money >= RULES.booster.price + 2) {
-    service.openBooster();
-    const best = [...run.boosterChoices].sort((a, b) => plays(b) - plays(a))[0];
-    service.pickFromBooster(plays(best) ? best : null);
+  const copies = (id) => run.parc.cards.filter((card) => card.moduleId === id).length;
+  const choose = { booster: (ids) => [...ids].sort((a, b) => plays(b) - plays(a)).find((id) => plays(id)) ?? null,
+    colis: (ids) => [...ids].sort((a, b) => copies(b) - copies(a))[0] };
+  for (const packId of ["booster", "colis"]) {
+    while (run.packsLeft[packId] && run.money >= PACKS[packId].price + 2) {
+      service.buyPack(packId);
+      service.pickFromPack(choose[packId](run.openPack.choices));
+    }
   }
   run.offers.forEach((offer, index) => { if (offer.kind === OfferKind.PLUGIN) service.buyOffer(index); });
-  run.offers.forEach((offer, index) => {
-    if (offer.kind === OfferKind.MODULE && run.money >= offer.price + 2 && random() < 0.6) service.buyOffer(index);
-  });
   service.nextContract();
 }
 

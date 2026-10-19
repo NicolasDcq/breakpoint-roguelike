@@ -1,30 +1,19 @@
-// La boutique entre deux contrats : des modules, des Plugins et des boosters de plans
-// d'architecture. Service du domaine : il tire les offres et donne les prix.
+// La boutique entre deux contrats : des Plugins (tirés selon leur rareté), l'arrivage de
+// paquets (voir catalog/packs.js) et des services. Service du domaine : tirages et prix.
 
-import { MODULES } from "../catalog/modules.js";
-import { PLUGINS } from "../catalog/plugins.js";
-import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
+import { PLUGINS, PLUGIN_IDS } from "../catalog/plugins.js";
 import { RULES } from "../catalog/rules.js";
 
-export const OfferKind = Object.freeze({ MODULE: "module", PLUGIN: "plugin" });
+export const OfferKind = Object.freeze({ PLUGIN: "plugin" });
 
 const offer = (kind, id, price) => ({ kind, id, price, sold: false });
+const rarityWeight = (pluginId) => RULES.rarityWeights[PLUGINS[pluginId].rarity];
 
-/**
- * Tire les offres de la boutique, dans le marché de la partie.
- * Les Plugins déjà possédés ne reviennent pas.
- */
-export function rollOffers(rng, ownedPluginIds, market) {
-  const { modules, plugins } = RULES.shop;
-  const freePlugins = market.plugins.filter((id) => !ownedPluginIds.includes(id));
-  return [
-    ...rng.sample(market.modules, modules).map((id) => offer(OfferKind.MODULE, id, MODULES[id].price)),
-    ...rng.sample(freePlugins, plugins).map((id) => offer(OfferKind.PLUGIN, id, PLUGINS[id].price)),
-  ];
+/** Tire les Plugins de la boutique parmi tous ceux qu'on n'a pas, selon leur rareté. */
+export function rollOffers(rng, ownedPluginIds) {
+  const free = PLUGIN_IDS.filter((id) => !ownedPluginIds.includes(id));
+  return rng.weightedSample(free, rarityWeight, RULES.shop.plugins).map((id) => offer(OfferKind.PLUGIN, id, PLUGINS[id].price));
 }
-
-/** Les plans d'un booster : des architectures différentes, tirées au hasard. */
-export const drawBooster = (rng) => rng.sample(ARCHITECTURE_IDS, RULES.booster.choices);
 
 /** Prix pour retirer un module du parc. */
 export const removalPrice = (pluginIds, currentPrice) =>

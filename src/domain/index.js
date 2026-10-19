@@ -9,6 +9,7 @@ export { MODULES, MODULE_IDS, familyOf } from "./catalog/modules.js";
 export { PLUGINS } from "./catalog/plugins.js";
 export { BOSSES } from "./catalog/bosses.js";
 export { STARTERS } from "./catalog/starters.js";
+export { PACKS, PACK_IDS } from "./catalog/packs.js";
 export { ARCHITECTURES, ARCHITECTURE_BY_ID, architectureBase } from "./catalog/architectures.js";
 export { CELLS, GRID_SIZE, CELL_COUNT, neighborCells } from "./board/grid.js";
 export { Board } from "./board/Board.js";

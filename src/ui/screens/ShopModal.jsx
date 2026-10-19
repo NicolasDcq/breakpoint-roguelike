@@ -1,7 +1,7 @@
-// La boutique, entre deux contrats : modules, Plugins, boosters de plans d'architecture et services.
+// La boutique, entre deux contrats : arrivage (colis de modules, boosters de plans), Plugins et services.
 
 import { BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES, upgradeCost } from "../../domain/index.js";
-import { BoosterOffers } from "./Booster.jsx";
+import { PackOffers } from "./Packs.jsx";
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { Tooltip } from "../common/Tooltip.jsx";
@@ -11,29 +11,6 @@ import { PluginCard, PluginTip } from "../components/PluginCard.jsx";
 
 const priceLabel = (offer, money, soldLabel) => (offer.sold ? soldLabel : `${offer.price} $`);
 const priceClass = (offer, money) => `price num ${money >= offer.price ? "" : "short"}`;
-
-function ModuleOffers({ view, onBuy }) {
-  return (
-    <div className="shop-modules">
-      {view.offers.map((offer, index) => {
-        if (offer.kind !== OfferKind.MODULE) return null;
-        const module = MODULES[offer.id];
-        return (
-          <Tooltip key={index} content={<ModuleTip card={{ moduleId: offer.id, level: 1 }} />} className="offer-wrap">
-            <button className={`offer module-offer accent-${FAMILY_ACCENT[module.family]} ${offer.sold ? "sold" : ""}`} disabled={offer.sold} onClick={() => onBuy(index)}>
-              <span className="offer-icon"><ModuleIcon id={offer.id} size={26} /></span>
-              <span className="offer-main">
-                <span className="offer-name">{module.name} <span className={`fam fam-${module.family}`}>{FAMILIES[module.family].name}</span></span>
-                <span className="offer-text">{module.lines(1).map((line) => line.text).join(" ")}</span>
-              </span>
-              <span className={priceClass(offer, view.money)}>{priceLabel(offer, view.money, "Acheté")}</span>
-            </button>
-          </Tooltip>
-        );
-      })}
-    </div>
-  );
-}
 
 function PluginOffers({ view, onBuy }) {
   const full = view.pluginIds.length >= RULES.maxPlugins;
@@ -98,10 +75,7 @@ export function ShopModal({ view, mode, actions }) {
         ) : (
           <>
             <div className="shop-col">
-              <h3 className="shop-section">Modules · ils rejoignent ton parc</h3>
-              <ModuleOffers view={view} onBuy={actions.buy} />
-              <h3 className="shop-section">Plans d'architecture</h3>
-              <BoosterOffers view={view} onOpen={actions.openBooster} />
+              <PackOffers view={view} onBuy={actions.buyPack} />
             </div>
             <div className="shop-col">
               <h3 className="shop-section">Plugins · {view.pluginIds.length}/{RULES.maxPlugins}</h3>

@@ -19,8 +19,8 @@ export function RulesModal({ onClose }) {
         <li><b>Architectures</b>, comme les mains au poker : 2 identiques font une Redondance, 3 un Cluster, 3 + 2 une Haute dispo, les 5 familles un Full-stack…</li>
         <li><b>Seuls les modules Calcul produisent du Compute.</b> Les autres apportent Scale, Data, $ ou réactivations, sauf si leur effet dit autre chose.</li>
         <li><b>{RULES.deploysPerContract} déploiements et {RULES.discardsPerContract} défausses par contrat.</b> Une carte jouée ou défaussée ne revient qu’au contrat suivant ; pioche vide, contrat perdu.</li>
-        <li><b>Chaque partie est différente</b> : profil de départ, marché de la boutique, clients, objectifs et boss sont tirés au hasard. Le bouton « Ta partie » les montre.</li>
-        <li><b>En boutique</b> : modules, Plugins (jusqu’à {RULES.maxPlugins}), boosters de plans d’architecture, amélioration avec la Data ◆, retrait de modules.</li>
+        <li><b>Chaque partie est différente</b> : profil de départ, clients, objectifs et boss sont tirés au hasard. Tu découvres les boss d’une version en y arrivant.</li>
+        <li><b>En boutique</b> : l’arrivage (colis de modules et boosters de plans : 3 cartes, tu en gardes une), des Plugins (jusqu’à {RULES.maxPlugins}, plus ou moins rares), l’amélioration avec la Data ◆ et le retrait de modules.</li>
       </ol>
       <div className="legend">
         <span><b className="c-compute">⚡ Compute</b> base du score, repart de l’architecture à chaque déploiement</span>

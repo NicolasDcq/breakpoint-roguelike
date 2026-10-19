@@ -4,6 +4,8 @@ import { FAMILIES, MODULES } from "../domain/index.js";
 import { fmt, fmtDec } from "./format.js";
 
 export const FAMILY_ACCENT = { calcul: "cyan", stockage: "violet", reseau: "pink", business: "amber", ops: "green" };
+/** Couleur CSS de chaque famille. */
+export const FAMILY_COLOR = { calcul: "var(--cyan)", stockage: "var(--violet)", reseau: "var(--rose)", business: "var(--amber)", ops: "var(--green)" };
 export const FAMILY_GLYPHS = { calcul: "⚡", stockage: "◆", reseau: "⇄", business: "$", ops: "⚙" };
 export const familyName = (familyId) => FAMILIES[familyId].name;
 

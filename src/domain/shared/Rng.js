@@ -27,6 +27,20 @@ export class Rng {
     return copy;
   }
 
+  /** Tire `count` éléments différents, chacun avec une chance proportionnelle à son poids. */
+  weightedSample(items, weightOf, count) {
+    const pool = [...items];
+    const picked = [];
+    while (picked.length < count && pool.length) {
+      const total = pool.reduce((sum, item) => sum + weightOf(item), 0);
+      let roll = this.next() * total;
+      let index = pool.findIndex((item) => (roll -= weightOf(item)) < 0);
+      if (index < 0) index = pool.length - 1;
+      picked.push(pool.splice(index, 1)[0]);
+    }
+    return picked;
+  }
+
   /** Tire `count` éléments différents. */
   sample(items, count) {
     return this.shuffle(items).slice(0, count);

@@ -1,7 +1,7 @@
 // L'écran de jeu. Il lit la vue de la partie et transmet les actions du joueur au service.
 
 import { useState } from "react";
-import { ARCHITECTURE_BY_ID, Phase } from "../domain/index.js";
+import { ARCHITECTURE_BY_ID, MODULES, Phase } from "../domain/index.js";
 import { useGame, useGameView } from "./GameContext.jsx";
 import { refusalMessage } from "./messages.js";
 import { fmt, fmtDec } from "./format.js";
@@ -18,12 +18,10 @@ import { SideDetail } from "./components/SideDetail.jsx";
 import { ModuleSheet } from "./components/ModuleSheet.jsx";
 import { ShopModal } from "./screens/ShopModal.jsx";
 import { EndModal, WonModal } from "./screens/ResultModals.jsx";
-import { BoosterOpening } from "./screens/Booster.jsx";
+import { PackOpening } from "./screens/Packs.jsx";
 import { ArchitecturesModal, ConfirmNewRun, ParcModal, PluginModal, RulesModal } from "./screens/InfoModals.jsx";
-import { BriefingModal } from "./screens/BriefingModal.jsx";
 
 const RULES_SEEN = "rulesSeen";
-const BRIEFING_SEEN = "briefingSeen";
 
 export function App() {
   const { game, sound, preferences } = useGame();
@@ -32,12 +30,7 @@ export function App() {
   const [marked, setMarked] = useState([]);
   const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
-  // Au lancement : les règles la première fois, puis « Ta partie » pour chaque nouvelle graine.
-  const briefingDue = () => preferences.get(BRIEFING_SEEN) !== String(game.getView().seed);
-  const [overlay, setOverlay] = useState(() => {
-    if (preferences.get(RULES_SEEN) !== "1") return { name: "rules" };
-    return briefingDue() ? { name: "briefing" } : null;
-  });
+  const [overlay, setOverlay] = useState(() => (preferences.get(RULES_SEEN) === "1" ? null : { name: "rules" }));
   const [shopMode, setShopMode] = useState(null);
   const [toast, showToast] = useToast();
   const { animation, play, setSpeed, skip } = useDeployAnimation({ game, sound });
@@ -100,11 +93,17 @@ export function App() {
     if (result) showToast(`${ARCHITECTURE_BY_ID[result.architecture.id].name} · +${fmt(result.score)} Performance (${fmt(result.compute)} × ${fmtDec(result.scale)})`);
   };
 
-  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); open("briefing"); };
+  const pickFromPack = (choiceId) => {
+    if (!attempt(game.pickFromPack(choiceId), choiceId ? "upgrade" : "click") || !choiceId) return;
+    if (view.openPack.packId === "booster") showToast(`Plan installé : ${ARCHITECTURE_BY_ID[choiceId].name} niveau ${view.architectureLevels[choiceId] + 1}.`);
+    else showToast(`${MODULES[choiceId].name} rejoint ton parc.`);
+  };
+
+  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); close(); };
 
   const shopActions = {
     buy: (index) => attempt(game.buyOffer(index), "cash"),
-    openBooster: () => attempt(game.openBooster(), "cash"),
+    buyPack: (packId) => attempt(game.buyPack(packId), "cash"),
     reroll: () => attempt(game.rerollShop(), "reroll"),
     setMode: setShopMode,
     upgrade: (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) { showToast("Module amélioré."); setShopMode(null); } },
@@ -125,7 +124,7 @@ export function App() {
   return (
     <div className={`app ${view.contract.boss ? "boss-mode" : ""} ${mobile ? "is-mobile" : ""}`}>
       <aside className="hud">
-        <TopBar view={view} onRules={() => open("rules")} onRestart={() => open("confirm")} onBriefing={() => open("briefing")} />
+        <TopBar view={view} onRules={() => open("rules")} onRestart={() => open("confirm")} />
         <ScorePanel
           view={view}
           animation={animation}
@@ -155,18 +154,13 @@ export function App() {
         </main>
       </div>
       {phaseScreen || null}
-      {!busy && !overlay && view.phase === Phase.SHOP && view.boosterChoices && (
-        <BoosterOpening
-          key={view.boosterChoices.join()}
-          view={view}
-          onPick={(id) => { if (attempt(game.pickFromBooster(id), id ? "upgrade" : "click") && id) showToast(`Plan installé : ${ARCHITECTURE_BY_ID[id].name} niveau ${view.architectureLevels[id] + 1}.`); }}
-        />
+      {!busy && !overlay && view.phase === Phase.SHOP && view.openPack && (
+        <PackOpening key={view.openPack.choices.join()} view={view} onPick={pickFromPack} />
       )}
       {sheetCard && !busy && (
         <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} onClose={() => setSheet(null)} actions={sheetActions} />
       )}
-      {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); if (briefingDue()) open("briefing"); else close(); }} />}
-      {overlay?.name === "briefing" && <BriefingModal view={view} onClose={() => { preferences.set(BRIEFING_SEEN, String(view.seed)); close(); }} />}
+      {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
       {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}
       {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
       {overlay?.name === "plugin" && <PluginModal id={overlay.id} onClose={close} />}

@@ -1,5 +1,14 @@
 # État du jeu et décisions
 
+## 19/10 · Colis de modules, Plugins par rareté, boss à découvrir
+
+Retour de Nicolas sur les parties procédurales : tout montrer d'avance revient à ne pas jouer la partie.
+- **Boss à découvrir** (comme Balatro) : on ne voit que les contrats de la version en cours ; ceux de la version suivante (et son boss) apparaissent une fois le boss passé (`Run.visibleContracts`). L'écran « Ta partie » est supprimé.
+- **Plus de marché** : tous les Plugins peuvent sortir en boutique, tirés selon leur **rareté** (commun 60, peu commun 30, rare 10) ; on ajoutera des Plugins de plusieurs raretés pour varier.
+- **Modules dans des colis** : la boutique ne vend plus de modules au choix. L'arrivage propose **2 colis de composants** (4 $ : 3 modules tirés parmi tous, on en garde un) et **2 boosters de plans** (6 $). Ouverture avec la boîte en carton de l'ancien jeu (`catalog/packs.js`).
+- **Profil de départ aléatoire** gardé.
+- Objectifs revus : 150, 215, 265, 415, 550, 720, 940, 1210, 1610, 2100, 2740, 3200. Bot (200 parties) : 32 % de victoires (Data lab le plus dur, 10 %).
+
 ## 19/10 · Parties procédurales
 
 Chaque partie est tirée de sa graine (`domain/generation/RunGenerator.js`) :

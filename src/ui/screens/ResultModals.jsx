@@ -25,7 +25,7 @@ export function WonModal({ view, onShop }) {
 
 export function EndModal({ view, onNewRun }) {
   const victory = view.phase === Phase.VICTORY;
-  const total = view.contracts.length;
+  const total = view.contractCount;
   const delivered = victory ? total : view.contractIndex;
   const plays = Object.values(view.architecturePlays).reduce((sum, count) => sum + count, 0);
   return (
@@ -33,7 +33,7 @@ export function EndModal({ view, onNewRun }) {
       <h2 className="end-title">{victory ? "Mise en production réussie" : "Incident en production"}</h2>
       <p className="modal-sub">
         {victory
-          ? `Les ${total} contrats sont livrés, ${view.contracts.at(-1).name} compris.`
+          ? `Les ${total} contrats sont livrés, ${view.contract.name} compris.`
           : `${view.contract.name} n’a pas été livré : ${fmt(view.score)} sur ${fmt(view.contract.target)}.`}
       </p>
       <div className="stats">

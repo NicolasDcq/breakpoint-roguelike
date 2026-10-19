@@ -4,7 +4,7 @@ Roguelike deckbuilder en français, jouable dans le navigateur (d'abord sur tél
 
 Ton **parc** de modules est ton paquet de cartes. À chaque contrat, tu pioches une main, tu poses jusqu'à 5 modules sur le plateau 4×4 et tu déploies. Les modules posés forment une **architecture** (Redondance, Cluster, Full-stack…), comme une main au poker : elle donne la base du score, puis chaque module l'améliore.
 
-Chaque partie est différente : profil de départ, marché de la boutique, clients, objectifs et boss sont tirés au hasard.
+Chaque partie est différente : profil de départ, clients, objectifs et boss sont tirés au hasard ; les modules se trouvent dans des colis et les Plugins sortent selon leur rareté.
 
 **Jouer : https://breakpoint-roguelike.vercel.app/**
 

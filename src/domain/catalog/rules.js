@@ -11,11 +11,9 @@ export const RULES = Object.freeze({
   maxPlugins: 4,
   removeStartPrice: 2,
   rerollStartPrice: 1,
-  shop: { modules: 4, plugins: 2 },
-  /** Le marché d'une partie : environ 65 % des modules de chaque famille, et 8 Plugins sur 12. */
-  market: { moduleShare: 0.65, plugins: 8 },
-  /** Boosters d'architecture : 2 par boutique (la relance ne les renouvelle pas), 3 plans, 1 gardé. */
-  booster: { perShop: 2, price: 6, choices: 3 },
+  /** Plugins proposés en boutique, tirés selon leur rareté. */
+  shop: { plugins: 2 },
+  rarityWeights: { common: 60, uncommon: 30, rare: 10 },
   /** Coût en ◆ pour passer du niveau N au niveau N+1. */
   cardUpgradeCost: { 1: 3, 2: 6 },
   maxCardLevel: 3,

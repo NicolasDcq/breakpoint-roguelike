@@ -23,8 +23,8 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 | `board/` | géométrie 4×4 (`grid.js`, taille réglable avec `GRID_SIZE`) et `Board` (objet valeur) |
 | `round/` | `Round` : un contrat en cours (pioche, main, plateau, essais) |
 | `scoring/` | `ScoringEngine` (calcul pur d'un déploiement) et `ActivationContext` (ce qu'un module a le droit de faire) |
-| `shop/` | service de boutique : tirage des offres, prix du retrait |
-| `generation/` | `RunGenerator` : la recette d'une partie tirée de sa graine (profil de départ, marché, contrats, boss) |
+| `shop/` | service de boutique : Plugins tirés selon leur rareté, prix du retrait (l'arrivage est dans `catalog/packs.js`) |
+| `generation/` | `RunGenerator` : la recette d'une partie tirée de sa graine (profil de départ, contrats, boss) |
 | `run/` | `Run` : la racine de l'agrégat. Toute commande passe par elle et rend un `Result` |
 
 `domain/index.js` est la porte d'entrée : les autres couches n'importent que ce fichier (sauf les tests, qui testent aussi les pièces internes).
@@ -64,7 +64,8 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 ## Ajouter du contenu
 
 - **Un module** : une entrée dans `domain/catalog/modules.js` (famille, prix, `lines`, `effect`).
-- **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets, et une icône dans `ui/visuals.js`.
+- **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets et sa rareté, et une icône dans `ui/visuals.js`.
+- **Un genre de paquet** : une entrée dans `domain/catalog/packs.js` (prix, nombre par boutique, lot de cartes, récompense).
 - **Une architecture** : une entrée dans `domain/catalog/architectures.js`, à sa place dans l'ordre de force.
 - **Un boss** : une entrée dans `domain/catalog/bosses.js` ; le générateur le tirera tout seul.
 - **Un profil de départ** : une entrée dans `domain/catalog/starters.js` (20 modules).

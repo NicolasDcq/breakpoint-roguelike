@@ -2,7 +2,7 @@
 // Chaque partie tire ses noms de clients, ses objectifs (± un peu) et ses boss.
 
 /** Objectif de référence de chaque contrat, dans l'ordre. */
-export const BASE_TARGETS = Object.freeze([155, 230, 285, 445, 595, 775, 1010, 1300, 1730, 2260, 2950, 3450]);
+export const BASE_TARGETS = Object.freeze([150, 215, 265, 415, 550, 720, 940, 1210, 1610, 2100, 2740, 3200]);
 export const VERSIONS = 4;
 export const LETTERS = Object.freeze(["A", "B", "C"]);
 /** L'objectif varie de ±8 % d'une partie à l'autre. */
