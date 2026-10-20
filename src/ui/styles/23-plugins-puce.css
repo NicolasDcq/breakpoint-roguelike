@@ -255,8 +255,8 @@
 .puce-slot.big .puce-die { height: 84px; border-width: 3px; }
 .puce-slot.big .puce-notch { width: 20px; height: 9px; margin-left: -10px; }
 .puce-slot.big .puce-mini-name { max-width: 120px; font-size: 12px; }
-.puce-rail-desk .puce-rail-btn:hover .puce-mini,
-.puce-rail-desk .puce-rail-btn:focus-visible .puce-mini { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px var(--rc), 0 0 0 2px var(--rc), 0 0 14px 2px var(--rc); }
+button:not(:disabled):hover .puce-slot.big .puce-mini,
+button:focus-visible .puce-slot.big .puce-mini { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px var(--rc), 0 0 0 2px var(--rc), 0 0 14px 2px var(--rc); }
 
 /* Infobulle d'un Plugin */
 .tooltip:has(.puce-tip) { padding: 0; border: none; background: none; box-shadow: none; }
@@ -279,7 +279,7 @@
 .puce-tip.r-rare { --rc: #ff3b5c; }
 .puce-tip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .puce-tip-head strong { font-size: 14px; text-shadow: 2px 2px 0 #05070f; text-align: left; }
-.puce-tip .puce-code { position: static; }
+.puce-tip .puce-code { position: static; white-space: nowrap; }
 .puce-tip .puce-text { font-size: 12px; padding: 6px 8px; }
 .puce-rail-desk + .workspace { margin-top: 0; }
 
@@ -425,3 +425,12 @@
   .replace-modal .rp-actions .rp-go { font-size: 13px; letter-spacing: 0; padding-inline: 6px; }
   .replace-modal .rp-actions .rp-cancel { padding-inline: 12px; }
 }
+
+/* Ordinateur : puces de taille fixe, effet au survol */
+.shop-jokers .joker-offer .puce-slot.big { margin-top: 6px; }
+.replace-modal.desk .rp-card .puce-slot.big { zoom: 1.5; }
+.replace-modal.desk .rp-card .puce-mini { box-shadow: 0 4px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px var(--rc), 0 0 0 3px #2bd96b; }
+.replace-modal.desk .rp-rail { justify-items: center; padding-top: 18px; }
+.rp-wrap { display: flex; justify-content: center; }
+.rp-gain { padding: 8px 10px; border: 2px dashed #2bd96b; border-radius: 10px; background: rgba(43, 217, 107, .08); font-size: 12.5px; line-height: 1.35; }
+.rp-gain b { color: #7cf0a5; }

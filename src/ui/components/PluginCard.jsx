@@ -53,6 +53,11 @@ export function PluginMini({ id, order, pulse = false, label = true, className =
   );
 }
 
+/** Puce de taille fixe pour l'ordinateur : le dessin et le nom ; l'effet est dans l'infobulle (PluginTip). */
+export function PluginChip({ id, order, pulse = false }) {
+  return <PluginMini id={id} order={order} pulse={pulse} className="big" spriteSize={64} />;
+}
+
 /** Infobulle d'un Plugin : nom, effet et rareté, aux couleurs de la carte à puce. */
 export function PluginTip({ id }) {
   const plugin = PLUGINS[id];

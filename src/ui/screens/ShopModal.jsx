@@ -9,26 +9,26 @@ import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { Tooltip } from "../common/Tooltip.jsx";
 import { FAMILY_ACCENT, tileClasses } from "../visuals.js";
 import { ModuleFace, ModuleTip } from "../components/ModuleFace.jsx";
-import { PluginCard, PluginTip } from "../components/PluginCard.jsx";
+import { PluginCard, PluginChip, PluginTip } from "../components/PluginCard.jsx";
 
 const priceLabel = (offer, money, soldLabel) => (offer.sold ? soldLabel : `${offer.price} $`);
 const priceClass = (offer, money) => `price num ${money >= offer.price ? "" : "short"}`;
 
-function PluginOffers({ view, onBuy, onReplace }) {
+function PluginOffers({ view, desktop, onBuy, onReplace }) {
   const full = view.pluginIds.length >= RULES.maxPlugins;
   return (
     <div className="shop-jokers">
       {view.offers.map((offer, index) => {
         if (offer.kind !== OfferKind.PLUGIN) return null;
         return (
-          <Tooltip key={index} content={<PluginTip id={offer.id} />} className="offer-wrap">
+          <Tooltip key={index} content={<PluginTip id={offer.id} />} className="offer-wrap" disabled={!desktop}>
             <button
               className={`joker-offer ${offer.sold ? "sold" : ""}`}
               disabled={offer.sold}
               onClick={() => (full ? onReplace(index) : onBuy(index))}
               aria-label={full ? `Remplacer un Plugin par ${PLUGINS[offer.id].name}` : `Recruter ${PLUGINS[offer.id].name} pour ${offer.price} $`}
             >
-              <PluginCard id={offer.id} />
+              {desktop ? <PluginChip id={offer.id} /> : <PluginCard id={offer.id} />}
               <span className={priceClass(offer, view.money)}>{offer.sold ? "Recruté" : full ? `Remplacer · ${offer.price} $` : `${offer.price} $`}</span>
             </button>
           </Tooltip>
@@ -85,7 +85,7 @@ export function ShopModal({ view, mode, actions, desktop }) {
             </div>
             <div className="shop-col">
               <h3 className="shop-section">Plugins · {view.pluginIds.length}/{RULES.maxPlugins}</h3>
-              <PluginOffers view={view} onBuy={actions.buy} onReplace={setReplacing} />
+              <PluginOffers view={view} desktop={desktop} onBuy={actions.buy} onReplace={setReplacing} />
               <h3 className="shop-section">Services</h3>
               <div className="shop-services">
                 <button className="ghost" onClick={() => actions.setMode("remove")}>Retirer un module ({view.removePrice} $)</button>

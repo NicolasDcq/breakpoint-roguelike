@@ -3,8 +3,9 @@
 ## 20/10 · Plugins en cartes à puce et écran « Plus de place »
 
 - Les 12 Plugins ont leur dessin en pixel-art 16×16 (`ui/plugins/sprites.js`, rendu en SVG par `PixelSprite`). Carte à puce : code (ex. `CPT-05`), fenêtre avec le dessin, nom, effet, rareté, couleur de bord selon la rareté.
-- Deux tailles : `PluginCard` (boutique, fiche, écran de remplacement) et `PluginMini` (rails, fin de partie).
-- Rail sur ordinateur : seulement la puce avec son dessin, toutes de la même taille. L'effet s'affiche **au survol** (infobulle aux couleurs de la puce, `PluginTip`) ; un clic ouvre la fiche.
+- Deux formats : `PluginCard`, la carte complète (fiche, et boutique sur téléphone), et `PluginMini`, la puce seule (rails, fin de partie, ordinateur).
+- Sur ordinateur, **partout** (rail, boutique, « Plus de place ») : seulement la puce avec son dessin et son nom, toutes de la même taille (`PluginChip`). L'effet s'affiche **au survol** (infobulle aux couleurs de la puce, `PluginTip`). Dans le rail, un clic ouvre la fiche (carte complète). Dans « Plus de place », l'encadré « Tu gagnes » rappelle l'effet du nouveau Plugin.
+- Sur téléphone (pas de survol) : la boutique et « Plus de place » gardent les cartes complètes.
 - Nouvel écran « Plus de place » (maquettes RP1–RP3 du canvas) : la carte achetée flotte en haut, on touche le Plugin qui laisse sa place, l'encadré « Tu perds » rappelle son effet, et la caisse est détaillée (Caisse + Revente − Prix). Sur ordinateur : deux colonnes.
 
 ## 20/10 · Remplacer un Plugin quand les emplacements sont pleins

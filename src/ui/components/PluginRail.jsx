@@ -2,7 +2,7 @@
 
 import { PLUGINS, RULES } from "../../domain/index.js";
 import { Tooltip } from "../common/Tooltip.jsx";
-import { PluginMini, PluginTip } from "./PluginCard.jsx";
+import { PluginChip, PluginMini, PluginTip } from "./PluginCard.jsx";
 
 export function PluginRail({ pluginIds, fired = [], compact, onOpen }) {
   const slots = RULES.maxPlugins;
@@ -35,7 +35,7 @@ export function PluginRail({ pluginIds, fired = [], compact, onOpen }) {
           return id ? (
             <Tooltip key={id} content={<PluginTip id={id} />} className="puce-wrap">
               <button className="puce-rail-btn" onClick={() => onOpen(id)} aria-label={PLUGINS[id].name}>
-                <PluginMini id={id} order={index + 1} pulse={fired.includes(id)} className="big" spriteSize={64} />
+                <PluginChip id={id} order={index + 1} pulse={fired.includes(id)} />
               </button>
             </Tooltip>
           ) : (
