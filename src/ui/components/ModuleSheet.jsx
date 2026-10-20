@@ -59,7 +59,7 @@ export function ModuleSheet({ card, place, view, desktop, onClose, actions }) {
             <section className="mm-sec">
               <h3>Prochaine amélioration</h3>
               <LevelCard label={`Niveau ${nextLevel}`} card={{ ...card, level: nextLevel }} className="next" />
-              <p className="mm-note">S’améliore en boutique, entre deux contrats, pour {upgradeCost(card.level)} ◆. Chaque exemplaire du parc s’améliore à part.</p>
+              <p className="mm-note">Améliore-le ici pour {upgradeCost(card.level)} ◆ de Data. Chaque exemplaire du parc s’améliore à part, et garde son niveau pour la suite.</p>
             </section>
           )}
           <section className="mm-sec">
@@ -67,14 +67,21 @@ export function ModuleSheet({ card, place, view, desktop, onClose, actions }) {
           </section>
         </div>
         <footer className="mm-foot">
-          {onBoard ? (
-            <button className="primary data mm-go" onClick={() => actions.takeBack(place.cell)}>Reprendre en main</button>
-          ) : (
-            <button className="primary data mm-go" disabled={!canPlace} onClick={() => actions.place(card.uid, freeCell)}>
-              {canPlace ? `Poser sur la case ${freeCell + 1}` : `${view.limits.maxPlaced} modules déjà posés`}
+          {nextLevel && (
+            <button className="primary data mm-go mm-upgrade" disabled={view.data < upgradeCost(card.level)} onClick={() => actions.upgrade(card.uid)}>
+              {view.data < upgradeCost(card.level)
+                ? `Améliorer · ${upgradeCost(card.level)} ◆ (il te manque ${upgradeCost(card.level) - view.data} ◆)`
+                : `Améliorer au niveau ${nextLevel} · ${upgradeCost(card.level)} ◆`}
             </button>
           )}
           <div className="mm-row">
+            {onBoard ? (
+              <button className="ghost mm-sell" onClick={() => actions.takeBack(place.cell)}>Reprendre en main</button>
+            ) : (
+              <button className="ghost mm-sell" disabled={!canPlace} onClick={() => actions.place(card.uid, freeCell)}>
+                {canPlace ? `Poser case ${freeCell + 1}` : `${view.limits.maxPlaced} déjà posés`}
+              </button>
+            )}
             <button className="mm-back" onClick={onClose}>Retour au plateau</button>
           </div>
         </footer>

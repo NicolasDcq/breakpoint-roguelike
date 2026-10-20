@@ -1,6 +1,6 @@
 // La boutique, entre deux contrats : arrivage (colis de modules, boosters de plans), Plugins et services.
 
-import { BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES, upgradeCost } from "../../domain/index.js";
+import { BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES } from "../../domain/index.js";
 import { PackOffers } from "./Packs.jsx";
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
@@ -31,22 +31,20 @@ function PluginOffers({ view, onBuy }) {
   );
 }
 
-/** Choisir un module du parc, pour l'améliorer (◆) ou le retirer ($). */
-function ParcPicker({ view, mode, onPick }) {
-  const upgrading = mode === "upgrade";
+/** Choisir un module du parc à retirer ($). */
+function ParcPicker({ view, onPick }) {
   return (
     <>
-      <p className="dim small">{upgrading ? "Touche un module pour l'améliorer (coût en ◆)." : `Touche un module pour le retirer (${view.removePrice} $, ${RULES.minParcSize} modules minimum).`}</p>
+      <p className="dim small">Touche un module pour le retirer ({view.removePrice} $, {RULES.minParcSize} modules minimum).</p>
       <div className="parc-grid">
         {view.parc.map((card) => {
-          const cost = upgradeCost(card.level);
-          const disabled = upgrading ? !cost || view.data < cost : view.money < view.removePrice || !view.canRemove;
+          const disabled = view.money < view.removePrice || !view.canRemove;
           return (
             <div key={card.uid} className="slot drawer-slot filled parc-cell">
               <button className={tileClasses(card)} disabled={disabled} onClick={() => onPick(card.uid)} aria-label={MODULES[card.moduleId].name}>
                 <ModuleFace card={card} />
               </button>
-              <span className="parc-price num">{upgrading ? (cost ? `${cost} ◆` : "max") : `${view.removePrice} $`}</span>
+              <span className="parc-price num">{view.removePrice} $</span>
             </div>
           );
         })}
@@ -71,7 +69,7 @@ export function ShopModal({ view, mode, actions }) {
       </div>
       <div className="shop">
         {mode ? (
-          <ParcPicker view={view} mode={mode} onPick={mode === "upgrade" ? actions.upgrade : actions.remove} />
+          <ParcPicker view={view} onPick={actions.remove} />
         ) : (
           <>
             <div className="shop-col">
@@ -82,7 +80,6 @@ export function ShopModal({ view, mode, actions }) {
               <PluginOffers view={view} onBuy={actions.buy} />
               <h3 className="shop-section">Services</h3>
               <div className="shop-services">
-                <button className="ghost" onClick={() => actions.setMode("upgrade")}>Améliorer un module (◆)</button>
                 <button className="ghost" onClick={() => actions.setMode("remove")}>Retirer un module ({view.removePrice} $)</button>
                 <button className="ghost" disabled={view.money < view.rerollPrice} onClick={actions.reroll}>Relancer ({view.rerollPrice} $)</button>
               </div>

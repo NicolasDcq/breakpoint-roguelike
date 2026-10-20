@@ -75,6 +75,7 @@ export function App() {
   const sheetActions = {
     place: (uid, cell) => { if (placeCard(uid, cell)) setSheet(null); },
     takeBack: (cell) => { if (attempt(game.takeBack(cell))) setSheet(null); },
+    upgrade: (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) showToast("Module amélioré."); },
   };
   const sheetCard = sheet && (sheet.kind === "hand" ? view.hand : view.board).find((card) => card?.uid === sheet.uid);
   const sheetPlace = sheetCard && sheet.kind === "cell" ? { kind: "cell", cell: view.board.findIndex((card) => card?.uid === sheet.uid) } : { kind: "hand" };
@@ -106,7 +107,6 @@ export function App() {
     buyPack: (packId) => attempt(game.buyPack(packId), "cash"),
     reroll: () => attempt(game.rerollShop(), "reroll"),
     setMode: setShopMode,
-    upgrade: (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) { showToast("Module amélioré."); setShopMode(null); } },
     remove: (uid) => { if (attempt(game.removeCard(uid), "sell")) { showToast("Module retiré du parc."); setShopMode(null); } },
     showParc: () => open("parc"),
     next: () => { attempt(game.nextContract()); stopDiscarding(); },

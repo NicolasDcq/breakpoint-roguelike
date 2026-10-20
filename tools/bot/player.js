@@ -55,16 +55,17 @@ function playTurn(service) {
     best = bestBoard(run);
   }
   best.board.cells.forEach((uid, cell) => { if (uid) service.placeCard(uid, cell); });
+  // Améliorer les modules posés avec la Data disponible.
+  for (const uid of run.round.board.placedUids()) {
+    const cost = upgradeCost(run.card(uid).level);
+    if (cost && run.data >= cost) service.upgradeCard(uid);
+  }
   service.deploy();
 }
 
 function shop(service, random) {
   service.openShop();
   const { run } = service;
-  for (const card of [...run.parc.cards].sort(() => random() - 0.5)) {
-    const cost = upgradeCost(card.level);
-    if (cost && run.data >= cost) service.upgradeCard(card.uid);
-  }
   // Arrivage : un plan pour l'architecture la plus jouée ; un module qu'on a déjà (pour les doubles).
   const plays = (id) => run.architecturePlays[id] ?? 0;
   const copies = (id) => run.parc.cards.filter((card) => card.moduleId === id).length;

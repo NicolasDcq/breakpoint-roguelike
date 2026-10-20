@@ -270,14 +270,26 @@ test("la boutique refuse un Plugin sans argent, puis un Plugin déjà acheté", 
   assert.equal(run.buy(0).reason, Refusal.ALREADY_SOLD);
 });
 
-test("améliorer coûte de la Data, retirer garde 8 modules au moins", () => {
+test("on améliore un module en partie, en main ou posé, avec de la Data", () => {
+  const run = Run.start(5);
+  const [inHand, onBoard] = run.round.hand;
+  run.place(onBoard, 0);
+  assert.equal(run.upgradeCard(inHand).reason, Refusal.NOT_ENOUGH_DATA);
+  run.data = 9;
+  const before = run.preview().score;
+  assert.ok(run.upgradeCard(onBoard).ok);
+  assert.equal(run.card(onBoard).level, 2);
+  assert.ok(run.preview().score >= before, "un module posé amélioré compte tout de suite");
+  assert.ok(run.upgradeCard(inHand).ok);
+  assert.equal(run.data, 3);
+  assert.equal(run.upgradeCard(run.round.drawPile[0]).reason, Refusal.NOT_AT_HAND, "pas un module encore dans la pioche");
+  run.phase = Phase.SHOP;
+  assert.equal(run.upgradeCard(inHand).reason, Refusal.WRONG_PHASE, "plus en boutique");
+});
+
+test("retirer un module garde 8 modules au moins", () => {
   const run = Run.start(5);
   run.phase = Phase.SHOP;
-  const card = run.parc.cards[0];
-  assert.equal(run.upgradeCard(card.uid).reason, Refusal.NOT_ENOUGH_DATA);
-  run.data = 3;
-  assert.ok(run.upgradeCard(card.uid).ok);
-  assert.equal(run.card(card.uid).level, 2);
   run.money = 100;
   while (run.parc.size > RULES.minParcSize) assert.ok(run.removeCard(run.parc.cards[0].uid).ok);
   assert.equal(run.removeCard(run.parc.cards[0].uid).reason, Refusal.PARC_TOO_SMALL);

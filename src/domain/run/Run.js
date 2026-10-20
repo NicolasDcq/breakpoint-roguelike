@@ -8,7 +8,7 @@ import { BOSSES, bossLimits } from "../catalog/bosses.js";
 import { PLUGINS } from "../catalog/plugins.js";
 import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 import { Parc } from "../parc/Parc.js";
-import { Round } from "../round/Round.js";
+import { CardPlace, Round } from "../round/Round.js";
 import { scoreDeployment } from "../scoring/ScoringEngine.js";
 import { OfferKind, removalPrice, rollOffers } from "../shop/Shop.js";
 import { PACKS, PACK_IDS, drawPack } from "../catalog/packs.js";
@@ -269,11 +269,12 @@ export class Run {
     return ok();
   }
 
+  /** Améliore un module en partie, quand il est en main ou posé : ça coûte de la Data. */
   upgradeCard(uid) {
-    const blocked = this.shopBlocked();
-    if (blocked) return blocked;
+    if (this.phase !== Phase.PLAY) return refuse(Refusal.WRONG_PHASE);
     const card = this.card(uid);
     if (!card) return refuse(Refusal.UNKNOWN_CARD);
+    if (![CardPlace.HAND, CardPlace.BOARD].includes(this.round.whereIs(uid))) return refuse(Refusal.NOT_AT_HAND);
     const cost = upgradeCost(card.level);
     if (!cost) return refuse(Refusal.MAX_LEVEL);
     if (this.data < cost) return refuse(Refusal.NOT_ENOUGH_DATA);

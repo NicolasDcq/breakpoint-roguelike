@@ -5,10 +5,22 @@ import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { FAMILY_GLYPHS, moduleSummary } from "../visuals.js";
 import { EffectLines } from "./EffectLines.jsx";
 
-export function ModuleFace({ card }) {
+/** Pastille « amélioration possible » (deux chevrons), comme dans l'ancien jeu. */
+export function UpgradeDot() {
+  return (
+    <span className="up-ready up-dot" title="Amélioration possible : touche le module" aria-label="Amélioration possible">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M5 11l7-6 7 6M5 20l7-6 7 6" />
+      </svg>
+    </span>
+  );
+}
+
+export function ModuleFace({ card, upgradable = false }) {
   const module = MODULES[card.moduleId];
   return (
     <>
+      {upgradable && <UpgradeDot />}
       <span className={`tile-fam fam-${module.family}`} title={`Famille ${FAMILIES[module.family].name}`} aria-hidden="true">
         {FAMILY_GLYPHS[module.family]}
       </span>

@@ -1,5 +1,12 @@
 # État du jeu et décisions
 
+## 20/10 · Améliorer un module en partie
+
+- L'amélioration quitte la boutique : on touche un module **en main ou posé** et on l'améliore depuis sa fiche (« Améliorer au niveau N · X ◆ »), en Data. Coûts inchangés : 3 ◆ puis 6 ◆.
+- Un module posé amélioré compte tout de suite dans le score prévu.
+- Pastille verte à deux chevrons sur les tuiles qu'on peut améliorer maintenant (Data suffisante), comme dans l'ancien jeu.
+- Bot : il améliore les modules qu'il pose. 32 % de victoires (200 parties).
+
 ## 19/10 · Ce qui reste vraiment dans le parc
 
 Fenêtre « Ton parc » pendant un contrat : compteurs (dans la pioche, en main, utilisés), les modules joués ou défaussés sont **grisés**, ceux de la main portent la pastille **« En main »** et ceux du plateau **« Posé »**. Ordre : pioche, puis main et plateau, puis utilisés. La règle est dans le domaine (`Round.whereIs`).
@@ -79,7 +86,7 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 - Par contrat : main de 7, 5 modules posés au plus sur le plateau 4×4, 4 déploiements, 3 défausses. Pas de remélange : une carte jouée ou défaussée revient au contrat suivant. Pioche vide : contrat perdu.
 - Score : l'architecture donne la base (Compute et Scale de départ), puis chaque case s'active dans l'ordre et l'améliore, puis les Plugins de fin.
 - Seuls les modules Calcul produisent du Compute (sauf effet écrit : Régie Pub, Index).
-- Boutique : 4 modules, 2 Plugins (4 au plus), 2 boosters de plans d'architecture (6 $, 3 plans, 1 gardé), amélioration en ◆ (3 puis 6), retrait (2 $, +1 à chaque fois, 8 modules au moins), relance (1 $, +1).
+- Boutique : 4 modules, 2 Plugins (4 au plus), 2 boosters de plans d'architecture (6 $, 3 plans, 1 gardé),  retrait (2 $, +1 à chaque fois, 8 modules au moins), relance (1 $, +1).
 - 12 contrats : 150, 220, 270, 420, 560, 730, 950, 1230, 1630, 2130, 2780, 3000. Les contrats C ont une contrainte.
 
 | Architecture | Condition | Base niv. 1 | Par niveau |

@@ -21,6 +21,7 @@ export const Refusal = Object.freeze({
   MAX_LEVEL: "max-level",
   PARC_TOO_SMALL: "parc-too-small",
   UNKNOWN_CARD: "unknown-card",
+  NOT_AT_HAND: "not-at-hand",
   UNKNOWN_OFFER: "unknown-offer",
   UNKNOWN_PACK: "unknown-pack",
   NO_PACK_LEFT: "no-pack-left",

@@ -3,7 +3,7 @@
 // (ou l'échange) ; le glisser vers la main le reprend. Toucher une tuile ouvre sa fiche.
 
 import { createPortal } from "react-dom";
-import { BOSSES, CELLS, GRID_SIZE, MODULES } from "../../domain/index.js";
+import { BOSSES, CELLS, GRID_SIZE, MODULES, upgradeCost } from "../../domain/index.js";
 import { Tooltip } from "../common/Tooltip.jsx";
 import { tileClasses } from "../visuals.js";
 import { TRACE_HEIGHT, TRACE_WIDTH, busPath, returnPaths, slotX, slotY } from "./boardGeometry.js";
@@ -18,6 +18,8 @@ function Popups({ pops, className = "" }) {
 }
 
 const isSource = (drag, kind, uid) => drag?.source.kind === kind && drag.source.uid === uid;
+/** On peut l'améliorer maintenant : un niveau au-dessus existe et la Data suffit. */
+const canUpgrade = (card, view) => { const cost = upgradeCost(card.level); return Boolean(cost) && view.data >= cost; };
 
 function Hand({ view, marked, discarding, locked, drag, dragProps }) {
   const over = drag?.over?.kind === "hand" && drag.source.kind === "cell";
@@ -39,7 +41,7 @@ function Hand({ view, marked, discarding, locked, drag, dragProps }) {
                 aria-label={`${MODULES[card.moduleId].name}, niveau ${card.level}, dans ta main. Toucher pour voir sa fiche, glisser pour le poser.`}
                 {...dragProps({ kind: "hand", uid: card.uid })}
               >
-                <ModuleFace card={card} />
+                <ModuleFace card={card} upgradable={!locked && canUpgrade(card, view)} />
               </div>
             </Tooltip>
           </div>
@@ -92,7 +94,7 @@ export function BoardView({ view, marked, discarding, animation, locked, drag, d
                     aria-label={`${MODULES[card.moduleId].name} niveau ${card.level}, case ${cell + 1}. Toucher pour voir sa fiche, glisser pour le déplacer.`}
                     {...dragProps({ kind: "cell", uid: card.uid, cell })}
                   >
-                    <ModuleFace card={card} />
+                    <ModuleFace card={card} upgradable={!locked && canUpgrade(card, view)} />
                   </div>
                 </Tooltip>
               ) : (
