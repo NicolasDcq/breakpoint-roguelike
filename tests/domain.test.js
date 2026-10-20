@@ -287,6 +287,19 @@ test("on améliore un module en partie, en main ou posé, avec de la Data", () =
   assert.equal(run.upgradeCard(inHand).reason, Refusal.WRONG_PHASE, "plus en boutique");
 });
 
+test("Plugins pleins : on en revend un pour le remplacer, la revente aide à payer", () => {
+  const run = Run.start(5);
+  run.phase = Phase.SHOP;
+  run.pluginIds = ["intern", "dba", "caffeine", "janitor"];
+  run.offers = [{ kind: OfferKind.PLUGIN, id: "growth", price: 6, sold: false }];
+  run.money = 4;
+  assert.equal(run.buy(0).reason, Refusal.NO_PLUGIN_SLOT);
+  assert.equal(run.buy(0, "sre").reason, Refusal.UNKNOWN_PLUGIN);
+  assert.ok(run.buy(0, "dba").ok, "4 $ + 2 $ de revente = 6 $");
+  assert.deepEqual(run.pluginIds, ["intern", "growth", "caffeine", "janitor"], "il prend la place de l'ancien");
+  assert.equal(run.money, 0);
+});
+
 test("retirer un module garde 8 modules au moins", () => {
   const run = Run.start(5);
   run.phase = Phase.SHOP;

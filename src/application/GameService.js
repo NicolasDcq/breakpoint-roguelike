@@ -51,7 +51,7 @@ export class GameService {
   discardCards(uids) { return this.execute((run) => run.discard(uids)); }
   deploy() { return this.execute((run) => run.deploy()); }
   openShop() { return this.execute((run) => run.openShop()); }
-  buyOffer(index) { return this.execute((run) => run.buy(index)); }
+  buyOffer(index, replacePluginId = null) { return this.execute((run) => run.buy(index, replacePluginId)); }
   buyPack(packId) { return this.execute((run) => run.buyPack(packId)); }
   pickFromPack(choiceId) { return this.execute((run) => run.pickFromPack(choiceId)); }
   rerollShop() { return this.execute((run) => run.reroll()); }

@@ -5,7 +5,7 @@ import { Rng } from "../shared/Rng.js";
 import { ok, refuse, Refusal } from "../shared/Result.js";
 import { RULES, upgradeCost } from "../catalog/rules.js";
 import { BOSSES, bossLimits } from "../catalog/bosses.js";
-import { PLUGINS } from "../catalog/plugins.js";
+import { PLUGINS, pluginSellPrice } from "../catalog/plugins.js";
 import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 import { Parc } from "../parc/Parc.js";
 import { CardPlace, Round } from "../round/Round.js";
@@ -232,17 +232,26 @@ export class Run {
     return ok(choiceId);
   }
 
-  buy(offerIndex) {
+  /**
+   * Achète une offre. Si les emplacements de Plugin sont pleins, on peut en revendre un
+   * (replacePluginId) : le nouveau prend sa place, et la revente aide à payer.
+   */
+  buy(offerIndex, replacePluginId = null) {
     const blocked = this.shopBlocked();
     if (blocked) return blocked;
     const offer = this.offers[offerIndex];
     if (!offer) return refuse(Refusal.UNKNOWN_OFFER);
     if (offer.sold) return refuse(Refusal.ALREADY_SOLD);
-    if (this.money < offer.price) return refuse(Refusal.NOT_ENOUGH_MONEY);
-    if (offer.kind === OfferKind.PLUGIN && this.pluginIds.length >= RULES.maxPlugins) return refuse(Refusal.NO_PLUGIN_SLOT);
-    this.money -= offer.price;
+    const replacing = replacePluginId !== null;
+    if (replacing && !this.pluginIds.includes(replacePluginId)) return refuse(Refusal.UNKNOWN_PLUGIN);
+    const refund = replacing ? pluginSellPrice(replacePluginId) : 0;
+    if (!replacing && this.pluginIds.length >= RULES.maxPlugins) return refuse(Refusal.NO_PLUGIN_SLOT);
+    if (this.money + refund < offer.price) return refuse(Refusal.NOT_ENOUGH_MONEY);
+    this.money += refund - offer.price;
     this.offers = this.offers.map((other, index) => (index === offerIndex ? { ...other, sold: true } : other));
-    if (offer.kind === OfferKind.PLUGIN) this.pluginIds = [...this.pluginIds, offer.id];
+    this.pluginIds = replacing
+      ? this.pluginIds.map((id) => (id === replacePluginId ? offer.id : id))
+      : [...this.pluginIds, offer.id];
     return ok(offer);
   }
 

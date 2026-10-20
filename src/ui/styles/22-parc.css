@@ -658,3 +658,63 @@ button.env-badge {
 .parc-modal .parc-cell {
   min-height: 74px;
 }
+
+/* Remplacer un Plugin quand les emplacements sont pleins */
+.replace-incoming {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0;
+}
+.replace-tag {
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: #2bd96b;
+  color: #05070f;
+  font: 800 10px/14px var(--mono);
+  text-transform: uppercase;
+}
+.replace-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 6px 0 12px;
+}
+.replace-option.sel {
+  outline: 3px solid #ff5a6e;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+.replace-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.replace-actions button.ghost {
+  min-height: 44px;
+  padding: 0 14px;
+}
+.replace-modal {
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+@media (max-width: 640px) {
+  .replace-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.replace-modal .replace-actions {
+  position: sticky;
+  bottom: 0;
+  padding: 8px 0 2px;
+  background: linear-gradient(transparent, #141c38 30%);
+}
+.replace-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+}

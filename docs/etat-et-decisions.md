@@ -1,5 +1,9 @@
 # État du jeu et décisions
 
+## 20/10 · Remplacer un Plugin quand les emplacements sont pleins
+
+En boutique, si les 4 emplacements sont pleins, une offre de Plugin affiche « Remplacer · X $ ». On choisit le Plugin à revendre (moitié de son prix, au moins 1 $) : le nouveau prend sa place, et la revente compte dans le paiement (`Run.buy(offre, pluginRevendu)`, `pluginSellPrice`).
+
 ## 20/10 · Améliorer un module en partie
 
 - L'amélioration quitte la boutique : on touche un module **en main ou posé** et on l'améliore depuis sa fiche (« Améliorer au niveau N · X ◆ »), en Data. Coûts inchangés : 3 ◆ puis 6 ◆.

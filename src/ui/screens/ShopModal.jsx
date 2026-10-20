@@ -1,7 +1,9 @@
 // La boutique, entre deux contrats : arrivage (colis de modules, boosters de plans), Plugins et services.
 
 import { BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES } from "../../domain/index.js";
+import { useState } from "react";
 import { PackOffers } from "./Packs.jsx";
+import { ReplacePluginModal } from "./ReplacePluginModal.jsx";
 import { Modal } from "../common/Modal.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { Tooltip } from "../common/Tooltip.jsx";
@@ -12,7 +14,7 @@ import { PluginCard, PluginTip } from "../components/PluginCard.jsx";
 const priceLabel = (offer, money, soldLabel) => (offer.sold ? soldLabel : `${offer.price} $`);
 const priceClass = (offer, money) => `price num ${money >= offer.price ? "" : "short"}`;
 
-function PluginOffers({ view, onBuy }) {
+function PluginOffers({ view, onBuy, onReplace }) {
   const full = view.pluginIds.length >= RULES.maxPlugins;
   return (
     <div className="shop-jokers">
@@ -20,9 +22,14 @@ function PluginOffers({ view, onBuy }) {
         if (offer.kind !== OfferKind.PLUGIN) return null;
         return (
           <Tooltip key={index} content={<PluginTip id={offer.id} />} className="offer-wrap">
-            <button className={`joker-offer ${offer.sold ? "sold" : ""}`} disabled={offer.sold || full} onClick={() => onBuy(index)} aria-label={`Recruter ${PLUGINS[offer.id].name} pour ${offer.price} $`}>
+            <button
+              className={`joker-offer ${offer.sold ? "sold" : ""}`}
+              disabled={offer.sold}
+              onClick={() => (full ? onReplace(index) : onBuy(index))}
+              aria-label={full ? `Remplacer un Plugin par ${PLUGINS[offer.id].name}` : `Recruter ${PLUGINS[offer.id].name} pour ${offer.price} $`}
+            >
               <PluginCard id={offer.id} variant="offer" />
-              <span className={priceClass(offer, view.money)}>{offer.sold ? "Recruté" : full ? "Plus de place" : `${offer.price} $`}</span>
+              <span className={priceClass(offer, view.money)}>{offer.sold ? "Recruté" : full ? `Remplacer · ${offer.price} $` : `${offer.price} $`}</span>
             </button>
           </Tooltip>
         );
@@ -55,6 +62,7 @@ function ParcPicker({ view, onPick }) {
 
 export function ShopModal({ view, mode, actions }) {
   const next = view.nextContract;
+  const [replacing, setReplacing] = useState(null);
   return (
     <Modal className="shop-modal parc-shop">
       <div className="fu-head">
@@ -77,7 +85,7 @@ export function ShopModal({ view, mode, actions }) {
             </div>
             <div className="shop-col">
               <h3 className="shop-section">Plugins · {view.pluginIds.length}/{RULES.maxPlugins}</h3>
-              <PluginOffers view={view} onBuy={actions.buy} />
+              <PluginOffers view={view} onBuy={actions.buy} onReplace={setReplacing} />
               <h3 className="shop-section">Services</h3>
               <div className="shop-services">
                 <button className="ghost" onClick={() => actions.setMode("remove")}>Retirer un module ({view.removePrice} $)</button>
@@ -103,6 +111,14 @@ export function ShopModal({ view, mode, actions }) {
           </>
         )}
       </div>
+      {replacing !== null && (
+        <ReplacePluginModal
+          view={view}
+          offer={view.offers[replacing]}
+          onClose={() => setReplacing(null)}
+          onReplace={(pluginId) => { if (actions.buy(replacing, pluginId)) setReplacing(null); }}
+        />
+      )}
     </Modal>
   );
 }

@@ -7,7 +7,7 @@ export { OfferKind } from "./shop/Shop.js";
 export { RULES, upgradeCost } from "./catalog/rules.js";
 export { FAMILIES, FAMILY_IDS } from "./catalog/families.js";
 export { MODULES, MODULE_IDS, familyOf } from "./catalog/modules.js";
-export { PLUGINS } from "./catalog/plugins.js";
+export { PLUGINS, pluginSellPrice } from "./catalog/plugins.js";
 export { BOSSES } from "./catalog/bosses.js";
 export { STARTERS } from "./catalog/starters.js";
 export { PACKS, PACK_IDS } from "./catalog/packs.js";

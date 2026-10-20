@@ -103,7 +103,7 @@ export function App() {
   const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); close(); };
 
   const shopActions = {
-    buy: (index) => attempt(game.buyOffer(index), "cash"),
+    buy: (index, replacePluginId = null) => attempt(game.buyOffer(index, replacePluginId), replacePluginId ? "sell" : "cash"),
     buyPack: (packId) => attempt(game.buyPack(packId), "cash"),
     reroll: () => attempt(game.rerollShop(), "reroll"),
     setMode: setShopMode,

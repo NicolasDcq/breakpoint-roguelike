@@ -78,3 +78,6 @@ export const PLUGINS = Object.freeze(
   Object.fromEntries(Object.entries(DEFINITIONS).map(([id, def]) => [id, Object.freeze({ id, ...def })])),
 );
 export const PLUGIN_IDS = Object.keys(PLUGINS);
+
+/** Ce que rapporte un Plugin revendu : la moitié de son prix, au moins 1 $. */
+export const pluginSellPrice = (pluginId) => Math.max(1, Math.floor(PLUGINS[pluginId].price / 2));
