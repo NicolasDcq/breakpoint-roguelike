@@ -1,5 +1,16 @@
 # État du jeu et décisions
 
+## 20/10 · 16 nouveaux Plugins (28 en tout)
+
+Pour que les parties ne se ressemblent pas : plus de Plugins, avec des **conditions variées** (position, ordre, nombre de modules, défausses, autres Plugins) et des **×Scale**.
+- **Communs** : Le Vétéran (+3 Compute par contrat déjà livré), La Mentor (+5 Compute par Plugin commun), Le Scrum Master (4 modules posés ou plus : +0,5 Scale), Le Responsable Sécu (+2 $ par contrat).
+- **Peu communs** : Chef de produit (+0,3 Scale par Business), La Pipeline (un Ops réactive le module posé juste après), La Monétique (2 Business ou plus : +15 Compute), Le Symétrique (colonne pleine : ×2), Le Tandem (+10 Compute par ligne avec 2 modules de même famille), L'Investisseuse (Scale ×1,25 à ×2 selon le nombre de Plugins).
+- **Rares** : Le Capital-risqueur (double la caisse en fin de contrat, +8 $ au plus), L'IA Générative (dernier module posé ×4), Le Monopole (3 modules ou plus d'une seule famille : Compute ×3 et Scale ×2), L'Overclocker (plateau plein : Scale ×2, suit la limite du boss), Le Clean Code (aucune défausse : +20 Compute et Scale ×1,5), La Diagonale (grandes diagonales ×2).
+- Noms choisis pour ne pas gêner la reprise de `main-old` (pas de « Load Balancer » ni de « Senior »).
+- Dessins : les personnages gardent **le visage du Stagiaire** (comme les Jokers de Balatro) ; seuls coiffure, accessoires et tenue changent. Les objets sont un seul objet simple.
+- Moteur : `atEnd` reçoit `{ parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed }` ; le contexte d'activation donne `cell()`, `cards`, `isLastPlaced()`, `nextFilledCell()`, `isRetrigger()`.
+- Bot (200 parties) : 37 % de victoires (32 % avant). Parties de référence régénérées.
+
 ## 20/10 · Plugins en cartes à puce et écran « Plus de place »
 
 - Les 12 Plugins ont leur dessin en pixel-art 16×16 (`ui/plugins/sprites.js`, rendu en SVG par `PixelSprite`). Carte à puce : code (ex. `CPT-05`), fenêtre avec le dessin, nom, effet, rareté, couleur de bord selon la rareté.

@@ -33,6 +33,14 @@ export function createActivationContext({ cell, depth, cards, state, output, pen
       return -1;
     },
     isFirstPlaced: () => cell === cards.findIndex((card) => card !== null),
+    isLastPlaced: () => cell === cards.findLastIndex((card) => card !== null),
+    cell: () => cell,
+    cards,
+    nextFilledCell: () => {
+      for (let index = cell + 1; index < cards.length; index++) if (filled(index)) return index;
+      return -1;
+    },
+    isRetrigger: () => depth > 0,
     // Effets sur les autres activations.
     boostNext: (factor) => { state.boost = state.boost ? state.boost + factor - 1 : factor; },
     queueRetriggers: (count) => { state.queue += count; },

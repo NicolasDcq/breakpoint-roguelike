@@ -115,6 +115,9 @@ export class Run {
       money: this.money,
       architectureLevels: this.architectureLevels,
       parcSize: this.parc.size,
+      contractsWon: this.contractIndex,
+      maxPlaced: this.limits.maxPlaced,
+      discardsUsed: this.limits.discards - this.round.discardsLeft,
     });
   }
 

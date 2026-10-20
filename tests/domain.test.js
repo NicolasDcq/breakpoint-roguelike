@@ -360,3 +360,75 @@ test("le plateau est un objet valeur", () => {
   assert.equal(empty.placedCount, 0);
   assert.equal(one.placedCount, 1);
 });
+
+// ---------- Plugins de la vague 2 ----------
+
+const at = (placements) => {
+  const cells = Array(CELL_COUNT).fill(null);
+  for (const [cell, id] of Object.entries(placements)) cells[cell] = cards(id)[0];
+  return cells;
+};
+const gain = (cells, pluginIds, extra = {}) => {
+  const without = score(cells, extra);
+  const withPlugins = score(cells, { pluginIds, ...extra });
+  return { without, with: withPlugins, fired: withPlugins.fired };
+};
+
+test("Plugins à condition de fin : Vétéran, Mentor, Scrum Master, Monétique, Clean Code", () => {
+  const four = board("server", "server", "saas", "saas");
+  let g = gain(four, ["veteran"], { contractsWon: 3 });
+  assert.equal(g.with.compute - g.without.compute, 9, "Vétéran : +3 par contrat livré");
+  g = gain(four, ["mentor", "intern", "growth"]);
+  assert.equal(g.with.compute - score(four, { pluginIds: ["intern", "growth"] }).compute, 10, "Mentor : 2 communs");
+  g = gain(four, ["scrum"]);
+  assert.equal(Math.round((g.with.scale - g.without.scale) * 10) / 10, 0.5, "Scrum : 4 modules posés");
+  assert.ok(!gain(board("server", "server", "saas"), ["scrum"]).fired.includes("scrum"));
+  g = gain(four, ["monetique"]);
+  assert.equal(g.with.compute - g.without.compute, 15, "Monétique : 2 Business");
+  assert.ok(gain(four, ["cleancode"]).with.score > gain(four, ["cleancode"]).without.score);
+  assert.ok(!gain(four, ["cleancode"], { discardsUsed: 1 }).fired.includes("cleancode"), "Clean Code : aucune défausse");
+});
+
+test("Monopole, Overclocker et Investisseuse multiplient le Scale", () => {
+  const mono = board("server", "micro", "api");
+  let g = gain(mono, ["monopoly"]);
+  assert.equal(g.with.compute, g.without.compute * 3);
+  assert.equal(g.with.scale, g.without.scale * 2);
+  assert.ok(!gain(board("server", "micro", "cdn"), ["monopoly"]).fired.includes("monopoly"), "deux familles : rien");
+  const full = board("server", "micro", "api", "gpu", "cdn");
+  g = gain(full, ["overclock"], { maxPlaced: 5 });
+  assert.equal(g.with.scale, g.without.scale * 2);
+  assert.ok(gain(mono, ["overclock"], { maxPlaced: 3 }).fired.includes("overclock"), "boss à 3 modules : 3 suffisent");
+  g = gain(mono, ["investor", "intern", "dba", "caffeine"]);
+  assert.ok(g.fired.includes("investor"));
+});
+
+test("Plugins de position : IA Générative, Diagonale, Symétrique, Tandem", () => {
+  const two = at({ 0: "server", 9: "server" });
+  const genai = score(two, { pluginIds: ["genai"] });
+  assert.equal(genai.events.find((e) => e.cell === 9).multiplier, 4, "le dernier posé ×4");
+  assert.equal(genai.events.find((e) => e.cell === 0).multiplier, 1);
+  const diag = score(at({ 0: "server", 1: "server", 6: "server" }), { pluginIds: ["diagonal"] });
+  assert.equal(diag.events.find((e) => e.cell === 0).multiplier, 2);
+  assert.equal(diag.events.find((e) => e.cell === 1).multiplier, 1);
+  const column = at({ 1: "server", 5: "server", 9: "server", 13: "server", 2: "server" });
+  const sym = score(column, { pluginIds: ["symmetric"] });
+  assert.equal(sym.events.find((e) => e.cell === 5).multiplier, 2);
+  assert.equal(sym.events.find((e) => e.cell === 2).multiplier, 1);
+  const tandem = gain(at({ 0: "server", 2: "micro", 4: "server", 9: "cdn", 10: "saas" }), ["tandem"]);
+  assert.equal(tandem.with.compute - tandem.without.compute, 10, "seule la 1re ligne a 2 Calcul");
+});
+
+test("La Pipeline : un module Ops réactive le module posé juste après", () => {
+  const cells = at({ 0: "worker", 2: "server" });
+  const plain = score(cells).events.filter((e) => e.cell === 2).length;
+  const piped = score(cells, { pluginIds: ["pipeline"] });
+  assert.equal(piped.events.filter((e) => e.cell === 2).length, plain + 1);
+  assert.ok(piped.fired.includes("pipeline"));
+});
+
+test("Fin de contrat : Responsable Sécu +2 $, Capital-risqueur double la caisse (+8 $ au plus)", () => {
+  assert.equal(PLUGINS.secuchief.contractInterest(0), 2);
+  assert.equal(PLUGINS.vc.contractInterest(5), 5);
+  assert.equal(PLUGINS.vc.contractInterest(30), 8);
+});

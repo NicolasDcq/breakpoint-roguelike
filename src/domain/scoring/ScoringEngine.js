@@ -23,11 +23,14 @@ const hasOutput = (output) => output.compute || output.scale || output.data || o
  * @param {number} input.money
  * @param {Record<string, number>} input.architectureLevels
  * @param {number} input.parcSize
+ * @param {number} [input.contractsWon]  contrats déjà livrés dans la partie
+ * @param {number} [input.maxPlaced]     modules posés au plus pendant ce contrat
+ * @param {number} [input.discardsUsed]  défausses déjà utilisées pendant ce contrat
  */
-export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, money, architectureLevels, parcSize }) {
+export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, money, architectureLevels, parcSize, contractsWon = 0, maxPlaced = 5, discardsUsed = 0 }) {
   const plugins = pluginIds.map((id) => PLUGINS[id]);
   const placed = cards.filter(Boolean);
-  const result = { compute: 0, scale: 1, data: 0, money: 0, events: [], fired: new Set(), placed, count: placed.length, architecture: null, score: 0 };
+  const result = { compute: 0, scale: 1, data: 0, money: 0, events: [], fired: new Set(), cards, placed, count: placed.length, architecture: null, score: 0 };
   const state = {
     result,
     stock: { data: dataStock, money },
@@ -98,7 +101,7 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
     state.stock.data += final.data;
     state.stock.money += final.money;
     result.events.push({ cell, output: final, multiplier, isRetrigger });
-    plugins.forEach((plugin) => plugin.afterActivation?.(card, ctx));
+    plugins.forEach((plugin) => { if (plugin.afterActivation?.(card, ctx)) result.fired.add(plugin.id); });
     if (isRetrigger) {
       plugins.filter((plugin) => plugin.onRetrigger).forEach((plugin) => {
         plugin.onRetrigger(ctx);
@@ -114,8 +117,9 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
   CELLS.forEach((cell) => activate(cell, 0, false));
 
   // 3. Les Plugins de fin.
+  const env = { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed };
   for (const plugin of plugins) {
-    if (plugin.atEnd?.(result, { parcSize })) result.fired.add(plugin.id);
+    if (plugin.atEnd?.(result, env)) result.fired.add(plugin.id);
   }
   result.scale = round2(result.scale);
   result.score = Math.round(result.compute * result.scale);
