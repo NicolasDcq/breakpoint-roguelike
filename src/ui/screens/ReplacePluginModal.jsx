@@ -1,48 +1,77 @@
-// Emplacements de Plugin pleins : choisir lequel revendre pour faire place au nouveau.
+// « Plus de place » : les 4 emplacements de Plugin sont pleins.
+// Le nouveau Plugin en vedette, la rangée pour choisir celui qui laisse sa place,
+// ce qu'on perd, et le compte (caisse + revente − prix).
 
 import { useState } from "react";
-import { PLUGINS, pluginSellPrice } from "../../domain/index.js";
+import { PLUGINS, RULES, pluginSellPrice } from "../../domain/index.js";
 import { Modal } from "../common/Modal.jsx";
-import { PluginCard } from "../components/PluginCard.jsx";
+import { FX } from "../fx.jsx";
+import { PluginCard, PluginMini } from "../components/PluginCard.jsx";
 
-export function ReplacePluginModal({ view, offer, onReplace, onClose }) {
-  const [chosen, setChosen] = useState(null);
-  const incoming = PLUGINS[offer.id];
-  const refund = chosen ? pluginSellPrice(chosen) : 0;
-  const affordable = (id) => view.money + pluginSellPrice(id) >= offer.price;
+const signed = (value) => `${value >= 0 ? "+" : "−"}${Math.abs(value)} $`;
+
+function Ledger({ money, refund, price }) {
+  const rest = money + refund - price;
   return (
-    <Modal className="rules-modal replace-modal" onClose={onClose}>
-      <h2 className="modal-title">Remplacer un Plugin</h2>
-      <p className="dim small">
-        Tes {view.pluginIds.length} emplacements sont pleins. Choisis le Plugin à revendre : {incoming.name} prendra sa place, et la revente aide à payer.
-      </p>
-      <div className="replace-incoming">
-        <span className="replace-tag">Arrive</span>
-        <PluginCard id={offer.id} variant="offer" />
-        <span className="price num">{offer.price} $</span>
+    <div className="rp-ledger num">
+      <span className="rp-lg cash">Caisse {money} $</span>
+      {refund > 0 && <><span className="rp-op">+</span><span className="rp-lg refund">Revente {refund} $</span></>}
+      <span className="rp-op">−</span>
+      <span className="rp-lg cost">Prix {price} $</span>
+      <span className="rp-op">=</span>
+      <span className={`rp-lg ${rest >= 0 ? "total" : "missing"}`}>{rest >= 0 ? `${rest} $` : `${signed(rest)} : revends-en un`}</span>
+    </div>
+  );
+}
+
+export function ReplacePluginModal({ view, offer, desktop, onReplace, onClose }) {
+  const [chosen, setChosen] = useState(null);
+  const affordable = (id) => view.money + pluginSellPrice(id) >= offer.price;
+  const refund = chosen ? pluginSellPrice(chosen) : 0;
+  const option = (id, index) => {
+    const state = chosen === null ? "" : chosen === id ? "sel" : "off";
+    return (
+      <button
+        key={id}
+        className={`rp-option ${state}`}
+        aria-pressed={chosen === id}
+        disabled={!affordable(id)}
+        onClick={() => setChosen(chosen === id ? null : id)}
+      >
+        {desktop ? <PluginCard id={id} order={index + 1} /> : <PluginMini id={id} order={index + 1} />}
+        <span className={`rp-sell num ${state === "sel" ? "on" : ""}`}>
+          {!affordable(id) ? "Pas assez" : `${desktop ? (state === "sel" ? "Revendu " : "Revendre ") : ""}+${pluginSellPrice(id)} $`}
+        </span>
+      </button>
+    );
+  };
+  return (
+    <Modal className={`replace-modal ${desktop ? "desk" : ""}`} onClose={onClose}>
+      <div className="rp-incoming">
+        <div className="rp-head">
+          <span className="rp-count num">{view.pluginIds.length} / {RULES.maxPlugins} emplacements</span>
+          <h2 className="rp-title">Plus de place</h2>
+          {!desktop && <p className="rp-sub">Un Plugin doit laisser sa place au nouveau.</p>}
+        </div>
+        <div className="rp-tags"><span className="rp-new">Nouveau</span><span className="rp-price num">{offer.price} $</span></div>
+        <div className="rp-card"><PluginCard id={offer.id} /></div>
       </div>
-      <h3 className="shop-section">Revendre lequel ?</h3>
-      <div className="replace-list">
-        {view.pluginIds.map((id, index) => (
-          <button
-            key={id}
-            className={`joker-offer replace-option ${chosen === id ? "sel" : ""}`}
-            aria-pressed={chosen === id}
-            disabled={!affordable(id)}
-            onClick={() => setChosen(id)}
-          >
-            <PluginCard id={id} variant="offer" order={index + 1} />
-            <span className="price num">{affordable(id) ? `Revendre +${pluginSellPrice(id)} $` : "Pas assez de $"}</span>
+      <div className="rp-choose">
+        {desktop
+          ? <p className="rp-sub">Choisis le Plugin qui laisse sa place à <b>{PLUGINS[offer.id].name}</b>. Tu récupères la moitié de son prix.</p>
+          : <div className="rp-arrow"><span>Prend la place de</span><b>▼</b></div>}
+        <div className="rp-rail">{view.pluginIds.map(option)}</div>
+        {chosen
+          ? <div className="rp-lose"><b>Tu perds :</b> {PLUGINS[chosen].name} — {FX(PLUGINS[chosen].text)}</div>
+          : <div className="rp-lose idle">Touche le Plugin qui laisse sa place. Tu récupères la moitié de son prix.</div>}
+        <div className="rp-spacer" />
+        <Ledger money={view.money} refund={refund} price={offer.price} />
+        <div className="rp-actions">
+          <button className="ghost rp-cancel" onClick={onClose}>Annuler</button>
+          <button className="deploy rp-go" disabled={!chosen} onClick={() => onReplace(chosen)}>
+            {chosen ? `Remplacer · ${signed(refund - offer.price)}` : "Touche un Plugin"}
           </button>
-        ))}
-      </div>
-      <div className="replace-actions">
-        <button className="ghost" onClick={onClose}>Annuler</button>
-        <button className="deploy" disabled={!chosen} onClick={() => onReplace(chosen)}>
-          {chosen
-            ? `Remplacer ${PLUGINS[chosen].name} · ${refund - offer.price >= 0 ? "+" : "−"}${Math.abs(refund - offer.price)} $`
-            : "Choisis un Plugin à revendre"}
-        </button>
+        </div>
       </div>
     </Modal>
   );

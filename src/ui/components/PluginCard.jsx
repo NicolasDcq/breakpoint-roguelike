@@ -1,47 +1,63 @@
-// Carte d'un Plugin (rail, boutique) et puce compacte (téléphone).
+// Les Plugins en cartes à puce : boîtier à broches dorées, encoche, référence gravée,
+// fenêtre avec le dessin en pixel art, étiquette blanche et pastille de rareté.
 
 import { PLUGINS } from "../../domain/index.js";
-import { PLUGIN_LOOK, RARITY_LABELS } from "../visuals.js";
+import { RARITY_LABELS } from "../visuals.js";
 import { FX } from "../fx.jsx";
+import { PixelSprite } from "../plugins/PixelSprite.jsx";
+import { PUCE_LOOK } from "../plugins/sprites.js";
 
-const look = (id) => PLUGIN_LOOK[id] ?? { emoji: "🔌", hue: ["#26305a", "#5a6aa0"] };
+const FALLBACK = { code: "PLG-00", bg: "#26305a", bg2: "#1f2848" };
+const lookOf = (id) => PUCE_LOOK[id] ?? FALLBACK;
 
-export function PluginCard({ id, variant = "rail", order, pulse }) {
-  const plugin = PLUGINS[id];
-  const { emoji, hue } = look(id);
+/** La fenêtre de la puce : fond en damier et rayons, avec le dessin. */
+function PuceWindow({ id, size }) {
+  const look = lookOf(id);
   return (
-    <div className={`joker v-${variant} r-${plugin.rarity} ${pulse ? "pulsing" : ""}`} style={{ "--j1": hue[0], "--j2": hue[1] }}>
-      <div className="joker-art" aria-hidden="true">
-        <span className="joker-emoji">{emoji}</span>
-        <span className="joker-scan" />
-      </div>
-      <div className="joker-body">
-        <div className="joker-title"><span className="joker-name">{plugin.name}</span></div>
-        <p className="joker-text">{FX(plugin.text)}</p>
-      </div>
-      <span className="joker-rarity">{RARITY_LABELS[plugin.rarity]}</span>
-      {order !== undefined && <span className="joker-order">{order}</span>}
+    <span className="puce-die" style={{ "--b1": look.bg, "--b2": look.bg2 }}>
+      <span className="puce-rays" />
+      <PixelSprite id={id} size={size} />
+    </span>
+  );
+}
+
+/** Carte complète (rail sur ordinateur, boutique, fiches). */
+export function PluginCard({ id, order, pulse = false, className = "" }) {
+  const plugin = PLUGINS[id];
+  return (
+    <div className={`puce r-${plugin.rarity} ${pulse ? "fired" : ""} ${className}`}>
+      <span className="puce-notch" />
+      <span className="puce-pin1" />
+      <span className="puce-code">{lookOf(id).code}</span>
+      {order !== undefined && <span className="puce-order num">{order}</span>}
+      <PuceWindow id={id} size={72} />
+      <span className={`puce-name ${plugin.name.length > 15 ? "long" : ""}`}>{plugin.name}</span>
+      <span className="puce-text"><span>{FX(plugin.text)}</span></span>
+      <span className="puce-rar">{RARITY_LABELS[plugin.rarity]}</span>
     </div>
+  );
+}
+
+/** Puce seule (rail sur téléphone, fin de partie) : le boîtier et son dessin. */
+export function PluginMini({ id, order, pulse = false, label = true, className = "" }) {
+  const plugin = PLUGINS[id];
+  return (
+    <span className={`puce-slot ${className}`}>
+      {order !== undefined && <span className="puce-order num">{order}</span>}
+      <span className={`puce-mini r-${plugin.rarity} ${pulse ? "fired" : ""}`}>
+        <span className="puce-notch" />
+        <PuceWindow id={id} size={40} />
+      </span>
+      {label && <span className="puce-mini-name">{plugin.name.replace(/^(Le |La |L’|L')/, "")}</span>}
+    </span>
   );
 }
 
 export function PluginTip({ id }) {
   return (
     <div className="tip-body">
-      <strong>{look(id).emoji} {PLUGINS[id].name}</strong>
+      <strong>{PLUGINS[id].name}</strong>
       <p>{FX(PLUGINS[id].text)}</p>
     </div>
-  );
-}
-
-export function PluginChip({ id, order, pulse, onOpen }) {
-  const plugin = PLUGINS[id];
-  const { emoji, hue } = look(id);
-  return (
-    <button className={`joker-chip r-${plugin.rarity} ${pulse ? "pulsing" : ""}`} style={{ "--j1": hue[0], "--j2": hue[1] }} onClick={onOpen} aria-label={`${order}. ${plugin.name}`}>
-      <span className="chip-order num">{order}</span>
-      <span className="chip-emoji" aria-hidden="true">{emoji}</span>
-      <span className="chip-name">{plugin.name.replace(/^(Le |La |L’|L'|Les )/, "")}</span>
-    </button>
   );
 }

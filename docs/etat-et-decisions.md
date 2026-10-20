@@ -1,5 +1,11 @@
 # État du jeu et décisions
 
+## 20/10 · Plugins en cartes à puce et écran « Plus de place »
+
+- Les 12 Plugins ont leur dessin en pixel-art 16×16 (`ui/plugins/sprites.js`, rendu en SVG par `PixelSprite`). Carte à puce : code (ex. `CPT-05`), fenêtre avec le dessin, nom, effet, rareté, couleur de bord selon la rareté.
+- Deux tailles : `PluginCard` (rail sur ordinateur, boutique, écran de remplacement) et `PluginMini` (rail sur téléphone, fin de partie).
+- Nouvel écran « Plus de place » (maquettes RP1–RP3 du canvas) : la carte achetée flotte en haut, on touche le Plugin qui laisse sa place, l'encadré « Tu perds » rappelle son effet, et la caisse est détaillée (Caisse + Revente − Prix). Sur ordinateur : deux colonnes.
+
 ## 20/10 · Remplacer un Plugin quand les emplacements sont pleins
 
 En boutique, si les 4 emplacements sont pleins, une offre de Plugin affiche « Remplacer · X $ ». On choisit le Plugin à revendre (moitié de son prix, au moins 1 $) : le nouveau prend sa place, et la revente compte dans le paiement (`Run.buy(offre, pluginRevendu)`, `pluginSellPrice`).

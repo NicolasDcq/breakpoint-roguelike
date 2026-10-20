@@ -114,7 +114,7 @@ export function App() {
 
   const phaseScreen = !busy && !overlay && {
     [Phase.WON]: <WonModal view={view} onShop={() => { setShopMode(null); attempt(game.openShop(), "cash"); }} />,
-    [Phase.SHOP]: <ShopModal view={view} mode={shopMode} actions={shopActions} />,
+    [Phase.SHOP]: <ShopModal view={view} mode={shopMode} actions={shopActions} desktop={!mobile} />,
     [Phase.LOST]: <EndModal view={view} onNewRun={newRun} />,
     [Phase.VICTORY]: <EndModal view={view} onNewRun={newRun} />,
   }[view.phase];

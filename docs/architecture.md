@@ -46,9 +46,10 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 - `App.jsx` : l'écran de jeu ; il lit la vue et appelle le service.
 - `components/` : morceaux d'écran (barre du haut, panneau de score, rail des Plugins, plateau et main). `ModuleFace` dessine une tuile de module partout (plateau, main, parc, boutique).
 - `screens/` : fenêtres (boutique, contrat livré, fin, parc, architectures, règles, nouvelle partie).
+- `plugins/` : dessins pixel-art des Plugins (`sprites.js`, grilles 16×16 + palette) et `PixelSprite` qui les dessine en SVG.
 - `common/` : fenêtre, infobulle, icônes des modules (repris de l'ancien jeu).
 - `hooks/` : animation de déploiement (vitesse, « Passer »), messages brefs, détection du téléphone.
-- `styles/` : feuilles de l'ancien jeu (`00` à `21`) et `22-parc.css` pour la main, l'architecture et la boutique.
+- `styles/` : feuilles de l'ancien jeu (`00` à `21`) `22-parc.css` pour la main, l'architecture et la boutique, `23-plugins-puce.css` pour les cartes à puce des Plugins.
 - `visuals.js` : couleurs, icônes et textes courts ; `messages.js` : textes des refus ; `format.js` et `fx.jsx` : nombres et pastilles.
 
 ## Les principes appliqués
@@ -64,7 +65,7 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 ## Ajouter du contenu
 
 - **Un module** : une entrée dans `domain/catalog/modules.js` (famille, prix, `lines`, `effect`).
-- **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets et sa rareté, et une icône dans `ui/visuals.js`.
+- **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets et sa rareté, et son dessin (grille 16×16 et couleurs) dans `ui/plugins/sprites.js`.
 - **Un genre de paquet** : une entrée dans `domain/catalog/packs.js` (prix, nombre par boutique, lot de cartes, récompense).
 - **Une architecture** : une entrée dans `domain/catalog/architectures.js`, à sa place dans l'ordre de force.
 - **Un boss** : une entrée dans `domain/catalog/bosses.js` ; le générateur le tirera tout seul.

@@ -20,21 +20,6 @@ export const LINE_CLASS = { compute: "el-c", scale: "el-s", data: "el-d", money:
 
 export const RARITY_LABELS = { common: "Commun", uncommon: "Peu commun", rare: "Rare" };
 
-/** Allure de chaque Plugin : icône et couleurs du dessin. */
-export const PLUGIN_LOOK = {
-  intern: { emoji: "🎒", hue: ["#1d3f6b", "#3f7fd0"] },
-  cloudarch: { emoji: "☁️", hue: ["#1d1f4f", "#5a4bb5"] },
-  pairprog: { emoji: "👥", hue: ["#3d1f5a", "#8a4fc4"] },
-  dba: { emoji: "🗄️", hue: ["#14513f", "#2fa37c"] },
-  netops: { emoji: "📡", hue: ["#5a1840", "#c43f8a"] },
-  growth: { emoji: "📈", hue: ["#123a5a", "#2f9ad0"] },
-  minimal: { emoji: "🧘", hue: ["#5b4410", "#d6a334"] },
-  sre: { emoji: "🧯", hue: ["#5a1818", "#d04a3f"] },
-  accountant: { emoji: "🧮", hue: ["#6b5a12", "#e2c234"] },
-  hoarder: { emoji: "🗃️", hue: ["#5a3418", "#b8742a"] },
-  caffeine: { emoji: "☕", hue: ["#4a2a18", "#a0602a"] },
-  janitor: { emoji: "🧹", hue: ["#1f4a3a", "#3fa080"] },
-};
 
 /** Résumé court d'un module pour sa tuile. */
 export const moduleSummary = (card) => MODULES[card.moduleId].lines(card.level).map((line) => line.value).join(" · ");

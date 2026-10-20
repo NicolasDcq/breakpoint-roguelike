@@ -3,7 +3,7 @@
 import { PLUGINS, Phase } from "../../domain/index.js";
 import { Modal } from "../common/Modal.jsx";
 import { fmt } from "../format.js";
-import { PLUGIN_LOOK } from "../visuals.js";
+import { PluginMini } from "../components/PluginCard.jsx";
 
 export function WonModal({ view, onShop }) {
   const { contract, score, lastPay } = view;
@@ -42,7 +42,7 @@ export function EndModal({ view, onNewRun }) {
         <div><span className="num">{plays}</span><span>déploiements</span></div>
       </div>
       <div className="end-jokers">
-        {view.pluginIds.map((id) => <span key={id} className="end-joker" title={PLUGINS[id].name}>{PLUGIN_LOOK[id]?.emoji}</span>)}
+        {view.pluginIds.map((id) => <span key={id} title={PLUGINS[id].name}><PluginMini id={id} /></span>)}
       </div>
       <p className="dim small">Graine de la partie : {view.seed}</p>
       <button className="deploy" onClick={onNewRun}>Nouvelle partie</button>

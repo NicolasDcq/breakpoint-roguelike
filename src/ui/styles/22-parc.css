@@ -306,6 +306,13 @@ button.fu-next {
     font-size: 13px;
   }
 }
+@media (max-width: 380px) {
+  button.discard-btn {
+    font-size: 12px;
+    letter-spacing: 0;
+    padding-inline: 4px;
+  }
+}
 button.fu-parc {
   min-height: 44px;
   padding: 0 14px;

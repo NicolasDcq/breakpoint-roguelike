@@ -28,7 +28,7 @@ function PluginOffers({ view, onBuy, onReplace }) {
               onClick={() => (full ? onReplace(index) : onBuy(index))}
               aria-label={full ? `Remplacer un Plugin par ${PLUGINS[offer.id].name}` : `Recruter ${PLUGINS[offer.id].name} pour ${offer.price} $`}
             >
-              <PluginCard id={offer.id} variant="offer" />
+              <PluginCard id={offer.id} />
               <span className={priceClass(offer, view.money)}>{offer.sold ? "Recruté" : full ? `Remplacer · ${offer.price} $` : `${offer.price} $`}</span>
             </button>
           </Tooltip>
@@ -60,7 +60,7 @@ function ParcPicker({ view, onPick }) {
   );
 }
 
-export function ShopModal({ view, mode, actions }) {
+export function ShopModal({ view, mode, actions, desktop }) {
   const next = view.nextContract;
   const [replacing, setReplacing] = useState(null);
   return (
@@ -114,6 +114,7 @@ export function ShopModal({ view, mode, actions }) {
       {replacing !== null && (
         <ReplacePluginModal
           view={view}
+          desktop={desktop}
           offer={view.offers[replacing]}
           onClose={() => setReplacing(null)}
           onReplace={(pluginId) => { if (actions.buy(replacing, pluginId)) setReplacing(null); }}
