@@ -39,25 +39,31 @@ export function PluginCard({ id, order, pulse = false, className = "" }) {
 }
 
 /** Puce seule (rail sur téléphone, fin de partie) : le boîtier et son dessin. */
-export function PluginMini({ id, order, pulse = false, label = true, className = "" }) {
+export function PluginMini({ id, order, pulse = false, label = true, className = "", spriteSize = 40 }) {
   const plugin = PLUGINS[id];
   return (
     <span className={`puce-slot ${className}`}>
       {order !== undefined && <span className="puce-order num">{order}</span>}
       <span className={`puce-mini r-${plugin.rarity} ${pulse ? "fired" : ""}`}>
         <span className="puce-notch" />
-        <PuceWindow id={id} size={40} />
+        <PuceWindow id={id} size={spriteSize} />
       </span>
       {label && <span className="puce-mini-name">{plugin.name.replace(/^(Le |La |L’|L')/, "")}</span>}
     </span>
   );
 }
 
+/** Infobulle d'un Plugin : nom, effet et rareté, aux couleurs de la carte à puce. */
 export function PluginTip({ id }) {
+  const plugin = PLUGINS[id];
   return (
-    <div className="tip-body">
-      <strong>{PLUGINS[id].name}</strong>
-      <p>{FX(PLUGINS[id].text)}</p>
+    <div className={`puce-tip r-${plugin.rarity}`}>
+      <span className="puce-tip-head">
+        <strong>{plugin.name}</strong>
+        <span className="puce-code">{lookOf(id).code}</span>
+      </span>
+      <span className="puce-text"><span>{FX(plugin.text)}</span></span>
+      <span className="puce-rar">{RARITY_LABELS[plugin.rarity]}</span>
     </div>
   );
 }

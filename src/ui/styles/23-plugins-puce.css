@@ -238,19 +238,49 @@
 .puce-rail-desk .puce-empty {
   display: grid;
   place-items: center;
-  width: 150px;
-  height: 226px;
+  width: 96px;
+  height: 106px;
   box-sizing: border-box;
   border: 2px dashed rgba(238, 242, 255, .2);
   border-radius: 9px;
   color: rgba(238, 242, 255, .35);
-  font-size: 12px;
+  font-size: 11px;
 }
-.puce.in-rail {
-  transform: scale(.82);
-  transform-origin: top center;
-  margin-bottom: -40px;
+.puce-slot.big { gap: 6px; }
+.puce-slot.big .puce-order { top: -9px; left: -7px; width: 21px; height: 21px; font-size: 12px; line-height: 17px; }
+.puce-slot.big .puce-mini { width: 96px; height: 106px; padding: 11px 6px 6px; border-radius: 9px; transition: transform .15s; }
+.puce-slot.big .puce-mini::before, .puce-slot.big .puce-mini::after { top: 22px; height: 60px; width: 6px; background: repeating-linear-gradient(180deg, #e0b24a 0 5px, transparent 5px 10px); }
+.puce-slot.big .puce-mini::before { left: -9px; }
+.puce-slot.big .puce-mini::after { right: -9px; }
+.puce-slot.big .puce-die { height: 84px; border-width: 3px; }
+.puce-slot.big .puce-notch { width: 20px; height: 9px; margin-left: -10px; }
+.puce-slot.big .puce-mini-name { max-width: 120px; font-size: 12px; }
+.puce-rail-desk .puce-rail-btn:hover .puce-mini,
+.puce-rail-desk .puce-rail-btn:focus-visible .puce-mini { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px var(--rc), 0 0 0 2px var(--rc), 0 0 14px 2px var(--rc); }
+
+/* Infobulle d'un Plugin */
+.tooltip:has(.puce-tip) { padding: 0; border: none; background: none; box-shadow: none; }
+.puce-tip {
+  --rc: #5fe0ff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 210px;
+  padding: 9px 10px 10px;
+  border: 3px solid #05070f;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #232c52, #171e3a);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .55), inset 0 0 0 2px var(--rc);
+  color: #eef2ff;
+  font-family: var(--display);
+  text-align: center;
 }
+.puce-tip.r-uncommon { --rc: #2bd96b; }
+.puce-tip.r-rare { --rc: #ff3b5c; }
+.puce-tip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.puce-tip-head strong { font-size: 14px; text-shadow: 2px 2px 0 #05070f; text-align: left; }
+.puce-tip .puce-code { position: static; }
+.puce-tip .puce-text { font-size: 12px; padding: 6px 8px; }
 .puce-rail-desk + .workspace { margin-top: 0; }
 
 /* Boutique */
