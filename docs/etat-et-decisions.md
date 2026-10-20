@@ -119,6 +119,6 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 - Sons de l'ancien jeu réutilisés.
 
 ### Pistes en attente
-- Plugins en cartes à puce avec dessins en pixel art (maquettes validées en idée sur le canvas, page « Plugins · cartes à puce »).
+
 - Effets qui multiplient le Scale (ils profiteront de la base de l'architecture).
 - Reprendre de `main-old` ce qui a du sens : éditions, tutoriel, profil.
