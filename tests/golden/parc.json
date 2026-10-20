@@ -39,8 +39,8 @@
     {
       "seed": 7,
       "phase": "lost",
-      "contractIndex": 5,
-      "chain": "0a4977f21155985e"
+      "contractIndex": 8,
+      "chain": "d199d8b319e354b2"
     },
     {
       "seed": 8,
@@ -52,7 +52,7 @@
       "seed": 9,
       "phase": "lost",
       "contractIndex": 8,
-      "chain": "9957ea20c3cabd02"
+      "chain": "d27651e39775c796"
     },
     {
       "seed": 10,

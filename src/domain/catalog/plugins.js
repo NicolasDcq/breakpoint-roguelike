@@ -16,6 +16,7 @@ const familiesOf = (cards) => new Set(cards.map((card) => familyOf(card.moduleId
 const rowOf = (cell) => Math.floor(cell / GRID_SIZE);
 const columnOf = (cell) => cell % GRID_SIZE;
 const isFullColumn = (cards, column) => Array.from({ length: GRID_SIZE }, (_, row) => cards[row * GRID_SIZE + column]).every(Boolean);
+const mirrorCell = (cell) => Math.floor(cell / GRID_SIZE) * GRID_SIZE + (GRID_SIZE - 1 - (cell % GRID_SIZE));
 const onDiagonal = (cell) => rowOf(cell) === columnOf(cell) || rowOf(cell) + columnOf(cell) === GRID_SIZE - 1;
 
 const DEFINITIONS = {
@@ -123,8 +124,11 @@ const DEFINITIONS = {
     atEnd: (result) => { if (countFamily(result.placed, "business") < 2) return false; result.compute += 15; return true; },
   },
   symmetric: {
-    name: "Le Symétrique", rarity: "uncommon", price: 5, text: "Les modules d'une colonne entièrement remplie (4 cases) produisent ×2.",
-    multiplier: (card, ctx) => (isFullColumn(ctx.cards, columnOf(ctx.cell())) ? 2 : 1),
+    name: "Le Symétrique", rarity: "uncommon", price: 5, text: "Un module posé sur la case miroir (gauche-droite) d'un autre module : les deux produisent ×2.",
+    multiplier: (card, ctx) => {
+      const mirror = mirrorCell(ctx.cell());
+      return mirror !== ctx.cell() && ctx.cards[mirror] ? 2 : 1;
+    },
   },
   tandem: {
     name: "Le Tandem", rarity: "uncommon", price: 5, text: "+10 Compute par ligne qui a 2 modules de la même famille ou plus.",

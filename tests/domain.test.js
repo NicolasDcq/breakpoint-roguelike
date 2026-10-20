@@ -411,10 +411,10 @@ test("Plugins de position : IA Générative, Diagonale, Symétrique, Tandem", ()
   const diag = score(at({ 0: "server", 1: "server", 6: "server" }), { pluginIds: ["diagonal"] });
   assert.equal(diag.events.find((e) => e.cell === 0).multiplier, 2);
   assert.equal(diag.events.find((e) => e.cell === 1).multiplier, 1);
-  const column = at({ 1: "server", 5: "server", 9: "server", 13: "server", 2: "server" });
-  const sym = score(column, { pluginIds: ["symmetric"] });
-  assert.equal(sym.events.find((e) => e.cell === 5).multiplier, 2);
-  assert.equal(sym.events.find((e) => e.cell === 2).multiplier, 1);
+  const sym = score(at({ 0: "server", 3: "server", 5: "server" }), { pluginIds: ["symmetric"] });
+  assert.equal(sym.events.find((e) => e.cell === 0).multiplier, 2, "0 et 3 sont miroirs : ×2");
+  assert.equal(sym.events.find((e) => e.cell === 3).multiplier, 2);
+  assert.equal(sym.events.find((e) => e.cell === 5).multiplier, 1, "5 sans miroir en 6 : rien");
   const tandem = gain(at({ 0: "server", 2: "micro", 4: "server", 9: "cdn", 10: "saas" }), ["tandem"]);
   assert.equal(tandem.with.compute - tandem.without.compute, 10, "seule la 1re ligne a 2 Calcul");
 });
