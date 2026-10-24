@@ -600,3 +600,30 @@ test("l'accueil ne propose de reprendre qu'une partie que le joueur a lancée", 
   const again = new GameService({ repository, seeds: fixedSeedSource(99) });
   assert.equal(again.getView().inProgress, true, "après rechargement, la partie est toujours là");
 });
+
+test("tutoriel : la partie préparée donne toujours deux paires de calcul et un premier contrat sans boss", () => {
+  const game = new GameService({ repository: new MemoryRunRepository(), seeds: fixedSeedSource(99) });
+  game.startTutorial();
+  const view = game.getView();
+  assert.equal(view.seed, RULES.tutorialSeed);
+  assert.equal(view.contract.boss, null);
+  const counts = {};
+  for (const card of view.hand) counts[card.moduleId] = (counts[card.moduleId] ?? 0) + 1;
+  const pairs = Object.entries(counts).filter(([id, n]) => n >= 2 && familyOf(id) === "calcul");
+  assert.ok(pairs.length >= 2, "deux paires de modules Calcul en main");
+  const [first, second] = view.hand.filter((card) => card.moduleId === pairs[0][0]);
+  assert.ok(game.placeCard(first.uid, 0).ok && game.placeCard(second.uid, 1).ok);
+  assert.equal(game.getView().preview.architecture.id, "redondance");
+});
+
+test("tutoriel : chaque étape a une phase, un texte et une pose connue", async () => {
+  const { TUTORIAL_STEPS } = await import("../src/ui/tutorial/steps.js");
+  const { LOUP_SVG } = await import("../src/ui/tutorial/loupNielSprites.js");
+  const game = new GameService({ repository: new MemoryRunRepository(), seeds: fixedSeedSource(99) });
+  game.startTutorial();
+  for (const step of TUTORIAL_STEPS) {
+    assert.ok(Object.values(Phase).includes(step.phase), step.id);
+    assert.ok(LOUP_SVG[step.pose], step.id);
+    assert.ok(step.text(game.getView()).length > 10, step.id);
+  }
+});

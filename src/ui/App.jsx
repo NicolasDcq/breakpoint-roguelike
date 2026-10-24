@@ -21,8 +21,10 @@ import { EndModal, WonModal } from "./screens/ResultModals.jsx";
 import { PackOpening } from "./screens/Packs.jsx";
 import { ArchitecturesModal, ConfirmNewRun, ParcModal, PluginModal, RulesModal } from "./screens/InfoModals.jsx";
 import { MainMenu } from "./screens/MainMenu.jsx";
+import { Tutorial, TutorialOffer } from "./tutorial/Tutorial.jsx";
 
 const RULES_SEEN = "rulesSeen";
+const TUTO_SEEN = "tutoSeen";
 
 export function App() {
   const { game, sound, preferences } = useGame();
@@ -32,8 +34,13 @@ export function App() {
   const [marked, setMarked] = useState([]);
   const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
-  const [overlay, setOverlay] = useState(() => (preferences.get(RULES_SEEN) === "1" ? null : { name: "rules" }));
+  const firstVisit = preferences.get(RULES_SEEN) !== "1" && preferences.get(TUTO_SEEN) !== "1";
   const [shopMode, setShopMode] = useState(null);
+  const [overlay, setOverlay] = useState(null);
+  const [tuto, setTuto] = useState(false);
+  const [offerTuto, setOfferTuto] = useState(firstVisit);
+  const endTuto = () => { preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); setTuto(false); setOfferTuto(false); };
+  const startTuto = () => { game.startTutorial(); setMarked([]); setShopMode(null); setTuto(true); setOfferTuto(false); preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); };
   const [toast, showToast] = useToast();
   const { animation, play, setSpeed, skip } = useDeployAnimation({ game, sound });
   const busy = Boolean(animation);
@@ -103,7 +110,7 @@ export function App() {
     else showToast(`${MODULES[choiceId].name} rejoint ton parc.`);
   };
 
-  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); close(); };
+  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); setTuto(false); close(); };
 
   const shopActions = {
     buy: (index, replacePluginId = null) => attempt(game.buyOffer(index, replacePluginId), replacePluginId ? "sell" : "cash"),
@@ -116,7 +123,9 @@ export function App() {
   };
 
   // Tant que le joueur n'a pas lancé ou repris une partie, l'accueil remplace le jeu.
-  if (screen === "menu") return <MainMenu onPlay={() => setScreen("game")} />;
+  if (screen === "menu") {
+    return <MainMenu onPlay={(fresh) => { if (fresh) setTuto(false); setScreen("game"); }} onTutorial={() => { startTuto(); setScreen("game"); }} />;
+  }
 
   const phaseScreen = !busy && !overlay && {
     [Phase.WON]: <WonModal view={view} onShop={() => { setShopMode(null); attempt(game.openShop(), "cash"); }} />,
@@ -171,6 +180,8 @@ export function App() {
       {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
       {overlay?.name === "plugin" && <PluginModal id={overlay.id} value={view.pluginValues[overlay.id] ?? null} onClose={close} />}
       {overlay?.name === "confirm" && <ConfirmNewRun onYes={newRun} onNo={close} />}
+      {tuto && <Tutorial view={view} hidden={busy || Boolean(overlay)} onQuit={endTuto} />}
+      {offerTuto && !tuto && <TutorialOffer onStart={startTuto} onSkip={endTuto} />}
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>
   );

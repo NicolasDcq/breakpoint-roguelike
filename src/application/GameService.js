@@ -1,7 +1,7 @@
 // Service applicatif : les actions du joueur (cas d'usage).
 // Chaque action passe par la partie (le domaine), puis la sauvegarde et prévient l'interface.
 
-import { Run } from "../domain/index.js";
+import { Run, RULES } from "../domain/index.js";
 import { presentRun } from "./RunPresenter.js";
 
 export class GameService {
@@ -53,6 +53,9 @@ export class GameService {
     this.run = this.createRun(seed);
     this.publish();
   }
+
+  /** La partie préparée du tutoriel (graine fixe, donc main et boutique rejouables). */
+  startTutorial() { this.newRun(RULES.tutorialSeed); }
 
   placeCard(uid, cell) { return this.execute((run) => run.place(uid, cell)); }
   takeBack(cell) { return this.execute((run) => run.unplace(cell)); }

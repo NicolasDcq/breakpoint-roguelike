@@ -1,6 +1,8 @@
 // Règles chiffrées d'une partie. Un seul endroit pour les régler.
 
 export const RULES = Object.freeze({
+  /** Graine de la partie du tutoriel : une main avec deux paires (Server et Lambda), donc une vraie Redondance. */
+  tutorialSeed: 6,
   handSize: 7,
   maxPlaced: 5,
   deploysPerContract: 4,

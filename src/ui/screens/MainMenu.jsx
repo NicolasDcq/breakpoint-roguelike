@@ -42,29 +42,36 @@ function Title() {
   );
 }
 
-export function MainMenu({ onPlay }) {
+export function MainMenu({ onPlay, onTutorial }) {
   const { game } = useGame();
   const view = useGameView();
   const mobile = useMediaQuery(MOBILE_QUERY);
   const [confirming, setConfirming] = useState(false);
 
-  const newRun = () => { game.newRun(); onPlay(); };
+  const newRun = () => { game.newRun(); onPlay(true); };
+  const askTutorial = () => (view.inProgress ? setConfirming("tuto") : onTutorial());
   const askNewRun = () => (view.inProgress ? setConfirming(true) : newRun());
   const contract = `Version ${view.contract.version} · contrat ${view.contract.letter}`;
 
+  const tutorialBtn = <button className="menu-btn menu-btn-second menu-btn-tuto" onClick={askTutorial}>TUTORIEL</button>;
+
   const actions = view.inProgress ? (
     <>
-      <button className="menu-btn menu-btn-main" onClick={onPlay} autoFocus>
+      <button className="menu-btn menu-btn-main" onClick={() => onPlay(false)} autoFocus>
         REPRENDRE LA PARTIE
         <small>{contract}</small>
       </button>
       <button className="menu-btn menu-btn-second" onClick={askNewRun}>NOUVELLE PARTIE</button>
+      {tutorialBtn}
     </>
   ) : (
-    <button className="menu-btn menu-btn-main" onClick={newRun} autoFocus>NOUVELLE PARTIE</button>
+    <>
+      <button className="menu-btn menu-btn-main" onClick={newRun} autoFocus>NOUVELLE PARTIE</button>
+      {tutorialBtn}
+    </>
   );
 
-  const confirm = confirming && <ConfirmNewRun onYes={newRun} onNo={() => setConfirming(false)} />;
+  const confirm = confirming && <ConfirmNewRun onYes={confirming === "tuto" ? onTutorial : newRun} onNo={() => setConfirming(false)} />;
 
   if (mobile) {
     return (
