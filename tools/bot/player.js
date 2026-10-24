@@ -2,7 +2,7 @@
 // Stratégie : essayer les combinaisons de la main, défausser pour viser une architecture,
 // acheter les mises à jour des architectures les plus jouées.
 
-import { Board, PACKS, PLUGINS, Phase, RULES, upgradeCost, OfferKind } from "../../src/domain/index.js";
+import { Board, PACKS, PLUGINS, RARITIES, Phase, RULES, upgradeCost, OfferKind } from "../../src/domain/index.js";
 import { GRID_SIZE } from "../../src/domain/board/grid.js";
 
 // Pour aller vite, le bot cherche ses places dans le coin 3×3 en haut à gauche du plateau :
@@ -69,13 +69,14 @@ function shop(service, random) {
   // Arrivage : un plan pour l'architecture la plus jouée ; un module qu'on a déjà (pour les doubles).
   const plays = (id) => run.architecturePlays[id] ?? 0;
   const copies = (id) => run.parc.cards.filter((card) => card.moduleId === id).length;
-  const rank = { common: 0, uncommon: 1, rare: 2 };
+  const rank = Object.fromEntries(RARITIES.map((name, index) => [name, index]));
   const choose = { booster: (ids) => [...ids].sort((a, b) => plays(b) - plays(a)).find((id) => plays(id)) ?? null,
     colis: (ids) => [...ids].sort((a, b) => copies(b) - copies(a))[0],
     plugins: (ids) => [...ids].sort((a, b) => rank[PLUGINS[b].rarity] - rank[PLUGINS[a].rarity])[0] };
+  choose.gros = choose.plugins;
   run.packSlots.forEach((slot, index) => {
     if (slot.sold || run.money < PACKS[slot.packId].price + 2) return;
-    if (slot.packId === "plugins" && run.pluginIds.length >= RULES.maxPlugins) return;
+    if (PACKS[slot.packId].reward === "plugin" && run.pluginIds.length >= RULES.maxPlugins) return;
     service.buyPack(index);
     service.pickFromPack(choose[slot.packId](run.openPack.choices));
   });

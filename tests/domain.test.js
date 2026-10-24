@@ -9,7 +9,7 @@ import { STARTERS } from "../src/domain/catalog/starters.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
-import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PACK_IDS, PLUGINS, pluginSellPrice, MODULE_IDS, CardPlace } from "../src/domain/index.js";
+import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PACK_IDS, PLUGINS, pluginSellPrice, RARITIES, drawPlugins, drawPluginPack, MODULE_IDS, CardPlace } from "../src/domain/index.js";
 import { GameService } from "../src/application/GameService.js";
 import { presentRun } from "../src/application/RunPresenter.js";
 import { MemoryRunRepository } from "../src/infrastructure/storage/MemoryRunRepository.js";
@@ -249,6 +249,36 @@ test("tous les modules peuvent sortir d'un colis, et tous les Plugins en boutiqu
   assert.equal(seenPlugins.size, Object.keys(PLUGINS).length);
 });
 
+test("le Gros pack montre 3 Plugins dont un rare ou mieux, et coûte plus cher", () => {
+  assert.ok(PACKS.gros.price > PACKS.plugins.price);
+  assert.equal(PACKS.gros.choices, 3);
+  const rank = (id) => RARITIES.indexOf(PLUGINS[id].rarity);
+  for (let seed = 1; seed <= 200; seed++) {
+    const choices = drawPluginPack(new Rng(seed), [], 3, { guaranteeRare: true });
+    assert.equal(new Set(choices).size, 3);
+    assert.ok(choices.some((id) => rank(id) >= RARITIES.indexOf("rare")), `graine ${seed}`);
+  }
+  const run = Run.start(11);
+  run.phase = Phase.WON;
+  run.openShop();
+  forceSlots(run, "gros", "plugins");
+  run.money = 100;
+  assert.ok(run.buyPack(0).ok);
+  assert.equal(run.money, 100 - PACKS.gros.price);
+  assert.equal(run.openPack.choices.length, 3);
+});
+
+test("le légendaire ne sort que d'un paquet, avec une petite chance", () => {
+  const legends = Object.values(PLUGINS).filter((plugin) => plugin.rarity === "legendary");
+  const rng = new Rng(5);
+  let drops = 0;
+  for (let roll = 0; roll < 4000; roll++) {
+    if (drawPluginPack(rng, [], 2, { legendaryChance: 0.05 }).some((id) => PLUGINS[id].rarity === "legendary")) drops++;
+  }
+  if (!legends.length) return assert.equal(drops, 0);
+  assert.ok(drops > 80 && drops < 320, `${drops} légendaires sur 4000`);
+});
+
 test("chaque boutique a 2 emplacements de paquets ; les 3 types peuvent sortir", () => {
   const seen = new Set();
   for (let seed = 1; seed <= 40; seed++) {
@@ -298,15 +328,37 @@ test("Plugins pleins : le Pack de Plugins demande lequel remplacer, et le rembou
   assert.equal(run.pluginIds.length, RULES.maxPlugins);
 });
 
-test("les Plugins rares sortent moins souvent que les communs", () => {
-  const counts = { common: 0, rare: 0 };
+test("les raretés sortent comme prévu ; le légendaire ne sort pas en boutique", () => {
+  const counts = { common: 0, uncommon: 0, rare: 0, epic: 0, legendary: 0 };
   const rng = new Rng(9);
-  for (let roll = 0; roll < 400; roll++) {
-    rng.weightedSample(Object.keys(PLUGINS), (id) => RULES.rarityWeights[PLUGINS[id].rarity], 1).forEach((id) => {
-      if (PLUGINS[id].rarity in counts) counts[PLUGINS[id].rarity]++;
-    });
-  }
-  assert.ok(counts.common > counts.rare * 3, JSON.stringify(counts));
+  for (let roll = 0; roll < 3000; roll++) drawPlugins(rng, [], 2).forEach((id) => counts[PLUGINS[id].rarity]++);
+  assert.equal(counts.legendary, 0);
+  assert.ok(counts.common > counts.uncommon && counts.uncommon > counts.rare && counts.rare > counts.epic, JSON.stringify(counts));
+  assert.ok(counts.common > counts.rare * 4, JSON.stringify(counts));
+  assert.equal(new Set(drawPlugins(new Rng(1), [], 4)).size, 4);
+});
+
+test("le prix d'un Plugin ne dépend que de sa rareté, et la revente en rend la moitié", () => {
+  Object.values(PLUGINS).forEach((plugin) => {
+    assert.equal(plugin.price, RULES.pluginPrice[plugin.rarity], plugin.id);
+    assert.ok(RARITIES.includes(plugin.rarity), plugin.id);
+  });
+  assert.ok(RULES.pluginPrice.common < RULES.pluginPrice.uncommon && RULES.pluginPrice.rare < RULES.pluginPrice.epic && RULES.pluginPrice.epic < RULES.pluginPrice.legendary);
+  assert.equal(pluginSellPrice("intern"), 2);
+});
+
+test("les nouveaux Plugins de la vague 3 font ce qu'ils disent", () => {
+  const card = (moduleId, level = 1) => createCard(`n${++uid}`, moduleId, level);
+  const withPlugin = (id, cells) => score(cells, { pluginIds: [id] });
+  const cells = (entries) => Array.from({ length: CELL_COUNT }, (_, index) => entries[index] ?? null);
+  const one = cells({ 0: card("server") });
+  const base = score(one).compute;
+  assert.equal(withPlugin("corner", one).compute, base + 5, "un module dans un coin");
+  assert.equal(withPlugin("corner", cells({ 5: card("server") })).compute, base, "pas dans un coin");
+  assert.equal(withPlugin("alternate", one).compute, base + 8);
+  assert.equal(withPlugin("pool", one).scale, score(one).scale + 0.3 * (GRID_SIZE - 1));
+  assert.equal(withPlugin("proofreader", cells({ 0: card("server", 2) })).scale, score(cells({ 0: card("server", 2) })).scale + 0.2);
+  assert.equal(withPlugin("tester", one).compute, base, "pas d'Ops posé");
 });
 
 test("on ne voit que les contrats de la version en cours, puis la suivante après le boss", () => {

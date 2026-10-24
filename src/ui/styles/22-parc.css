@@ -754,3 +754,27 @@ button.env-badge {
   width: 150px;
   height: 100%;
 }
+
+/* Gros pack de Plugins : or et violet, 3 cartes */
+.pk-big .pk-body {
+  background:
+    linear-gradient(
+      135deg,
+      #ffcf4a,
+      #ff7cc6 40%,
+      #a35cff 70%,
+      #3d8bff);
+  background-size: 200% 200%;
+}
+.pk-big .pk-glyph {
+  color: #a35cff;
+}
+.pack-cards.n3 {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+@media (max-width: 1180px) {
+  .pack-cards.n3 .pack-card.plg-card {
+    zoom: .78;
+  }
+}

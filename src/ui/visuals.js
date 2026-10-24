@@ -18,7 +18,7 @@ export function tileClasses(card) {
 /** Pastille des lignes d'effet. */
 export const LINE_CLASS = { compute: "el-c", scale: "el-s", data: "el-d", money: "el-b", retrigger: "el-r", boost: "el-x" };
 
-export const RARITY_LABELS = { common: "Commun", uncommon: "Peu commun", rare: "Rare" };
+export const RARITY_LABELS = { common: "Commun", uncommon: "Peu commun", rare: "Rare", epic: "Épique", legendary: "Légendaire" };
 
 
 /** Résumé court d'un module pour sa tuile. */

@@ -1,5 +1,17 @@
 # État du jeu et décisions
 
+## 24/10 · Cinq raretés de Plugins (façon Balatro) et Gros pack
+
+- **Raretés** : commun (gris), peu commun (vert), rare (bleu), épique (violet), légendaire (doré). Réglages dans `rules.js` : `rarityWeights` (62 / 26 / 9 / 3 / 0 %) et `pluginPrice` (4 / 5 / 7 / 10 / 15 $). Le prix ne dépend plus du Plugin, seulement de sa rareté ; la revente rend la moitié.
+- **Tirage** : on tire la rareté d'abord, puis un Plugin de cette rareté (avant, le poids était par Plugin). Le légendaire ne sort jamais en boutique.
+- **Légendaire** : seulement dans les paquets. 0,5 % de chance dans le Pack de Plugins, 1,5 % dans le Gros pack. Aucun légendaire n'est encore codé (candidats : La Singularité, Le Grand Architecte, Le Boss Killer).
+- **Gros pack de Plugins** : 9 $, 3 Plugins, un rare ou mieux au moins ; l'arrivage a donc 4 types de paquets, à chances égales.
+- **Répartition des 28 Plugins** : communs (9) inchangés ; peu communs (6) : Ingé Réseau, Chef de produit, La Monétique, La SRE, La Collectionneuse, Le Minimaliste ; rares (6) : Architecte Cloud, Pair Programming, La Pipeline, Le Tandem, Le Symétrique, La Diagonale ; épiques (7) : Growth Hacker, L'Investisseuse, Le Clean Code, L'Overclocker, Le Capital-risqueur, Le Monopole, L'IA Générative.
+- **8 nouveaux Plugins** : Le Testeur, Le Coin Café, Le Relecteur (communs) ; L'Alternante, La Revue de code, Le Pilier (peu communs) ; Le Cache, Le Pool de connexions (rares).
+- À venir (besoin de nouveaux crochets du moteur) : Le Freelance, Le Quantum, Le Plateau Infini, Le Clone, puis les légendaires.
+- Équilibrage : le bot gagne 13 % des parties (33 % avant ce changement). Avec moins de Plugins puissants et des prix plus hauts, c'est attendu. Essais : prix 3-4-5-6 donne 16 %, et des chances 40 / 30 / 20 / 10 donnent 26 %. À régler avec le joueur automatique avant de publier.
+- Test de référence (`golden`) régénéré.
+
 ## 24/10 · Arrivage à 2 emplacements et Pack de Plugins
 
 La boutique n'a plus que **2 emplacements de paquets** (avant : 2 colis + 2 boosters). À chaque boutique, chaque emplacement tire son type **au hasard**, à chances égales (`RULES.shop.packWeights`, 1/1/1). Le même type peut sortir deux fois.

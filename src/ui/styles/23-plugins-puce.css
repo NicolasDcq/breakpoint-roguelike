@@ -18,8 +18,15 @@
   font-family: var(--display);
   text-align: center;
 }
+.puce.r-common, .puce-mini.r-common { --rc: #9aa3b8; }
 .puce.r-uncommon, .puce-mini.r-uncommon { --rc: #2bd96b; }
-.puce.r-rare, .puce-mini.r-rare { --rc: #ff3b5c; }
+.puce.r-rare, .puce-mini.r-rare { --rc: #3d8bff; }
+.puce.r-epic, .puce-mini.r-epic { --rc: #a35cff; }
+.puce.r-legendary, .puce-mini.r-legendary { --rc: #ffcf4a; animation: legendary-glow 1.8s ease-in-out infinite; }
+@keyframes legendary-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px #ffcf4a88); }
+  50% { filter: drop-shadow(0 0 12px #ffcf4acc); }
+}
 .puce::before, .puce::after {
   content: "";
   position: absolute;
@@ -275,8 +282,11 @@ button:focus-visible .puce-slot.big .puce-mini { transform: translateY(-3px); bo
   font-family: var(--display);
   text-align: center;
 }
+.puce-tip.r-common { --rc: #9aa3b8; }
 .puce-tip.r-uncommon { --rc: #2bd96b; }
-.puce-tip.r-rare { --rc: #ff3b5c; }
+.puce-tip.r-rare { --rc: #3d8bff; }
+.puce-tip.r-epic { --rc: #a35cff; }
+.puce-tip.r-legendary { --rc: #ffcf4a; }
 .puce-tip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .puce-tip-head strong { font-size: 14px; text-shadow: 2px 2px 0 #05070f; text-align: left; }
 .puce-tip .puce-code { position: static; white-space: nowrap; }

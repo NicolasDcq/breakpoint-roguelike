@@ -1,7 +1,7 @@
 // L'écran de jeu. Il lit la vue de la partie et transmet les actions du joueur au service.
 
 import { useState } from "react";
-import { ARCHITECTURE_BY_ID, MODULES, PLUGINS, Phase } from "../domain/index.js";
+import { ARCHITECTURE_BY_ID, MODULES, PACKS, PLUGINS, Phase } from "../domain/index.js";
 import { useGame, useGameView } from "./GameContext.jsx";
 import { refusalMessage } from "./messages.js";
 import { fmt, fmtDec } from "./format.js";
@@ -98,7 +98,7 @@ export function App() {
 
   const pickFromPack = (choiceId, replacePluginId = null) => {
     if (!attempt(game.pickFromPack(choiceId, replacePluginId), choiceId ? "upgrade" : "click") || !choiceId) return;
-    if (view.openPack.packId === "plugins") showToast(`${PLUGINS[choiceId].name} rejoint tes Plugins.`);
+    if (PACKS[view.openPack.packId].reward === "plugin") showToast(`${PLUGINS[choiceId].name} rejoint tes Plugins.`);
     else if (view.openPack.packId === "booster") showToast(`Plan installé : ${ARCHITECTURE_BY_ID[choiceId].name} niveau ${view.architectureLevels[choiceId] + 1}.`);
     else showToast(`${MODULES[choiceId].name} rejoint ton parc.`);
   };

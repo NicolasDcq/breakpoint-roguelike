@@ -42,15 +42,16 @@ function BoosterArt({ scale = 1, shake = false }) {
   );
 }
 
-function PluginPackArt({ scale = 1, shake = false }) {
+function PluginPackArt({ scale = 1, shake = false, big = false }) {
+  const pack = big ? PACKS.gros : PACKS.plugins;
   return (
-    <div className={`pk pk-plg ${shake ? "shake" : ""}`} style={{ transform: `scale(${scale})` }} aria-hidden="true">
+    <div className={`pk pk-plg ${big ? "pk-big" : ""} ${shake ? "shake" : ""}`} style={{ transform: `scale(${scale})` }} aria-hidden="true">
       <div className="pk-edge" style={{ clipPath: PACK_CLIP }} />
       <div className="pk-body" style={{ clipPath: PACK_CLIP }} />
       <div className="pk-label">
         <span className="pk-glyph">⬢</span>
-        <b>PACK DE<br />PLUGINS</b>
-        <span className="pk-count">{PACKS.plugins.choices} PLUGINS · 1 GARDÉ</span>
+        <b>{big ? <>GROS PACK<br />DE PLUGINS</> : <>PACK DE<br />PLUGINS</>}</b>
+        <span className="pk-count">{pack.choices} PLUGINS · 1 GARDÉ</span>
       </div>
     </div>
   );
@@ -71,6 +72,11 @@ function BoxArt({ small, open }) {
 }
 
 const PACK_LOOK = {
+  gros: {
+    thumb: () => <PluginPackArt scale={0.5} big />,
+    effect: `${PACKS.gros.choices} Plugins dont un rare ou mieux : tu en gardes un, ou aucun.`,
+    sheetClass: "plg-sheet big-sheet",
+  },
   plugins: {
     thumb: () => <PluginPackArt scale={0.5} />,
     effect: `${PACKS.plugins.choices} Plugins tirés au hasard : tu en gardes un, ou aucun.`,
@@ -155,9 +161,10 @@ function PluginFace({ id }) {
   return <PluginCard id={id} className="pc-puce" />;
 }
 
-const RARITY_ACCENT = { common: "#13b6e0", uncommon: "#7a5cff", rare: "#ffcf4a" };
+const RARITY_ACCENT = { common: "#9aa3b8", uncommon: "#2bd96b", rare: "#3d8bff", epic: "#a35cff", legendary: "#ffcf4a" };
 
 const CHOICE = {
+  gros: { title: "Choisis un Plugin", noun: "un Plugin", accent: (id) => RARITY_ACCENT[PLUGINS[id].rarity] ?? "#13b6e0", name: (id) => PLUGINS[id].name, Face: PluginFace },
   plugins: { title: "Choisis un Plugin", noun: "un Plugin", accent: (id) => RARITY_ACCENT[PLUGINS[id].rarity] ?? "#13b6e0", name: (id) => PLUGINS[id].name, Face: PluginFace },
   booster: { title: "Choisis un plan", noun: "un plan", accent: (id) => ARCHITECTURE_ACCENT[id], name: (id) => ARCHITECTURE_BY_ID[id].name, Face: PlanFace },
   colis: { title: "Choisis un module", noun: "un module", accent: (id) => FAMILY_COLOR[MODULES[id].family], name: (id) => MODULES[id].name, Face: ModuleFace },
@@ -179,7 +186,8 @@ export function PackOpening({ view, onPick }) {
   const [taken, setTaken] = useState(null);
   const [replacing, setReplacing] = useState(false);
   const desktop = !useMediaQuery(MOBILE_QUERY);
-  const full = packId === "plugins" && view.pluginIds.length >= RULES.maxPlugins;
+  const isPluginPack = PACKS[packId].reward === "plugin";
+  const full = isPluginPack && view.pluginIds.length >= RULES.maxPlugins;
 
   useEffect(() => {
     if (stage !== "pack") return undefined;
@@ -208,7 +216,7 @@ export function PackOpening({ view, onPick }) {
 
   const stageArt = packId === "colis"
     ? <span className="box-drop"><BoxArt /></span>
-    : <span className="pack-drop">{packId === "plugins" ? <PluginPackArt shake /> : <BoosterArt shake />}</span>;
+    : <span className="pack-drop">{isPluginPack ? <PluginPackArt shake big={packId === "gros"} /> : <BoosterArt shake />}</span>;
 
   return (
     <div className={`overlay pack-overlay ${packId === "colis" ? "box-overlay" : ""}`} role="dialog" aria-modal="true" aria-label={PACKS[packId].name}>
@@ -222,11 +230,11 @@ export function PackOpening({ view, onPick }) {
       ) : (
         <div className={`pack-table ${taken ? "has-taken" : ""}`}>
           <h2 className="pack-title">{choice.title}</h2>
-          <div className="pack-cards">
+          <div className={`pack-cards ${choices.length > 2 ? "n3" : ""}`}>
             {choices.map((id, index) => (
               <button
                 key={id}
-                className={`pack-card ${packId === "plugins" ? "plg-card" : "arch-card"} ${chosen === id ? "sel" : ""} ${taken === id ? "taken" : ""} ${taken && taken !== id ? "gone" : ""}`}
+                className={`pack-card ${isPluginPack ? "plg-card" : "arch-card"} ${chosen === id ? "sel" : ""} ${taken === id ? "taken" : ""} ${taken && taken !== id ? "gone" : ""}`}
                 style={{ "--i": index, "--acc": choice.accent(id) }}
                 disabled={!ready || Boolean(taken)}
                 onClick={() => { sound.play("click"); setChosen(id); }}
