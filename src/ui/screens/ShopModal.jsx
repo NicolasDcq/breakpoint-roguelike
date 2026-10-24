@@ -1,4 +1,4 @@
-// La boutique, entre deux contrats : arrivage (colis de modules, boosters de plans), Plugins et services.
+// La boutique, entre deux contrats : arrivage (2 emplacements : colis, boosters, Pack de Plugins), Plugins et services.
 
 import { BOSSES, FAMILIES, MODULES, OfferKind, PLUGINS, RULES } from "../../domain/index.js";
 import { useState } from "react";

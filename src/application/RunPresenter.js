@@ -42,7 +42,7 @@ export function presentRun(run, { started = true } = {}) {
     /** Où est chaque carte du parc pendant le contrat (tout est en pioche hors contrat). */
     placeOf: (uid) => (run.phase === Phase.PLAY ? round.whereIs(uid) : CardPlace.DRAW),
     offers: run.offers,
-    packsLeft: run.packsLeft,
+    packSlots: run.packSlots,
     openPack: run.openPack,
     lastPay: run.lastPay,
     removePrice: run.currentRemovePrice,

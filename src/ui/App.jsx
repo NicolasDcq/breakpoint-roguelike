@@ -1,7 +1,7 @@
 // L'écran de jeu. Il lit la vue de la partie et transmet les actions du joueur au service.
 
 import { useState } from "react";
-import { ARCHITECTURE_BY_ID, MODULES, Phase } from "../domain/index.js";
+import { ARCHITECTURE_BY_ID, MODULES, PLUGINS, Phase } from "../domain/index.js";
 import { useGame, useGameView } from "./GameContext.jsx";
 import { refusalMessage } from "./messages.js";
 import { fmt, fmtDec } from "./format.js";
@@ -96,9 +96,10 @@ export function App() {
     if (result) showToast(`${ARCHITECTURE_BY_ID[result.architecture.id].name} · +${fmt(result.score)} Performance (${fmt(result.compute)} × ${fmtDec(result.scale)})`);
   };
 
-  const pickFromPack = (choiceId) => {
-    if (!attempt(game.pickFromPack(choiceId), choiceId ? "upgrade" : "click") || !choiceId) return;
-    if (view.openPack.packId === "booster") showToast(`Plan installé : ${ARCHITECTURE_BY_ID[choiceId].name} niveau ${view.architectureLevels[choiceId] + 1}.`);
+  const pickFromPack = (choiceId, replacePluginId = null) => {
+    if (!attempt(game.pickFromPack(choiceId, replacePluginId), choiceId ? "upgrade" : "click") || !choiceId) return;
+    if (view.openPack.packId === "plugins") showToast(`${PLUGINS[choiceId].name} rejoint tes Plugins.`);
+    else if (view.openPack.packId === "booster") showToast(`Plan installé : ${ARCHITECTURE_BY_ID[choiceId].name} niveau ${view.architectureLevels[choiceId] + 1}.`);
     else showToast(`${MODULES[choiceId].name} rejoint ton parc.`);
   };
 
@@ -106,7 +107,7 @@ export function App() {
 
   const shopActions = {
     buy: (index, replacePluginId = null) => attempt(game.buyOffer(index, replacePluginId), replacePluginId ? "sell" : "cash"),
-    buyPack: (packId) => attempt(game.buyPack(packId), "cash"),
+    buyPack: (slotIndex) => attempt(game.buyPack(slotIndex), "cash"),
     reroll: () => attempt(game.rerollShop(), "reroll"),
     setMode: setShopMode,
     remove: (uid) => { if (attempt(game.removeCard(uid), "sell")) { showToast("Module retiré du parc."); setShopMode(null); } },

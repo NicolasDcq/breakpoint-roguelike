@@ -10,18 +10,33 @@ import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 import { Parc } from "../parc/Parc.js";
 import { CardPlace, Round } from "../round/Round.js";
 import { scoreDeployment } from "../scoring/ScoringEngine.js";
-import { OfferKind, removalPrice, rollOffers } from "../shop/Shop.js";
-import { PACKS, PACK_IDS, drawPack } from "../catalog/packs.js";
+import { OfferKind, removalPrice, rollOffers, rollPackSlots } from "../shop/Shop.js";
+import { PACKS, drawPack } from "../catalog/packs.js";
 import { Phase } from "./Phase.js";
 import { generateRun } from "../generation/RunGenerator.js";
 
-const SNAPSHOT_VERSION = 4;
+const SNAPSHOT_VERSION = 5;
 
-/** Ce que rapporte une carte gardée, selon le genre de paquet. */
+/**
+ * Ce que rapporte une carte gardée, selon le genre de paquet.
+ * Rend un refus si la carte ne peut pas être gardée (le paquet reste alors ouvert), sinon rien.
+ */
 const PACK_REWARDS = {
-  module: (run, moduleId) => run.parc.add(moduleId),
+  module: (run, moduleId) => { run.parc.add(moduleId); },
   architecture: (run, architectureId) => {
     run.architectureLevels = { ...run.architectureLevels, [architectureId]: run.architectureLevels[architectureId] + 1 };
+  },
+  // Emplacements pleins : le Plugin gardé remplace un des siens (replacePluginId), qui est revendu.
+  plugin: (run, pluginId, replacePluginId) => {
+    if (run.pluginIds.length < RULES.maxPlugins) {
+      run.pluginIds = [...run.pluginIds, pluginId];
+      return null;
+    }
+    if (replacePluginId === null) return refuse(Refusal.NO_PLUGIN_SLOT);
+    if (!run.pluginIds.includes(replacePluginId)) return refuse(Refusal.UNKNOWN_PLUGIN);
+    run.money += pluginSellPrice(replacePluginId);
+    run.pluginIds = run.pluginIds.map((id) => (id === replacePluginId ? pluginId : id));
+    return null;
   },
 };
 
@@ -49,7 +64,7 @@ export class Run {
       removePrice: RULES.removeStartPrice,
       rerollPrice: RULES.rerollStartPrice,
       offers: [],
-      packsLeft: {},
+      packSlots: [],
       openPack: null,
       lastPay: null,
       phase: Phase.PLAY,
@@ -200,7 +215,7 @@ export class Run {
     this.phase = Phase.SHOP;
     this.rerollPrice = RULES.rerollStartPrice;
     this.offers = rollOffers(this.rng, this.pluginIds);
-    this.packsLeft = Object.fromEntries(PACK_IDS.map((id) => [id, PACKS[id].perShop]));
+    this.packSlots = rollPackSlots(this.rng);
     this.openPack = null;
     return ok();
   }
@@ -212,25 +227,32 @@ export class Run {
     return null;
   }
 
-  /** Achète et ouvre un paquet de l'arrivage (colis de modules ou booster de plans). */
-  buyPack(packId) {
+  /** Achète et ouvre le paquet d'un emplacement de l'arrivage (colis, booster ou pack de Plugins). */
+  buyPack(slotIndex) {
     const blocked = this.shopBlocked();
     if (blocked) return blocked;
-    const pack = PACKS[packId];
-    if (!pack) return refuse(Refusal.UNKNOWN_PACK);
-    if (!this.packsLeft[packId]) return refuse(Refusal.NO_PACK_LEFT);
+    const slot = this.packSlots[slotIndex];
+    if (!slot) return refuse(Refusal.UNKNOWN_PACK);
+    if (slot.sold) return refuse(Refusal.NO_PACK_LEFT);
+    const pack = PACKS[slot.packId];
     if (this.money < pack.price) return refuse(Refusal.NOT_ENOUGH_MONEY);
     this.money -= pack.price;
-    this.packsLeft = { ...this.packsLeft, [packId]: this.packsLeft[packId] - 1 };
-    this.openPack = { packId, choices: drawPack(this.rng, packId) };
+    this.packSlots = this.packSlots.map((other, index) => (index === slotIndex ? { ...other, sold: true } : other));
+    this.openPack = { packId: slot.packId, choices: drawPack(this.rng, slot.packId, this.pluginIds) };
     return ok(this.openPack);
   }
 
-  /** Garde une carte du paquet ouvert, ou aucune (null). */
-  pickFromPack(choiceId) {
+  /**
+   * Garde une carte du paquet ouvert, ou aucune (null).
+   * Pack de Plugins avec les emplacements pleins : replacePluginId dit lequel est revendu.
+   */
+  pickFromPack(choiceId, replacePluginId = null) {
     if (this.phase !== Phase.SHOP || !this.openPack) return refuse(Refusal.WRONG_PHASE);
     if (choiceId !== null && !this.openPack.choices.includes(choiceId)) return refuse(Refusal.NOT_IN_PACK);
-    if (choiceId !== null) PACK_REWARDS[PACKS[this.openPack.packId].reward](this, choiceId);
+    if (choiceId !== null) {
+      const refusal = PACK_REWARDS[PACKS[this.openPack.packId].reward](this, choiceId, replacePluginId);
+      if (refusal) return refusal;
+    }
     this.openPack = null;
     return ok(choiceId);
   }
@@ -300,6 +322,7 @@ export class Run {
     if (blocked) return blocked;
     this.contractIndex++;
     this.offers = [];
+    this.packSlots = [];
     this.startRound();
     return ok();
   }
@@ -312,7 +335,7 @@ export class Run {
       seed: this.seed, rngState: this.rng.state, starterId: this.starterId, contracts: this.contracts, parc: this.parc.toJSON(), contractIndex: this.contractIndex,
       money: this.money, data: this.data, pluginIds: this.pluginIds, architectureLevels: this.architectureLevels,
       architecturePlays: this.architecturePlays, removePrice: this.removePrice, rerollPrice: this.rerollPrice,
-      offers: this.offers, packsLeft: this.packsLeft, openPack: this.openPack, lastPay: this.lastPay, phase: this.phase, round: this.round.toJSON(),
+      offers: this.offers, packSlots: this.packSlots, openPack: this.openPack, lastPay: this.lastPay, phase: this.phase, round: this.round.toJSON(),
     };
   }
 

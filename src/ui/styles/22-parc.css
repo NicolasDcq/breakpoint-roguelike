@@ -725,3 +725,32 @@ button.env-badge {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: stretch;
 }
+
+/* Pack de Plugins : même paquet que le booster, couleurs de puce électronique */
+.pk-plg .pk-body {
+  background:
+    linear-gradient(
+      135deg,
+      #13b6e0,
+      #3d7bff 35%,
+      #7a5cff 65%,
+      #ff4fb4);
+  background-size: 200% 200%;
+}
+.pk-plg .pk-glyph {
+  color: #3d7bff;
+}
+.pack-card.plg-card {
+  width: 150px;
+  height: 272px;
+}
+.plg-card .pc-face {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.plg-card .puce {
+  width: 150px;
+  height: 100%;
+}

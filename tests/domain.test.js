@@ -9,7 +9,7 @@ import { STARTERS } from "../src/domain/catalog/starters.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
-import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PLUGINS, MODULE_IDS, CardPlace } from "../src/domain/index.js";
+import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PACK_IDS, PLUGINS, pluginSellPrice, MODULE_IDS, CardPlace } from "../src/domain/index.js";
 import { GameService } from "../src/application/GameService.js";
 import { presentRun } from "../src/application/RunPresenter.js";
 import { MemoryRunRepository } from "../src/infrastructure/storage/MemoryRunRepository.js";
@@ -185,36 +185,44 @@ test("un contrat livré paie et ouvre la boutique", () => {
   assert.ok(run.openShop().ok);
   assert.equal(run.phase, Phase.SHOP);
   assert.equal(run.offers.length, RULES.shop.plugins);
-  assert.deepEqual(run.packsLeft, { colis: PACKS.colis.perShop, booster: PACKS.booster.perShop });
+  assert.equal(run.packSlots.length, RULES.shop.packSlots);
+  run.packSlots.forEach((slot) => { assert.equal(slot.sold, false); assert.ok(PACK_IDS.includes(slot.packId)); });
 });
+
+/** Force l'arrivage pour tester un type de paquet précis. */
+const forceSlots = (run, ...packIds) => { run.packSlots = packIds.map((packId) => ({ packId, sold: false })); };
 
 test("un booster montre 3 plans d'architecture ; on en garde un, ou aucun", () => {
   const run = Run.start(5);
   run.phase = Phase.WON;
   run.openShop();
+  forceSlots(run, "booster", "booster");
   run.money = PACKS.booster.price - 1;
-  assert.equal(run.buyPack("booster").reason, Refusal.NOT_ENOUGH_MONEY);
+  assert.equal(run.buyPack(0).reason, Refusal.NOT_ENOUGH_MONEY);
   run.money = 100;
-  assert.ok(run.buyPack("booster").ok);
+  assert.ok(run.buyPack(0).ok);
   assert.equal(new Set(run.openPack.choices).size, PACKS.booster.choices);
   assert.equal(run.buy(0).reason, Refusal.PACK_PENDING, "on choisit avant de continuer ses achats");
   assert.equal(run.pickFromPack("inconnue").reason, Refusal.NOT_IN_PACK);
   const chosen = run.openPack.choices[0];
   assert.ok(run.pickFromPack(chosen).ok);
   assert.equal(run.architectureLevels[chosen], 2);
-  assert.ok(run.buyPack("booster").ok);
+  assert.ok(run.buyPack(1).ok);
   assert.ok(run.pickFromPack(null).ok, "on peut passer sans rien prendre");
-  assert.equal(run.buyPack("booster").reason, Refusal.NO_PACK_LEFT);
+  assert.equal(run.buyPack(1).reason, Refusal.NO_PACK_LEFT);
+  assert.equal(run.buyPack(2).reason, Refusal.UNKNOWN_PACK);
+  const slots = JSON.stringify(run.packSlots);
   run.reroll();
-  assert.equal(run.packsLeft.booster, 0, "la relance ne renouvelle pas l'arrivage");
+  assert.equal(JSON.stringify(run.packSlots), slots, "la relance ne renouvelle pas l'arrivage");
 });
 
 test("un colis montre 3 modules ; celui qu'on garde rejoint le parc", () => {
   const run = Run.start(6);
   run.phase = Phase.WON;
   run.openShop();
+  forceSlots(run, "colis", "colis");
   run.money = 100;
-  assert.ok(run.buyPack("colis").ok);
+  assert.ok(run.buyPack(0).ok);
   const chosen = run.openPack.choices[1];
   const before = run.parc.size;
   assert.ok(run.pickFromPack(chosen).ok);
@@ -232,12 +240,62 @@ test("tous les modules peuvent sortir d'un colis, et tous les Plugins en boutiqu
     run.money = 1000;
     run.offers.forEach((offer) => seenPlugins.add(offer.id));
     for (let roll = 0; roll < 3; roll++) { run.reroll(); run.offers.forEach((offer) => seenPlugins.add(offer.id)); }
-    run.buyPack("colis");
+    forceSlots(run, "colis", "colis");
+    run.buyPack(0);
     run.openPack.choices.forEach((id) => seenModules.add(id));
     run.pickFromPack(null);
   }
   assert.equal(seenModules.size, MODULE_IDS.length);
   assert.equal(seenPlugins.size, Object.keys(PLUGINS).length);
+});
+
+test("chaque boutique a 2 emplacements de paquets ; les 3 types peuvent sortir", () => {
+  const seen = new Set();
+  for (let seed = 1; seed <= 40; seed++) {
+    const run = Run.start(seed);
+    run.phase = Phase.WON;
+    run.openShop();
+    assert.equal(run.packSlots.length, 2);
+    run.packSlots.forEach((slot) => seen.add(slot.packId));
+  }
+  assert.deepEqual([...seen].sort(), [...PACK_IDS].sort());
+});
+
+test("un Pack de Plugins montre 2 Plugins différents qu'on n'a pas ; on en garde un", () => {
+  const run = Run.start(7);
+  run.phase = Phase.WON;
+  run.openShop();
+  forceSlots(run, "plugins", "plugins");
+  run.money = 100;
+  assert.ok(run.buyPack(0).ok);
+  assert.equal(run.money, 100 - PACKS.plugins.price);
+  const { choices } = run.openPack;
+  assert.equal(new Set(choices).size, PACKS.plugins.choices);
+  choices.forEach((id) => assert.ok(!run.pluginIds.includes(id)));
+  assert.ok(run.pickFromPack(choices[0]).ok);
+  assert.ok(run.pluginIds.includes(choices[0]));
+  assert.equal(run.openPack, null);
+});
+
+test("Plugins pleins : le Pack de Plugins demande lequel remplacer, et le rembourse à moitié", () => {
+  const run = Run.start(8);
+  run.phase = Phase.WON;
+  run.openShop();
+  forceSlots(run, "plugins", "plugins");
+  run.money = 100;
+  const owned = Object.keys(PLUGINS).slice(0, RULES.maxPlugins);
+  run.pluginIds = [...owned];
+  run.buyPack(0);
+  const chosen = run.openPack.choices[0];
+  assert.equal(run.pickFromPack(chosen).reason, Refusal.NO_PLUGIN_SLOT);
+  assert.ok(run.openPack, "le paquet reste ouvert après un refus");
+  assert.equal(run.pickFromPack(chosen, "inconnu").reason, Refusal.UNKNOWN_PLUGIN);
+  const before = run.money;
+  assert.ok(run.pickFromPack(chosen, owned[0]).ok);
+  assert.ok(run.pluginIds.includes(chosen));
+  assert.ok(!run.pluginIds.includes(owned[0]));
+  assert.equal(run.money, before + pluginSellPrice(owned[0]));
+  assert.equal(run.pluginIds.length, RULES.maxPlugins);
 });
 
 test("les Plugins rares sortent moins souvent que les communs", () => {

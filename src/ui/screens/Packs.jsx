@@ -1,13 +1,17 @@
-// L'arrivage de la boutique : colis de composants et boosters de plans.
+// L'arrivage de la boutique : 2 emplacements, chacun un colis de composants,
+// un booster de plans ou un Pack de Plugins (tirés au hasard).
 // Même mise en scène que l'ancien jeu : le paquet (ou le colis) s'ouvre, puis on garde
 // une carte sur trois, ou aucune.
 
 import { useEffect, useRef, useState } from "react";
-import { ARCHITECTURE_BY_ID, FAMILIES, MODULES, PACKS, PACK_IDS, architectureBase } from "../../domain/index.js";
+import { ARCHITECTURE_BY_ID, FAMILIES, MODULES, PACKS, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
 import { useGame } from "../GameContext.jsx";
 import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { fmtDec } from "../format.js";
 import { ARCHITECTURE_ACCENT, FAMILY_ACCENT, FAMILY_COLOR } from "../visuals.js";
+import { PluginCard } from "../components/PluginCard.jsx";
+import { MOBILE_QUERY, useMediaQuery } from "../hooks/useMediaQuery.js";
+import { ReplacePluginModal } from "./ReplacePluginModal.jsx";
 import { ArchitectureDiagram, ARCHITECTURE_HINTS } from "../components/ArchitectureDiagram.jsx";
 
 /** Bord en dents de scie d'un paquet. */
@@ -38,6 +42,20 @@ function BoosterArt({ scale = 1, shake = false }) {
   );
 }
 
+function PluginPackArt({ scale = 1, shake = false }) {
+  return (
+    <div className={`pk pk-plg ${shake ? "shake" : ""}`} style={{ transform: `scale(${scale})` }} aria-hidden="true">
+      <div className="pk-edge" style={{ clipPath: PACK_CLIP }} />
+      <div className="pk-body" style={{ clipPath: PACK_CLIP }} />
+      <div className="pk-label">
+        <span className="pk-glyph">⬢</span>
+        <b>PACK DE<br />PLUGINS</b>
+        <span className="pk-count">{PACKS.plugins.choices} PLUGINS · 1 GARDÉ</span>
+      </div>
+    </div>
+  );
+}
+
 function BoxArt({ small, open }) {
   return (
     <div className={`zb ${small ? "zb-small" : ""} ${open ? "zb-open" : ""}`} aria-hidden="true">
@@ -53,6 +71,11 @@ function BoxArt({ small, open }) {
 }
 
 const PACK_LOOK = {
+  plugins: {
+    thumb: () => <PluginPackArt scale={0.5} />,
+    effect: `${PACKS.plugins.choices} Plugins tirés au hasard : tu en gardes un, ou aucun.`,
+    sheetClass: "plg-sheet",
+  },
   colis: {
     thumb: () => <div className="zbw"><BoxArt small /></div>,
     effect: `${PACKS.colis.choices} modules tirés parmi tous : tu en gardes un pour ton parc, ou aucun.`,
@@ -65,32 +88,30 @@ const PACK_LOOK = {
   },
 };
 
-/** Dans la boutique : l'arrivage (ce qu'il reste à ouvrir). */
+/** Dans la boutique : l'arrivage (2 emplacements tirés au hasard). */
 export function PackOffers({ view, onBuy }) {
   return (
     <div className="pack-arrivage">
-      <span className="pack-arrivage-title">Arrivage · colis de modules et boosters de plans · la relance ne le renouvelle pas</span>
-      {PACK_IDS.flatMap((packId) => {
-        const pack = PACKS[packId];
-        const look = PACK_LOOK[packId];
+      <span className="pack-arrivage-title">Arrivage · {view.packSlots.length} emplacements tirés au hasard · la relance ne le renouvelle pas</span>
+      {view.packSlots.map((slot, index) => {
+        const pack = PACKS[slot.packId];
+        const look = PACK_LOOK[slot.packId];
+        const available = !slot.sold;
         const affordable = view.money >= pack.price;
-        return Array.from({ length: pack.perShop }, (_, index) => {
-          const available = index < (view.packsLeft[packId] ?? 0);
-          return (
-            <div key={`${packId}${index}`} className={`pack-sheet ${look.sheetClass} ${available ? "" : "done"}`}>
-              <div className="pack-thumb">{available ? look.thumb() : <span className="pack-empty">▣</span>}</div>
-              <div className="pack-text">
-                <span className="pack-name">{pack.name}</span>
-                <span className="pack-effect">{available ? look.effect : "Ouvert. Nouvel arrivage à la prochaine boutique."}</span>
-              </div>
-              {available && (
-                <button className={`pack-buy ${affordable ? "" : "short"}`} disabled={!affordable} onClick={() => onBuy(packId)}>
-                  <span className="num">{pack.price} $</span>
-                </button>
-              )}
+        return (
+          <div key={index} className={`pack-sheet ${look.sheetClass} ${available ? "" : "done"}`}>
+            <div className="pack-thumb">{available ? look.thumb() : <span className="pack-empty">▣</span>}</div>
+            <div className="pack-text">
+              <span className="pack-name">{pack.name}</span>
+              <span className="pack-effect">{available ? look.effect : "Ouvert. Nouvel arrivage à la prochaine boutique."}</span>
             </div>
-          );
-        });
+            {available && (
+              <button className={`pack-buy ${affordable ? "" : "short"}`} disabled={!affordable} onClick={() => onBuy(index)}>
+                <span className="num">{pack.price} $</span>
+              </button>
+            )}
+          </div>
+        );
       })}
     </div>
   );
@@ -130,7 +151,14 @@ function ModuleFace({ id, view }) {
   );
 }
 
+function PluginFace({ id }) {
+  return <PluginCard id={id} className="pc-puce" />;
+}
+
+const RARITY_ACCENT = { common: "#13b6e0", uncommon: "#7a5cff", rare: "#ffcf4a" };
+
 const CHOICE = {
+  plugins: { title: "Choisis un Plugin", noun: "un Plugin", accent: (id) => RARITY_ACCENT[PLUGINS[id].rarity] ?? "#13b6e0", name: (id) => PLUGINS[id].name, Face: PluginFace },
   booster: { title: "Choisis un plan", noun: "un plan", accent: (id) => ARCHITECTURE_ACCENT[id], name: (id) => ARCHITECTURE_BY_ID[id].name, Face: PlanFace },
   colis: { title: "Choisis un module", noun: "un module", accent: (id) => FAMILY_COLOR[MODULES[id].family], name: (id) => MODULES[id].name, Face: ModuleFace },
 };
@@ -149,6 +177,9 @@ export function PackOpening({ view, onPick }) {
   const [ready, setReady] = useState(reduced);
   const [chosen, setChosen] = useState(null);
   const [taken, setTaken] = useState(null);
+  const [replacing, setReplacing] = useState(false);
+  const desktop = !useMediaQuery(MOBILE_QUERY);
+  const full = packId === "plugins" && view.pluginIds.length >= RULES.maxPlugins;
 
   useEffect(() => {
     if (stage !== "pack") return undefined;
@@ -164,16 +195,20 @@ export function PackOpening({ view, onPick }) {
     return () => clearTimeout(timer);
   }, [stage, reduced, sound]);
 
-  const take = () => {
-    if (!chosen || taken) return;
+  const finish = (replaceId = null) => {
     setTaken(chosen);
     sound.play("upgrade");
-    setTimeout(() => onPick(chosen), reduced ? 0 : 650);
+    setTimeout(() => onPick(chosen, replaceId), reduced ? 0 : 650);
+  };
+  const take = () => {
+    if (!chosen || taken) return;
+    if (full) setReplacing(true);
+    else finish();
   };
 
   const stageArt = packId === "colis"
     ? <span className="box-drop"><BoxArt /></span>
-    : <span className="pack-drop"><BoosterArt shake /></span>;
+    : <span className="pack-drop">{packId === "plugins" ? <PluginPackArt shake /> : <BoosterArt shake />}</span>;
 
   return (
     <div className={`overlay pack-overlay ${packId === "colis" ? "box-overlay" : ""}`} role="dialog" aria-modal="true" aria-label={PACKS[packId].name}>
@@ -181,7 +216,7 @@ export function PackOpening({ view, onPick }) {
         <button className={`pack-stage ${packId === "colis" ? "box-stage" : ""}`} onClick={() => setStage("cards")} aria-label="Ouvrir">
           <span className="pack-glow" />
           {stageArt}
-          {packId === "booster" && <><span className="pack-burst" /><span className="pack-ring" /></>}
+          {packId !== "colis" && <><span className="pack-burst" /><span className="pack-ring" /></>}
           <span className="pack-tap">Touche pour ouvrir</span>
         </button>
       ) : (
@@ -191,7 +226,7 @@ export function PackOpening({ view, onPick }) {
             {choices.map((id, index) => (
               <button
                 key={id}
-                className={`pack-card arch-card ${chosen === id ? "sel" : ""} ${taken === id ? "taken" : ""} ${taken && taken !== id ? "gone" : ""}`}
+                className={`pack-card ${packId === "plugins" ? "plg-card" : "arch-card"} ${chosen === id ? "sel" : ""} ${taken === id ? "taken" : ""} ${taken && taken !== id ? "gone" : ""}`}
                 style={{ "--i": index, "--acc": choice.accent(id) }}
                 disabled={!ready || Boolean(taken)}
                 onClick={() => { sound.play("click"); setChosen(id); }}
@@ -214,6 +249,15 @@ export function PackOpening({ view, onPick }) {
             <button className="ghost pack-pass" disabled={!ready || Boolean(taken)} onClick={() => onPick(null)}>Passer sans rien prendre</button>
           </div>
         </div>
+      )}
+      {replacing && chosen && (
+        <ReplacePluginModal
+          view={view}
+          desktop={desktop}
+          offer={{ id: chosen, price: 0 }}
+          onClose={() => setReplacing(false)}
+          onReplace={(pluginId) => { setReplacing(false); finish(pluginId); }}
+        />
       )}
     </div>
   );

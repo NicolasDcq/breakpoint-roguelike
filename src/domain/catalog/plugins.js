@@ -10,6 +10,7 @@
 
 import { familyOf } from "./modules.js";
 import { GRID_SIZE } from "../board/grid.js";
+import { RULES } from "./rules.js";
 
 const countFamily = (cards, family) => cards.filter((card) => familyOf(card.moduleId) === family).length;
 const familiesOf = (cards) => new Set(cards.map((card) => familyOf(card.moduleId)));
@@ -187,6 +188,10 @@ export const PLUGINS = Object.freeze(
 );
 export const PLUGIN_IDS = Object.keys(PLUGINS);
 const PLUGIN_RARITY = Object.fromEntries(Object.entries(DEFINITIONS).map(([id, def]) => [id, def.rarity]));
+
+/** Tire des Plugins que le joueur n'a pas, selon leur rareté (boutique et pack de Plugins). */
+export const drawPlugins = (rng, ownedPluginIds, count) =>
+  rng.weightedSample(PLUGIN_IDS.filter((id) => !ownedPluginIds.includes(id)), (id) => RULES.rarityWeights[PLUGINS[id].rarity], count);
 
 /** Ce que rapporte un Plugin revendu : la moitié de son prix, au moins 1 $. */
 export const pluginSellPrice = (pluginId) => Math.max(1, Math.floor(PLUGINS[pluginId].price / 2));

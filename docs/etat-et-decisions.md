@@ -1,5 +1,18 @@
 # État du jeu et décisions
 
+## 24/10 · Arrivage à 2 emplacements et Pack de Plugins
+
+La boutique n'a plus que **2 emplacements de paquets** (avant : 2 colis + 2 boosters). À chaque boutique, chaque emplacement tire son type **au hasard**, à chances égales (`RULES.shop.packWeights`, 1/1/1). Le même type peut sortir deux fois.
+- **Colis de composants** : 4 $, 3 modules, on en garde un pour le parc (inchangé).
+- **Booster de plans** : 6 $, 3 plans, +1 niveau à l'architecture gardée (inchangé).
+- **Pack de Plugins** (nouveau) : 5 $ (prix par défaut, à équilibrer), 2 Plugins différents que le joueur n'a pas, tirés selon la rareté (60/30/10). On en garde un, ou aucun.
+- Plugins pleins (4/4) : garder un Plugin du pack ouvre « Plus de place » (prix 0 $) ; le Plugin remplacé est revendu à moitié prix. Si le joueur annule, le pack reste ouvert.
+- La relance ne renouvelle pas l'arrivage. Les 2 Plugins directs de la boutique restent.
+- Moteur : `Run.packSlots` remplace `packsLeft` ; `buyPack(indexEmplacement)`, `pickFromPack(choix, pluginRemplacé)` ; `drawPlugins` (catalogue des Plugins) sert à la boutique et au pack.
+- **Sauvegarde version 5** : les anciennes parties en cours sont abandonnées.
+- Test de référence (`golden`) régénéré. Bot (80 parties) : 33 % de victoires, contre 44 % avant : moins de paquets, donc moins de renforts. À regarder avant de toucher aux prix.
+- Captures : téléphone 390×844 et 360×740, ordinateur 1366×768 et 1776×1270 (boutique, ouverture du pack, remplacement). Le bureau garde ses deux colonnes.
+
 ## 24/10 · Écran d'accueil (bêta)
 
 Au lancement, le jeu s'ouvre sur un accueil (maquettes « PARC · Menu d’accueil ») : titre BREAKPOINT avec le numéro de bêta (`__APP_VERSION__`, tiré de `package.json`), cinq Plugins qui flottent, et les boutons.

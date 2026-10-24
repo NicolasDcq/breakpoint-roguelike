@@ -11,8 +11,11 @@ export const RULES = Object.freeze({
   maxPlugins: 4,
   removeStartPrice: 2,
   rerollStartPrice: 1,
-  /** Plugins proposés en boutique, tirés selon leur rareté. */
-  shop: { plugins: 2 },
+  /**
+   * La boutique : Plugins en vente directe (tirés selon leur rareté) et emplacements de paquets.
+   * Chaque emplacement tire son type de paquet au hasard, selon ces poids (1 partout : chances égales).
+   */
+  shop: { plugins: 2, packSlots: 2, packWeights: { colis: 1, booster: 1, plugins: 1 } },
   rarityWeights: { common: 60, uncommon: 30, rare: 10 },
   /** Coût en ◆ pour passer du niveau N au niveau N+1. */
   cardUpgradeCost: { 1: 3, 2: 6 },
