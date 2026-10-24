@@ -146,7 +146,7 @@ const DEFINITIONS = {
     },
   },
   investor: {
-    name: "L'Investisseuse", rarity: "epic", text: "Scale ×(1 + 0,25 par Plugin possédé) : ×2 avec 4 Plugins.",
+    name: "L'Investisseuse", rarity: "epic", text: "Scale ×(1 + 0,25 par Plugin possédé) : ×2,25 avec 5 Plugins.",
     atEnd: (result, env) => { result.scale *= 1 + 0.25 * env.pluginIds.length; return true; },
   },
   vc: {
@@ -248,6 +248,7 @@ export const PLUGINS = Object.freeze(
 export const RARITIES = Object.freeze(["common", "uncommon", "rare", "epic", "legendary"]);
 export const PLUGIN_IDS = Object.keys(PLUGINS);
 const PLUGIN_RARITY = Object.fromEntries(Object.entries(DEFINITIONS).map(([id, def]) => [id, def.rarity]));
+export const RARITY_OF = (pluginId) => PLUGIN_RARITY[pluginId];
 
 /** Tire des Plugins que le joueur n'a pas : la rareté d'abord (RULES.rarityWeights), puis un Plugin de cette rareté. */
 export const drawPlugins = (rng, ownedPluginIds, count, allowed = RARITIES) => {

@@ -1,5 +1,14 @@
 # État du jeu et décisions
 
+## 24/10 · 5 Plugins, valeur actuelle, animation et ordre des Plugins
+
+- **5 emplacements de Plugin** de base (`RULES.maxPlugins`). L'Investisseuse monte à ×2,25 avec 5 Plugins.
+- **Valeur actuelle** : chaque Plugin dont le chiffre change (ou qui est un multiplicateur de production) affiche un badge collé sous sa puce. Couleurs : Compute bleu, Scale rouge, réactivations vert, argent jaune, Data violet, multiplicateur pur de production blanc. Calcul dans le domaine (`catalog/pluginValues.js`, exposé par `Run.pluginValues` puis `RunPresenter.pluginValues`) ; l'écran ne fait que l'afficher. Les Plugins sans chiffre qui change n'ont pas de badge (Concierge, Responsable Sécu…). Le badge est aussi dans la fiche et dans l'infobulle.
+- **Animation à l'activation** : le déploiement dit maintenant quels Plugins s'activent à chaque case (`events[].plugins`) et à la fin (`endEvents`). La puce saute et une bulle montre ce qu'elle apporte (« +15 ⚡ », « ×1,5 »). `prefers-reduced-motion` coupe le saut.
+- **Glisser-déposer** : on glisse une puce sur une autre pour changer l'ordre (`Run.movePlugin`, `usePluginDrag`). L'ordre compte : les Plugins de fin agissent l'un après l'autre (Compute ×2 après +3 vaut plus que l'inverse). Un appui court ouvre toujours la fiche. Pas de glisser pendant un déploiement.
+- Bot (80 parties) : 25 % de victoires. Test de référence régénéré.
+- Captures : téléphone 390×844 et 360×740, ordinateur 1366×768 et 1776×1270.
+
 ## 24/10 · Cinq raretés de Plugins (façon Balatro) et Gros pack
 
 - **Raretés** : commun (gris), peu commun (vert), rare (bleu), épique (violet), légendaire (doré). Réglages dans `rules.js` : `rarityWeights` (62 / 26 / 9 / 3 / 0 %) et `pluginPrice` (4 / 5 / 7 / 10 / 15 $). Le prix ne dépend plus du Plugin, seulement de sa rareté ; la revente rend la moitié.

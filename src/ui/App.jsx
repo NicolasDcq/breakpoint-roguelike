@@ -146,7 +146,7 @@ export function App() {
         {!mobile && side}
       </aside>
       <div className="stage">
-        <PluginRail pluginIds={view.pluginIds} fired={animation?.fired} compact={mobile} onOpen={(id) => open("plugin", { id })} />
+        <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} compact={mobile} onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
         <main className="workspace">
           <section className="board-col">
             <div className="board-head">
@@ -169,7 +169,7 @@ export function App() {
       {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
       {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}
       {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
-      {overlay?.name === "plugin" && <PluginModal id={overlay.id} onClose={close} />}
+      {overlay?.name === "plugin" && <PluginModal id={overlay.id} value={view.pluginValues[overlay.id] ?? null} onClose={close} />}
       {overlay?.name === "confirm" && <ConfirmNewRun onYes={newRun} onNo={close} />}
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>

@@ -1,4 +1,4 @@
-// « Plus de place » : les 4 emplacements de Plugin sont pleins.
+// « Plus de place » : tous les emplacements de Plugin sont pleins.
 // Le nouveau Plugin en vedette, la rangée pour choisir celui qui laisse sa place,
 // ce qu'on perd, et le compte (caisse + revente − prix).
 

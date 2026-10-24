@@ -8,6 +8,7 @@ import { BOSSES, bossLimits } from "../catalog/bosses.js";
 import { PLUGINS, pluginSellPrice } from "../catalog/plugins.js";
 import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 import { Parc } from "../parc/Parc.js";
+import { pluginValuesFor } from "../catalog/pluginValues.js";
 import { CardPlace, Round } from "../round/Round.js";
 import { scoreDeployment } from "../scoring/ScoringEngine.js";
 import { OfferKind, removalPrice, rollOffers, rollPackSlots } from "../shop/Shop.js";
@@ -133,6 +134,29 @@ export class Run {
       contractsWon: this.contractIndex,
       maxPlaced: this.limits.maxPlaced,
       discardsUsed: this.limits.discards - this.round.discardsLeft,
+    });
+  }
+
+  /** Déplace un Plugin : l'ordre compte, car les Plugins de fin agissent l'un après l'autre. */
+  movePlugin(fromIndex, toIndex) {
+    const last = this.pluginIds.length - 1;
+    if (![fromIndex, toIndex].every((index) => Number.isInteger(index) && index >= 0 && index <= last)) return refuse(Refusal.UNKNOWN_PLUGIN);
+    if (fromIndex === toIndex) return ok();
+    const ids = [...this.pluginIds];
+    ids.splice(toIndex, 0, ids.splice(fromIndex, 1)[0]);
+    this.pluginIds = ids;
+    return ok();
+  }
+
+  /** Ce que chaque Plugin apporte en ce moment (partie et plateau en cours). */
+  get pluginValues() {
+    const cards = this.round ? this.cardsOn() : Array(16).fill(null);
+    return pluginValuesFor(this.pluginIds, {
+      cards,
+      placed: cards.filter(Boolean),
+      contractsWon: this.contractIndex,
+      parcSize: this.parc.size,
+      money: this.money,
     });
   }
 

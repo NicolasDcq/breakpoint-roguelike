@@ -8,7 +8,7 @@ export const RULES = Object.freeze({
   startMoney: 4,
   startData: 0,
   minParcSize: 8,
-  maxPlugins: 4,
+  maxPlugins: 5,
   removeStartPrice: 2,
   rerollStartPrice: 1,
   /**

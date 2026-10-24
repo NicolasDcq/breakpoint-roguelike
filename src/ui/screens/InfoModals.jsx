@@ -90,10 +90,10 @@ export function ParcModal({ view, onClose }) {
   );
 }
 
-export function PluginModal({ id, onClose }) {
+export function PluginModal({ id, value = null, onClose }) {
   return (
     <Modal className="plugin-modal" onClose={onClose}>
-      <PluginCard id={id} />
+      <PluginCard id={id} value={value} />
       <p className="dim small">{PLUGINS[id].text}</p>
       <button className="deploy" onClick={onClose}>Fermer</button>
     </Modal>

@@ -9,7 +9,20 @@ import { popupLines } from "../visuals.js";
 
 const prefersReducedMotion = () => globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
-export const TIMING = { base: 900, perActivation: 420, end: 600 };
+export const TIMING = { base: 900, perActivation: 420, perPlugin: 380, end: 600 };
+
+let fireKey = 0;
+
+/** Ce qu'affiche la bulle d'un Plugin qui s'active : « ×1,5 », « +15 ⚡ », « +0,3 × », « +1 ◆ ». */
+function firingOf(entry) {
+  const key = ++fireKey;
+  if (entry.mult) return { key, kind: "mult", text: `×${fmtDec(entry.mult)}` };
+  if (entry.compute > 0) return { key, kind: "compute", text: `+${fmtDec(entry.compute)} ⚡` };
+  if (entry.scale > 0) return { key, kind: "scale", text: `+${fmtDec(entry.scale)} ×` };
+  if (entry.data > 0) return { key, kind: "data", text: `+${entry.data} ◆` };
+  return { key, kind: "retry", text: "↻" };
+}
+const firingMap = (entries) => (entries.length ? Object.fromEntries(entries.map((entry) => [entry.id, firingOf(entry)])) : null);
 
 export function useDeployAnimation({ game, sound }) {
   const [animation, setAnimation] = useState(null);
@@ -36,7 +49,7 @@ export function useDeployAnimation({ game, sound }) {
     const formula = () => ({ compute, scale: Math.round(scale * 100) / 100, score: Math.round(compute * scale) });
     const basePop = { key: "base", cell: null, lines: [{ tone: "boost", text: ARCHITECTURE_BY_ID[architecture.id].name }, { tone: "compute", text: `${architecture.compute} ⚡` }, { tone: "scale", text: `× ${fmtDec(architecture.scale)}` }] };
     if (!skipped.current) sound.play("deploy");
-    setAnimation({ step: 0, speed: speed.current, formula: formula(), highlight: architecture.members, flash: true, pops: [basePop], firing: null, fired: [] });
+    setAnimation({ step: 0, speed: speed.current, formula: formula(), highlight: architecture.members, flash: true, pops: [basePop], firing: null, pluginFiring: null, fired: [] });
     await wait(TIMING.base);
     for (const [index, event] of result.events.entries()) {
       if (skipped.current) break;
@@ -46,12 +59,19 @@ export function useDeployAnimation({ game, sound }) {
       }
       sound.play(event.failure ? "fail" : event.isRetrigger ? "retrigger" : "activate", index, event.isRetrigger);
       const pop = { key: `e${index}`, cell: event.cell, lines: popupLines(event) };
-      setAnimation((previous) => ({ ...previous, step: index + 1, flash: false, formula: formula(), firing: { cell: event.cell, failure: event.failure }, pops: [...previous.pops.slice(-6), pop] }));
+      setAnimation((previous) => ({ ...previous, step: index + 1, flash: false, formula: formula(), firing: { cell: event.cell, failure: event.failure }, pluginFiring: firingMap(event.plugins ?? []), pops: [...previous.pops.slice(-6), pop] }));
       await wait(TIMING.perActivation);
+    }
+    setAnimation((previous) => ({ ...previous, step: result.events.length, firing: null, pluginFiring: null }));
+    for (const entry of result.endEvents ?? []) {
+      if (skipped.current) break;
+      sound.play("joker");
+      setAnimation((previous) => ({ ...previous, pluginFiring: firingMap([entry]) }));
+      await wait(TIMING.perPlugin);
     }
     if (result.fired.length) sound.play("joker");
     sound.play("score", result.score > 0);
-    setAnimation((previous) => ({ ...previous, step: result.events.length, firing: null, fired: result.fired, done: true, formula: { compute: result.compute, scale: result.scale, score: result.score } }));
+    setAnimation((previous) => ({ ...previous, step: result.events.length, firing: null, pluginFiring: null, fired: result.fired, done: true, formula: { compute: result.compute, scale: result.scale, score: result.score } }));
     await wait(TIMING.end);
     const outcome = game.deploy();
     setAnimation(null);

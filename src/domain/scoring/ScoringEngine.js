@@ -30,7 +30,7 @@ const hasOutput = (output) => output.compute || output.scale || output.data || o
 export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, money, architectureLevels, parcSize, contractsWon = 0, maxPlaced = 5, discardsUsed = 0 }) {
   const plugins = pluginIds.map((id) => PLUGINS[id]);
   const placed = cards.filter(Boolean);
-  const result = { compute: 0, scale: 1, data: 0, money: 0, events: [], fired: new Set(), cards, placed, count: placed.length, architecture: null, score: 0 };
+  const result = { compute: 0, scale: 1, data: 0, money: 0, events: [], endEvents: [], fired: new Set(), cards, placed, count: placed.length, architecture: null, score: 0 };
   const state = {
     result,
     stock: { data: dataStock, money },
@@ -55,6 +55,13 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
     result.scale = base.scale;
   }
 
+  // Ce qu'un Plugin a ajouté pendant un appel (pour l'animation : « +15 ⚡ » sur sa puce).
+  const tracked = (plugin, call) => {
+    const before = { compute: result.compute, scale: result.scale, data: result.data };
+    const fired = call();
+    return { fired, change: { id: plugin.id, compute: result.compute - before.compute, scale: round2(result.scale - before.scale), data: result.data - before.data } };
+  };
+
   // 2. Le plateau, case par case.
   const activate = (cell, depth, isRetrigger) => {
     if (state.activations++ > MAX_ACTIVATIONS) return;
@@ -75,12 +82,14 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
       return;
     }
     let multiplier = 1;
+    const pluginEvents = [];
     if (module.producer) {
       for (const plugin of plugins) {
         const factor = plugin.multiplier?.(card, ctx) ?? 1;
         if (factor !== 1) {
           multiplier *= factor;
           result.fired.add(plugin.id);
+          pluginEvents.push({ id: plugin.id, mult: factor });
         }
       }
       if (state.boost && hasOutput(output)) {
@@ -100,12 +109,16 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
     result.money += final.money;
     state.stock.data += final.data;
     state.stock.money += final.money;
-    result.events.push({ cell, output: final, multiplier, isRetrigger });
-    plugins.forEach((plugin) => { if (plugin.afterActivation?.(card, ctx)) result.fired.add(plugin.id); });
+    result.events.push({ cell, output: final, multiplier, isRetrigger, plugins: pluginEvents });
+    plugins.filter((plugin) => plugin.afterActivation).forEach((plugin) => {
+      const { fired, change } = tracked(plugin, () => plugin.afterActivation(card, ctx));
+      if (fired) { result.fired.add(plugin.id); pluginEvents.push(change); }
+    });
     if (isRetrigger) {
       plugins.filter((plugin) => plugin.onRetrigger).forEach((plugin) => {
-        plugin.onRetrigger(ctx);
+        const { change } = tracked(plugin, () => plugin.onRetrigger(ctx));
         result.fired.add(plugin.id);
+        pluginEvents.push(change);
       });
     }
     if (module.producer && state.queue > 0 && !isRetrigger) {
@@ -119,7 +132,9 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
   // 3. Les Plugins de fin.
   const env = { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed };
   for (const plugin of plugins) {
-    if (plugin.atEnd?.(result, env)) result.fired.add(plugin.id);
+    if (!plugin.atEnd) continue;
+    const { fired, change } = tracked(plugin, () => plugin.atEnd(result, env));
+    if (fired) { result.fired.add(plugin.id); result.endEvents.push(change); }
   }
   result.scale = round2(result.scale);
   result.score = Math.round(result.compute * result.scale);

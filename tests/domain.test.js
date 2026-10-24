@@ -401,14 +401,50 @@ test("on améliore un module en partie, en main ou posé, avec de la Data", () =
 test("Plugins pleins : on en revend un pour le remplacer, la revente aide à payer", () => {
   const run = Run.start(5);
   run.phase = Phase.SHOP;
-  run.pluginIds = ["intern", "dba", "caffeine", "janitor"];
+  run.pluginIds = ["intern", "dba", "caffeine", "janitor", "veteran"];
   run.offers = [{ kind: OfferKind.PLUGIN, id: "growth", price: 6, sold: false }];
   run.money = 4;
   assert.equal(run.buy(0).reason, Refusal.NO_PLUGIN_SLOT);
   assert.equal(run.buy(0, "sre").reason, Refusal.UNKNOWN_PLUGIN);
   assert.ok(run.buy(0, "dba").ok, "4 $ + 2 $ de revente = 6 $");
-  assert.deepEqual(run.pluginIds, ["intern", "growth", "caffeine", "janitor"], "il prend la place de l'ancien");
+  assert.deepEqual(run.pluginIds, ["intern", "growth", "caffeine", "janitor", "veteran"], "il prend la place de l'ancien");
   assert.equal(run.money, 0);
+});
+
+test("la valeur actuelle des Plugins suit la partie et le plateau", () => {
+  const run = Run.start(4);
+  run.pluginIds = ["veteran", "hoarder", "investor", "intern", "cloudarch", "janitor"].slice(0, RULES.maxPlugins);
+  run.contractIndex = 3;
+  const values = run.pluginValues;
+  assert.deepEqual(values.veteran, { kind: "compute", amount: 9, mode: "add" });
+  assert.deepEqual(values.hoarder, { kind: "compute", amount: run.parc.size, mode: "add" });
+  assert.deepEqual(values.investor, { kind: "scale", amount: 1 + 0.25 * run.pluginIds.length, mode: "times" });
+  assert.deepEqual(values.cloudarch, { kind: "mult", amount: 1.5, mode: "times" });
+  assert.equal(values.janitor, undefined, "pas de badge quand le chiffre ne change jamais");
+  assert.equal(values.intern.amount, 3 * run.round.board.placedCount, "suit le plateau en cours");
+});
+
+test("le déploiement dit quels Plugins s'activent à chaque case et à la fin", () => {
+  const cardsOn = Array.from({ length: CELL_COUNT }, (_, index) => (index === 0 ? createCard("c1", "server") : null));
+  const result = score(cardsOn, { pluginIds: ["cloudarch", "intern", "corner"] });
+  assert.deepEqual(result.events[0].plugins.map((entry) => entry.id), ["cloudarch"]);
+  assert.equal(result.events[0].plugins[0].mult, 1.5);
+  const end = Object.fromEntries(result.endEvents.map((entry) => [entry.id, entry.compute]));
+  assert.deepEqual(end, { intern: 3, corner: 5 });
+});
+
+test("on réordonne les Plugins par glisser-déposer, et l'ordre change le score", () => {
+  const run = Run.start(6);
+  run.pluginIds = ["intern", "minimal", "dba"];
+  assert.ok(run.movePlugin(2, 0).ok);
+  assert.deepEqual(run.pluginIds, ["dba", "intern", "minimal"]);
+  assert.ok(run.movePlugin(1, 1).ok);
+  assert.equal(run.movePlugin(0, 3).reason, Refusal.UNKNOWN_PLUGIN);
+  assert.equal(run.movePlugin(-1, 0).reason, Refusal.UNKNOWN_PLUGIN);
+  const board = Array.from({ length: CELL_COUNT }, (_, index) => (index === 0 ? createCard("o1", "server") : null));
+  const before = score(board, { pluginIds: ["intern", "minimal"] }).compute;
+  const after = score(board, { pluginIds: ["minimal", "intern"] }).compute;
+  assert.ok(before > after, "Compute ×2 après +3 vaut plus que l'inverse");
 });
 
 test("retirer un module garde 8 modules au moins", () => {

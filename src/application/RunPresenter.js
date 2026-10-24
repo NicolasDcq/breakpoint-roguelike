@@ -27,6 +27,7 @@ export function presentRun(run, { started = true } = {}) {
     money: run.money,
     data: run.data,
     pluginIds: run.pluginIds,
+    pluginValues: run.pluginValues,
     architectureLevels: run.architectureLevels,
     architecturePlays: run.architecturePlays,
     score: round.score,
