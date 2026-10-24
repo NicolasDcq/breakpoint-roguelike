@@ -57,7 +57,7 @@ function Spotlight({ rect, interactive }) {
   );
 }
 
-export function Tutorial({ view, hidden = false, onQuit }) {
+export function Tutorial({ view, hidden = false, onQuit, onNewRun }) {
   const [index, setIndex] = useState(0);
   const current = TUTORIAL_STEPS.findIndex((step, i) => i >= index && step.phase === view.phase && (!step.when || step.when(view)));
   const step = current >= 0 ? TUTORIAL_STEPS[current] : null;
@@ -74,14 +74,19 @@ export function Tutorial({ view, hidden = false, onQuit }) {
       {step.target.length > 0 && rect ? <Spotlight rect={rect} interactive={step.interactive} /> : <div className="tut-dim tut-all" />}
       <div className={`tut-bubble ${lower ? "top" : "bottom"}`} role="status">
         <div className="tut-top">
-          <button className="tut-quit" onClick={onQuit}>Quitter le tuto</button>
+          {!step.last && <button className="tut-quit" onClick={onQuit}>Quitter le tuto</button>}
           <span className="tut-count num">{current + 1} / {TUTORIAL_STEPS.length}</span>
         </div>
         <div className="tut-row">
           <LoupNiel pose={step.pose} className="tut-loup" />
           <p className="tut-text" dangerouslySetInnerHTML={{ __html: step.text(view) }} />
         </div>
-        {showNext && <button className="tut-next" onClick={step.last ? onQuit : advance}>{step.last ? "Terminer" : "Suivant"}</button>}
+        {step.last ? (
+          <div className="tut-end">
+            <button className="tut-next" onClick={onNewRun}>Lancer une vraie partie</button>
+            <button className="tut-skip" onClick={onQuit}>Continuer cette partie</button>
+          </div>
+        ) : showNext && <button className="tut-next" onClick={advance}>Suivant</button>}
       </div>
     </div>
   );

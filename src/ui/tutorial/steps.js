@@ -42,9 +42,6 @@ export const TUTORIAL_STEPS = [
   { id: "suivant", phase: Phase.SHOP, target: [".fu-next"], interactive: true, pose: "salut",
     text: () => "Quand tu es prêt, passe au <b>contrat suivant</b>. Tes achats restent pour toute la partie." },
 
-  { id: "boss", phase: Phase.PLAY, when: (view) => Boolean(view.contract.boss), target: [".topbar .contract"], pose: "alerte",
-    text: (view) => `Un <b>boss</b> ! Il change une règle du contrat${view.bossRule ? ` : <b>${view.bossRule}</b>` : ""}. Lis-la avant de poser.` },
-
-  { id: "fin", phase: Phase.VICTORY, target: [], pose: "bravo", last: true,
-    text: (view) => `Bravo ! Pour <b>gagner</b>, il faut livrer les <b>${view.contractCount} contrats</b>. Tu sais jouer : bonne mise en prod !` },
+  { id: "fin", phase: Phase.PLAY, when: (view) => view.contractIndex >= 1, target: [], pose: "bravo", last: true,
+    text: (view) => `Bravo, tu sais jouer ! Il faut livrer les <b>${view.contractCount} contrats</b> pour gagner, avec des <b>boss</b> qui changent une règle. Tu lances une <b>vraie partie</b> ?` },
 ];

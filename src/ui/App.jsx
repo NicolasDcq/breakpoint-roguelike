@@ -180,7 +180,7 @@ export function App() {
       {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
       {overlay?.name === "plugin" && <PluginModal id={overlay.id} value={view.pluginValues[overlay.id] ?? null} onClose={close} />}
       {overlay?.name === "confirm" && <ConfirmNewRun onYes={newRun} onNo={close} />}
-      {tuto && <Tutorial view={view} hidden={busy || Boolean(overlay)} onQuit={endTuto} />}
+      {tuto && <Tutorial view={view} hidden={busy || Boolean(overlay)} onQuit={endTuto} onNewRun={() => { endTuto(); newRun(); }} />}
       {offerTuto && !tuto && <TutorialOffer onStart={startTuto} onSkip={endTuto} />}
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>

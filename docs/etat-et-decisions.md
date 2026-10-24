@@ -3,7 +3,7 @@
 ## 24/10 · Tutoriel avec Loup Niel
 
 - **Partie préparée** : graine fixe `RULES.tutorialSeed` (6). La main a deux paires de Calcul (Serveur et Serverless), donc une vraie Redondance. `GameService.startTutorial()` lance cette partie.
-- **Scénario** : liste d'étapes dans `src/ui/tutorial/steps.js` (phase, zone éclairée, texte, fin automatique ou bouton « Suivant »). 17 étapes : contrat, familles, les 9 architectures, formule, défausse, amélioration (Data), déploiement, paie, boutique (arrivage, Booster de plans si présent, Plugins et raretés, services), contrat suivant, boss, victoire.
+- **Scénario** : liste d'étapes dans `src/ui/tutorial/steps.js` (phase, zone éclairée, texte, fin automatique ou bouton « Suivant »). 16 étapes : contrat, familles, les 9 architectures, formule, défausse, amélioration (Data), déploiement, paie, boutique (arrivage, Booster de plans si présent, Plugins et raretés, services), contrat suivant, puis un bravo qui propose de lancer une vraie partie (le tutoriel s’arrête là, il ne dure pas jusqu’aux boss).
 - **Écran** : `Tutorial.jsx` éclaire la zone utile (quatre panneaux qui bloquent les clics, sauf dans le trou quand l'étape demande d'agir). La bulle de Loup Niel passe en haut ou en bas selon la zone. « Quitter le tuto » est en haut de la bulle, loin de DÉPLOYER.
 - **Lancement** : proposé au premier lancement (préférences `tutoSeen` et `rulesSeen`), rejouable depuis le bouton « Tutoriel » du menu. La fenêtre « Comment jouer » reste, accessible par « Règles ».
 - Le tutoriel ne change aucune règle : il ne lit que la vue. Pas de test golden à régénérer. Mascotte : `tools/loup-niel-sprite.py --module` → `src/ui/tutorial/loupNielSprites.js`.
