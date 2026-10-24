@@ -1,5 +1,16 @@
 # État du jeu et décisions
 
+## 24/10 · Écran d'accueil (bêta)
+
+Au lancement, le jeu s'ouvre sur un accueil (maquettes « PARC · Menu d’accueil ») : titre BREAKPOINT avec le numéro de bêta (`__APP_VERSION__`, tiré de `package.json`), cinq Plugins qui flottent, et les boutons.
+- **Pas de partie lancée** : un seul bouton, NOUVELLE PARTIE.
+- **Partie en cours** : REPRENDRE LA PARTIE (avec « Version X · contrat Y »), puis NOUVELLE PARTIE en plus petit. Si une partie est en cours, NOUVELLE PARTIE demande confirmation (« La partie en cours sera perdue. »).
+- Une partie est **en cours** si le joueur l'a lancée et qu'elle n'est ni perdue ni gagnée (les 12 contrats livrés). Un visiteur qui n'a jamais lancé de partie ne voit donc pas de reprise : la partie n'est sauvegardée qu'au premier lancement (`GameService.started`).
+- Les règles s'ouvrent à la première visite, après le clic sur le bouton de lancement.
+- Moteur intact. La vue expose `inProgress` (`RunPresenter`) ; l'accueil n'appelle que `GameService` (`newRun`).
+- Captures : téléphone 390×844 et 360×740, ordinateur 1366×768 et 1776×1270, sans débordement.
+- Piste : un bouton « Accueil » dans la barre du haut pour revenir au menu sans recharger la page.
+
 ## 20/10 · 16 nouveaux Plugins (28 en tout)
 
 Pour que les parties ne se ressemblent pas : plus de Plugins, avec des **conditions variées** (position, ordre, nombre de modules, défausses, autres Plugins) et des **×Scale**.

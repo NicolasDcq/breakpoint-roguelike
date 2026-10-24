@@ -11,6 +11,7 @@ import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
 import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PLUGINS, MODULE_IDS, CardPlace } from "../src/domain/index.js";
 import { GameService } from "../src/application/GameService.js";
+import { presentRun } from "../src/application/RunPresenter.js";
 import { MemoryRunRepository } from "../src/infrastructure/storage/MemoryRunRepository.js";
 import { fixedSeedSource } from "../src/infrastructure/random/RandomSeedSource.js";
 
@@ -431,4 +432,25 @@ test("Fin de contrat : Responsable Sécu +2 $, Capital-risqueur double la caisse
   assert.equal(PLUGINS.secuchief.contractInterest(0), 2);
   assert.equal(PLUGINS.vc.contractInterest(5), 5);
   assert.equal(PLUGINS.vc.contractInterest(30), 8);
+});
+
+test("l'écran d'accueil : une partie neuve est en cours, une partie perdue ou gagnée ne l'est plus", () => {
+  const run = Run.start(11);
+  assert.equal(presentRun(run).inProgress, true);
+  run.phase = Phase.WON;
+  assert.equal(presentRun(run).inProgress, true);
+  run.phase = Phase.LOST;
+  assert.equal(presentRun(run).inProgress, false);
+  run.phase = Phase.VICTORY;
+  assert.equal(presentRun(run).inProgress, false);
+});
+
+test("l'accueil ne propose de reprendre qu'une partie que le joueur a lancée", () => {
+  const repository = new MemoryRunRepository();
+  const first = new GameService({ repository, seeds: fixedSeedSource(5) });
+  assert.equal(first.getView().inProgress, false, "visiteur neuf : rien à reprendre");
+  first.newRun();
+  assert.equal(first.getView().inProgress, true, "partie lancée : on peut la reprendre");
+  const again = new GameService({ repository, seeds: fixedSeedSource(99) });
+  assert.equal(again.getView().inProgress, true, "après rechargement, la partie est toujours là");
 });

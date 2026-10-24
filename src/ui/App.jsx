@@ -20,6 +20,7 @@ import { ShopModal } from "./screens/ShopModal.jsx";
 import { EndModal, WonModal } from "./screens/ResultModals.jsx";
 import { PackOpening } from "./screens/Packs.jsx";
 import { ArchitecturesModal, ConfirmNewRun, ParcModal, PluginModal, RulesModal } from "./screens/InfoModals.jsx";
+import { MainMenu } from "./screens/MainMenu.jsx";
 
 const RULES_SEEN = "rulesSeen";
 
@@ -27,6 +28,7 @@ export function App() {
   const { game, sound, preferences } = useGame();
   const view = useGameView();
   const mobile = useMediaQuery(MOBILE_QUERY);
+  const [screen, setScreen] = useState("menu");
   const [marked, setMarked] = useState([]);
   const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
@@ -111,6 +113,9 @@ export function App() {
     showParc: () => open("parc"),
     next: () => { attempt(game.nextContract()); stopDiscarding(); },
   };
+
+  // Tant que le joueur n'a pas lancé ou repris une partie, l'accueil remplace le jeu.
+  if (screen === "menu") return <MainMenu onPlay={() => setScreen("game")} />;
 
   const phaseScreen = !busy && !overlay && {
     [Phase.WON]: <WonModal view={view} onShop={() => { setShopMode(null); attempt(game.openShop(), "cash"); }} />,

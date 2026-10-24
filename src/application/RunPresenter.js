@@ -3,12 +3,18 @@
 
 import { CardPlace, Phase, RULES, upgradeCost } from "../domain/index.js";
 
-export function presentRun(run) {
+/**
+ * @param {object} run
+ * @param {{ started?: boolean }} [options]  started : le joueur a lancé cette partie (elle est sauvegardée).
+ */
+export function presentRun(run, { started = true } = {}) {
   const { round } = run;
   const toCard = (uid) => run.card(uid);
   return {
     seed: run.seed,
     phase: run.phase,
+    /** Reprendre : une partie lancée, ni perdue ni gagnée (les 12 contrats livrés). */
+    inProgress: started && run.phase !== Phase.LOST && run.phase !== Phase.VICTORY,
     contractIndex: run.contractIndex,
     contract: run.contract,
     contracts: run.visibleContracts,

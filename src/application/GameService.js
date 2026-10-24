@@ -14,14 +14,23 @@ export class GameService {
     this.repository = repository;
     this.seeds = seeds;
     this.listeners = new Set();
-    this.run = Run.fromSnapshot(repository.load()) ?? this.createRun();
-    this.view = presentRun(this.run);
+    const saved = Run.fromSnapshot(repository.load());
+    this.run = saved ?? Run.start(seeds.next());
+    /** Le joueur a déjà lancé une partie : sinon l'accueil ne propose pas de reprendre. */
+    this.started = Boolean(saved);
+    this.view = presentRun(this.run, { started: this.started });
   }
 
+  /** Crée une partie neuve, sauvegardée tout de suite (le joueur l'a lancée). */
   createRun(seed = this.seeds.next()) {
     const run = Run.start(seed);
-    this.repository.save(run.toSnapshot());
+    this.persist(run);
     return run;
+  }
+
+  persist(run = this.run) {
+    this.repository.save(run.toSnapshot());
+    this.started = true;
   }
 
   subscribe(listener) {
@@ -64,14 +73,14 @@ export class GameService {
   execute(command) {
     const result = command(this.run);
     if (result.ok) {
-      this.repository.save(this.run.toSnapshot());
+      this.persist();
       this.publish();
     }
     return result;
   }
 
   publish() {
-    this.view = presentRun(this.run);
+    this.view = presentRun(this.run, { started: this.started });
     this.listeners.forEach((listener) => listener(this.view));
   }
 }
