@@ -25,6 +25,7 @@ export const DEFEAT_QUOTES = [
   "Le client veut une réunion. Je dis que tu es en congé ?",
   "Pas de Ctrl+Z en prod, mais une nouvelle partie, si.",
   "Même les meilleurs ont fait tomber la prod un vendredi.",
+  "Quand je dis « on fait du 80/20 », c'est les 80 % qu'il faut faire, pas les 20.",
 ];
 
 /** Une réplique de la liste, choisie par la graine (même partie, même réplique). */

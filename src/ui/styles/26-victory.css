@@ -33,3 +33,15 @@
 }
 @media (prefers-reduced-motion: reduce) { .confetti i, .vic-rays { animation: none; } }
 .end-modal.victory .deploy.vic-btn { position: static !important; inset: auto !important; }
+
+/* Défaite : même mise en page, en rouge. */
+.end-modal.defeat { position: relative; width: min(760px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; display: block; padding-block: 16px; text-align: center; box-shadow: inset 0 0 0 3px #3a0f18, inset 0 0 0 5px #ff3b5c, 0 10px 0 #05070f; }
+.defeat .vic-eyebrow { color: #ff3b5c; }
+.defeat .vic-title { color: #ffd0d8; text-shadow: 3px 3px 0 #a3122f, 6px 6px 0 #05070f; }
+.defeat .vic-img { filter: saturate(.7); }
+.defeat .vic-stats b { color: #ff8da1; }
+.defeat .end-jokers { justify-content: center; flex-wrap: wrap; }
+.defeat .vic-bar { height: 18px; margin: 4px 0; border: 3px solid #05070f; border-radius: 9px; background: #0b1430; overflow: hidden; }
+.defeat .vic-bar i { display: block; height: 100%; background: #ff3b5c; }
+.defeat .vic-bar-label { margin: 0 0 12px; font: 800 13px "JetBrains Mono", monospace; color: #ff8da1; }
+.end-modal.defeat .deploy.vic-btn { position: static !important; inset: auto !important; background: #ffb020; color: #05070f; }

@@ -3,9 +3,9 @@
 ## 25/10 · Écran de victoire avec Loup Niel
 
 - **Victoire** : titre doré, confettis, Loup Niel (pose « bravo ») et une réplique dans une bulle, chiffres de la partie (contrats, déploiements, modules, Plugins), Plugins du joueur, bouton « Nouvelle partie ». Composant `VictoryModal` (`ResultModals.jsx`), style `26-victory.css`.
-- **Répliques** : `src/ui/mascot/repliques.js` (12 de victoire, 8 de défaite). Le choix dépend de la graine (`quoteFor`) : pas de hasard dans l'interface, la même partie dit la même chose. Ajouter une réplique = ajouter une ligne.
+- **Répliques** : `src/ui/mascot/repliques.js` (12 de victoire, 9 de défaite). Le choix dépend de la graine (`quoteFor`) : pas de hasard dans l'interface, la même partie dit la même chose. Ajouter une réplique = ajouter une ligne.
 - La mascotte est maintenant dans `src/ui/mascot/` (`LoupNiel.jsx` et ses poses), partagée par le tutoriel et les écrans de fin.
-- À faire : l'écran de défaite avec Loup Niel (maquette PV4 à PV6 du canvas, en attente de validation). Les répliques de défaite sont déjà dans le catalogue.
+- **Défaite** : même mise en page en rouge (`DefeatModal`) : Loup Niel inquiet, une réplique de défaite (dont « Quand je dis on fait du 80/20… »), barre de l'objectif manqué, chiffres, Plugins, bouton « Rejouer ».
 - La case « meilleur score » de la maquette est remplacée par le nombre de Plugins (le jeu ne retient pas le meilleur déploiement).
 - Captures : téléphone 390×844 et 360×740, ordinateur 1366×768 et 1776×1270.
 

@@ -5,7 +5,7 @@ import { Modal } from "../common/Modal.jsx";
 import { fmt } from "../format.js";
 import { PluginMini } from "../components/PluginCard.jsx";
 import { LoupNiel } from "../mascot/LoupNiel.jsx";
-import { VICTORY_QUOTES, quoteFor } from "../mascot/repliques.js";
+import { DEFEAT_QUOTES, VICTORY_QUOTES, quoteFor } from "../mascot/repliques.js";
 
 export function WonModal({ view, onShop }) {
   const { contract, score, lastPay } = view;
@@ -63,30 +63,37 @@ function VictoryModal({ view, onNewRun }) {
   );
 }
 
-export function EndModal({ view, onNewRun }) {
-  const victory = view.phase === Phase.VICTORY;
-  if (victory) return <VictoryModal view={view} onNewRun={onNewRun} />;
-  const total = view.contractCount;
-  const delivered = victory ? total : view.contractIndex;
+/** La défaite : Loup Niel reste calme, l'objectif manqué est montré en barre. */
+function DefeatModal({ view, onNewRun }) {
   const plays = Object.values(view.architecturePlays).reduce((sum, count) => sum + count, 0);
+  const progress = Math.min(100, Math.round((view.score / view.contract.target) * 100));
   return (
-    <Modal className={`end-modal ${victory ? "won" : "lost"}`}>
-      <h2 className="end-title">{victory ? "Mise en production réussie" : "Incident en production"}</h2>
-      <p className="modal-sub">
-        {victory
-          ? `Les ${total} contrats sont livrés, ${view.contract.name} compris.`
-          : `${view.contract.name} n’a pas été livré : ${fmt(view.score)} sur ${fmt(view.contract.target)}.`}
-      </p>
-      <div className="stats">
-        <div><span className="num">{delivered}/{total}</span><span>contrats livrés</span></div>
-        <div><span className="num">{view.parc.length}</span><span>modules dans le parc</span></div>
-        <div><span className="num">{plays}</span><span>déploiements</span></div>
+    <Modal className="end-modal lost defeat">
+      <span className="vic-eyebrow">VERSION {view.contract.version} · CONTRAT {view.contract.letter} · NON LIVRÉ</span>
+      <h2 className="vic-title">Incident<br />en production</h2>
+      <div className="vic-wolf">
+        <div className="vic-loup"><LoupNiel pose="inquiet" className="vic-img" /></div>
+        <p className="vic-bubble">{quoteFor(DEFEAT_QUOTES, view.seed)}</p>
       </div>
+      <p className="vic-sub">{view.contract.name} n’a pas été livré.</p>
+      <div className="vic-bar" role="progressbar" aria-valuemin={0} aria-valuemax={view.contract.target} aria-valuenow={view.score}><i style={{ width: `${progress}%` }} /></div>
+      <p className="vic-bar-label num">{fmt(view.score)} / {fmt(view.contract.target)} Performance</p>
+      <div className="vic-stats">
+        <Stat value={`${view.contractIndex}/${view.contractCount}`} label="CONTRATS" />
+        <Stat value={plays} label="DÉPLOIEMENTS" />
+        <Stat value={view.parc.length} label="MODULES" />
+        <Stat value={view.pluginIds.length} label="PLUGINS" />
+      </div>
+      {view.pluginIds.length > 0 && <div className="vic-label">TES PLUGINS</div>}
       <div className="end-jokers">
         {view.pluginIds.map((id) => <span key={id} title={PLUGINS[id].name}><PluginMini id={id} /></span>)}
       </div>
+      <button className="deploy vic-btn" onClick={onNewRun} autoFocus>Rejouer</button>
       <p className="dim small">Graine de la partie : {view.seed}</p>
-      <button className="deploy" onClick={onNewRun}>Nouvelle partie</button>
     </Modal>
   );
+}
+
+export function EndModal({ view, onNewRun }) {
+  return view.phase === Phase.VICTORY ? <VictoryModal view={view} onNewRun={onNewRun} /> : <DefeatModal view={view} onNewRun={onNewRun} />;
 }
