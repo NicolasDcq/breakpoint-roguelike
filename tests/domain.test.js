@@ -618,12 +618,21 @@ test("tutoriel : la partie préparée donne toujours deux paires de calcul et un
 
 test("tutoriel : chaque étape a une phase, un texte et une pose connue", async () => {
   const { TUTORIAL_STEPS } = await import("../src/ui/tutorial/steps.js");
-  const { LOUP_SVG } = await import("../src/ui/tutorial/loupNielSprites.js");
+  const { LOUP_SVG } = await import("../src/ui/mascot/loupNielSprites.js");
   const game = new GameService({ repository: new MemoryRunRepository(), seeds: fixedSeedSource(99) });
   game.startTutorial();
   for (const step of TUTORIAL_STEPS) {
     assert.ok(Object.values(Phase).includes(step.phase), step.id);
     assert.ok(LOUP_SVG[step.pose], step.id);
     assert.ok(step.text(game.getView()).length > 10, step.id);
+  }
+});
+
+test("répliques de Loup Niel : même graine, même réplique, toujours dans la liste", async () => {
+  const { VICTORY_QUOTES, DEFEAT_QUOTES, quoteFor } = await import("../src/ui/mascot/repliques.js");
+  for (const seed of [0, 1, 48213, -7, 2 ** 31 - 1]) {
+    assert.equal(quoteFor(VICTORY_QUOTES, seed), quoteFor(VICTORY_QUOTES, seed));
+    assert.ok(VICTORY_QUOTES.includes(quoteFor(VICTORY_QUOTES, seed)));
+    assert.ok(DEFEAT_QUOTES.includes(quoteFor(DEFEAT_QUOTES, seed)));
   }
 });

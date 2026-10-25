@@ -1,0 +1,35 @@
+/* Écran de victoire : titre doré, Loup Niel et sa réplique, confettis. */
+.end-modal.victory { position: relative; overflow: hidden; width: min(760px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; text-align: center; border-color: #05070f; box-shadow: inset 0 0 0 3px #3a2f10, inset 0 0 0 5px #ffb020, 0 10px 0 #05070f; }
+.victory > :not(.confetti) { position: relative; z-index: 1; }
+.vic-eyebrow { font: 800 12px "JetBrains Mono", monospace; letter-spacing: .2em; color: #ffb020; }
+.vic-title { margin: 6px 0 0; font-size: clamp(28px, 7vw, 46px); line-height: 1; color: #ffe9b0; text-shadow: 3px 3px 0 #b3560f, 6px 6px 0 #05070f; letter-spacing: .03em; }
+.vic-wolf { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 8px 0 2px; }
+.vic-loup { position: relative; width: 150px; height: 150px; flex: none; }
+.vic-img { position: relative; width: 100%; height: 100%; }
+.vic-rays { position: absolute; inset: -40px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 207, 74, .10) 0 8deg, transparent 8deg 16deg); animation: vic-spin 20s linear infinite; }
+@keyframes vic-spin { to { transform: rotate(360deg); } }
+.vic-bubble { position: relative; margin: 0; max-width: 380px; padding: 10px 16px; background: #eef2ff; color: #05070f; border: 3px solid #05070f; border-radius: 12px; box-shadow: 0 5px 0 #05070f; font-size: clamp(16px, 2.4vw, 24px); font-weight: 700; line-height: 1.2; text-align: left; }
+.vic-bubble::after { content: ""; position: absolute; left: -11px; bottom: 22px; width: 16px; height: 16px; background: #eef2ff; border: 3px solid #05070f; border-top: 0; border-right: 0; transform: rotate(45deg); }
+.vic-sub { margin: 6px 0 8px; color: #9aa8d8; }
+.vic-stats { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.vic-stats > div { flex: 1 1 22%; min-width: 120px; padding: 8px 6px; border: 3px solid #05070f; border-radius: 9px; background: #141c38; box-shadow: inset 0 0 0 2px #26305a; }
+.vic-stats b { display: block; font: 800 24px "JetBrains Mono", monospace; color: #ffcf4a; }
+.vic-stats span { font: 700 10px "JetBrains Mono", monospace; letter-spacing: .06em; color: #9aa8d8; }
+.vic-label { margin: 10px 0 4px; font: 800 11px "JetBrains Mono", monospace; letter-spacing: .1em; color: #9aa8d8; }
+.victory .end-jokers { justify-content: center; }
+.vic-btn { margin: 12px auto 0; max-width: 460px; width: 100%; display: flex; align-items: center; justify-content: center; text-align: center; }
+.end-modal.victory { display: block; padding-block: 16px; }
+.victory .end-jokers { flex-wrap: wrap; }
+.victory .dim.small { margin: 8px 0 0; }
+.confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.confetti i { position: absolute; top: -20px; width: 10px; height: 14px; border: 2px solid #05070f; border-radius: 2px; animation: vic-fall 4.5s linear infinite; }
+@keyframes vic-fall { to { transform: translateY(110vh) rotate(calc(var(--rot) + 540deg)); } }
+@media (max-width: 640px) {
+  .vic-wolf { flex-direction: column; gap: 14px; }
+  .vic-loup { width: 150px; height: 150px; }
+  .vic-bubble { text-align: center; max-width: none; }
+  .vic-bubble::after { left: 50%; margin-left: -8px; top: -10px; bottom: auto; transform: rotate(135deg); }
+  .vic-stats > div { flex-basis: 40%; }
+}
+@media (prefers-reduced-motion: reduce) { .confetti i, .vic-rays { animation: none; } }
+.end-modal.victory .deploy.vic-btn { position: static !important; inset: auto !important; }

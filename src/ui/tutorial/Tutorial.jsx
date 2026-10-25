@@ -3,15 +3,9 @@
 
 import { useEffect, useState } from "react";
 import { TUTORIAL_STEPS } from "./steps.js";
-import { LOUP_SVG } from "./loupNielSprites.js";
+import { LoupNiel } from "../mascot/LoupNiel.jsx";
 
 const PAD = 6;
-const svgUrl = (pose) => `data:image/svg+xml;utf8,${encodeURIComponent(LOUP_SVG[pose] ?? LOUP_SVG.neutre)}`;
-
-export function LoupNiel({ pose = "neutre", className = "" }) {
-  return <img className={`loup ${className}`} src={svgUrl(pose)} alt="" draggable="false" />;
-}
-
 /** Le rectangle qui englobe les éléments visés, ou null s'ils ne sont pas à l'écran. */
 function measure(selectors) {
   let box = null;
