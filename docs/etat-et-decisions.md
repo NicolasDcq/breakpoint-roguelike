@@ -1,5 +1,12 @@
 # État du jeu et décisions
 
+## 26/10 · Architectures alignées sur les mains de poker de Balatro
+
+- Les architectures étaient déjà calquées sur les mains : Monolithe = carte haute (5 × 1), Redondance = paire (10 × 2), Double redondance = double paire (20 × 2), Cluster = brelan (30 × 3), Full-stack = suite (30 × 4), Stack = couleur (35 × 4), Haute dispo = full (40 × 4), Ferme = carré (60 × 7). Les gains par niveau sont aussi ceux de Balatro.
+- Deux écarts corrigés : **Datacenter** (5 identiques = « Five of a Kind ») passe de 100 × 8 à **120 × 12** ; **Full-stack** (suite) gagne **+3 Scale par niveau** au lieu de +2.
+- Pas d'équivalent à la « quinte flush » (100 × 8) : à voir si on crée une architecture pour un Stack avec 5 identiques.
+- Test de référence régénéré.
+
 ## 26/10 · 8 versions et objectifs façon Balatro
 
 - **8 versions × 3 contrats = 24 contrats** (`VERSIONS = 8`), comme les 8 antes de Balatro. 8 boss différents, un par version. 8 listes de clients (`CLIENT_NAMES`), de plus en plus gros.
@@ -200,11 +207,11 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 
 | Architecture | Condition | Base niv. 1 | Par niveau |
 |---|---|---|---|
-| Datacenter | 5 identiques | 100 ⚡ × 8 | +35 ⚡ +3 × |
+| Datacenter | 5 identiques | 120 ⚡ × 12 | +35 ⚡ +3 × |
 | Ferme de serveurs | 4 identiques | 60 ⚡ × 7 | +30 ⚡ +3 × |
 | Haute dispo | 3 + 2 identiques | 40 ⚡ × 4 | +25 ⚡ +2 × |
 | Stack | 5 de la même famille | 35 ⚡ × 4 | +15 ⚡ +2 × |
-| Full-stack | les 5 familles | 30 ⚡ × 4 | +30 ⚡ +2 × |
+| Full-stack | les 5 familles | 30 ⚡ × 4 | +30 ⚡ +3 × |
 | Cluster | 3 identiques | 30 ⚡ × 3 | +20 ⚡ +2 × |
 | Double redondance | 2 + 2 identiques | 20 ⚡ × 2 | +20 ⚡ +1 × |
 | Redondance | 2 identiques | 10 ⚡ × 2 | +15 ⚡ +1 × |

@@ -29,7 +29,7 @@ const firstTwoGroups = (profile) => [...profile.modules[0], ...profile.modules[1
 const everything = (profile) => profile.all;
 
 const DEFINITIONS = [
-  { id: "datacenter", name: "Datacenter", rule: "5 modules identiques", base: [100, 8], perLevel: [35, 3],
+  { id: "datacenter", name: "Datacenter", rule: "5 modules identiques", base: [120, 12], perLevel: [35, 3],
     matches: (p) => groupSize(p.modules, 0) >= 5, members: firstGroup("modules") },
   { id: "ferme", name: "Ferme de serveurs", rule: "4 modules identiques", base: [60, 7], perLevel: [30, 3],
     matches: (p) => groupSize(p.modules, 0) >= 4, members: firstGroup("modules") },
@@ -37,7 +37,7 @@ const DEFINITIONS = [
     matches: (p) => groupSize(p.modules, 0) >= 3 && groupSize(p.modules, 1) >= 2, members: firstTwoGroups },
   { id: "stack", name: "Stack", rule: "5 modules de la même famille", base: [35, 4], perLevel: [15, 2],
     matches: (p) => groupSize(p.families, 0) >= 5, members: firstGroup("families") },
-  { id: "fullstack", name: "Full-stack", rule: "5 modules des 5 familles", base: [30, 4], perLevel: [30, 2],
+  { id: "fullstack", name: "Full-stack", rule: "5 modules des 5 familles", base: [30, 4], perLevel: [30, 3],
     matches: (p) => p.families.length >= 5, members: everything },
   { id: "cluster", name: "Cluster", rule: "3 modules identiques", base: [30, 3], perLevel: [20, 2],
     matches: (p) => groupSize(p.modules, 0) >= 3, members: firstGroup("modules") },
