@@ -1,5 +1,13 @@
 # État du jeu et décisions
 
+## 26/10 · Le Cache resserre son résultat aux réactivations
+
+- Quand le Cache booste un producteur, le moteur retient le facteur pour cette case (`state.cached` dans `ScoringEngine`). Chaque réactivation de la même case, pendant le même déploiement, reprend ce facteur : un cache qui sert le même résultat. Vidé à chaque déploiement.
+- Exemple : Serveur à 10 Compute, Cache ×2 avant lui, Worker après : 20 + 20 au lieu de 20 + 10.
+- Le Plugin « Le Cache » (×1,5 sur un module réactivé) ne change pas et se cumule.
+- Texte du module mis à jour. Test de référence régénéré (`npm run golden`). Deux tests ajoutés.
+- À surveiller : Cache + Worker niveau 3 compte le bonus 4 fois. Équilibrage à revoir plus tard (bot 80 parties).
+
 ## 25/10 · Écran de victoire avec Loup Niel
 
 - **Victoire** : titre doré, confettis, Loup Niel (pose « bravo ») et une réplique dans une bulle, chiffres de la partie (contrats, déploiements, modules, Plugins), Plugins du joueur, bouton « Nouvelle partie ». Composant `VictoryModal` (`ResultModals.jsx`), style `26-victory.css`.

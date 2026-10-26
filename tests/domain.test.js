@@ -636,3 +636,21 @@ test("répliques de Loup Niel : même graine, même réplique, toujours dans la 
     assert.ok(DEFEAT_QUOTES.includes(quoteFor(DEFEAT_QUOTES, seed)));
   }
 });
+
+test("Cache : une brique réactivée ressert le résultat mis en cache", () => {
+  const plain = score(board("server", "worker"));
+  const cached = score(board("cache", "server", "worker"));
+  const server = score(board("server"));
+  const unit = server.compute - 5; // ce que produit le Serveur (la base du Monolithe est 5)
+  assert.ok(unit > 0);
+  assert.equal(plain.compute, 5 + 2 * unit); // activation + réactivation
+  assert.equal(cached.compute, 5 + 2 * (2 * unit)); // les deux activations profitent du Cache ×2
+});
+
+test("Cache : le cache ne sert qu'à la case qui en a profité", () => {
+  const other = score(board("cache", "server", "micro", "worker"));
+  const base = score(board("server", "micro", "worker"));
+  // le Worker réactive le Micro (non boosté) : seul le Serveur gagne le ×2
+  const server = score(board("server")).compute - 5;
+  assert.equal(other.compute - base.compute, server);
+});

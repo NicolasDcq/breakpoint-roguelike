@@ -35,6 +35,8 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
     result,
     stock: { data: dataStock, money },
     boost: null,
+    /** Case → facteur du Cache dont elle a profité : une réactivation resert le même résultat. */
+    cached: new Map(),
     queue: 0,
     activations: 0,
     spend(resource, amount) {
@@ -92,9 +94,14 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
           pluginEvents.push({ id: plugin.id, mult: factor });
         }
       }
-      if (state.boost && hasOutput(output)) {
-        multiplier *= state.boost;
-        state.boost = null;
+      if (hasOutput(output)) {
+        const replay = isRetrigger ? state.cached.get(cell) ?? 1 : 1;
+        const boost = state.boost ?? 1;
+        if (replay * boost !== 1) {
+          multiplier *= replay * boost;
+          state.cached.set(cell, replay * boost);
+          state.boost = null;
+        }
       }
     }
     const final = {

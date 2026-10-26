@@ -112,7 +112,7 @@ const DEFINITIONS = {
   },
   cache: {
     name: "Cache", family: "ops", price: 5, producer: false,
-    lines: (level) => [line("boost", `×${frNumber(atLevel([2, 2.5, 3], level))}`, `Le prochain producteur activé produit ×${frNumber(atLevel([2, 2.5, 3], level))}.`, "Sans producteur ensuite, le boost est perdu.")],
+    lines: (level) => [line("boost", `×${frNumber(atLevel([2, 2.5, 3], level))}`, `Le prochain producteur activé produit ×${frNumber(atLevel([2, 2.5, 3], level))}, et à chaque fois qu'il est réactivé.`, "Sans producteur ensuite, le boost est perdu. Le résultat est gardé en cache jusqu'à la fin du déploiement.")],
     effect: (ctx, level) => ctx.boostNext(atLevel([2, 2.5, 3], level)),
   },
   worker: {
