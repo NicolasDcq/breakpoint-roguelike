@@ -2,7 +2,7 @@
 // phase : où l'étape s'affiche · when : condition en plus · target : zone éclairée (sélecteurs CSS)
 // interactive : le joueur peut agir dans la zone éclairée · done : fin automatique (sinon bouton « Suivant »).
 
-import { ARCHITECTURE_BY_ID, Phase, RULES } from "../../domain/index.js";
+import { ARCHITECTURES, ARCHITECTURE_BY_ID, Phase, RULES } from "../../domain/index.js";
 
 const archName = (view) => ARCHITECTURE_BY_ID[view.preview.architecture.id].name;
 const hasPack = (id) => (view) => view.packSlots.some((slot) => slot.packId === id && !slot.sold);
@@ -20,7 +20,7 @@ export const TUTORIAL_STEPS = [
   { id: "architecture", phase: Phase.PLAY, target: [".arch-line"], pose: "bravo",
     text: (view) => `Tes modules forment une architecture : <b>${archName(view)}</b>. C’est la <b>base</b> du score, comme une main au poker.` },
   { id: "neuf", phase: Phase.PLAY, target: [".arch-line"], pose: "surpris",
-    text: () => "Il y a <b>9 architectures</b> : Monolithe, Redondance, Cluster, Double redondance, Haute dispo, Full-stack, Stack, Ferme de serveurs, Datacenter. Plus elle est rare, plus sa <b>base</b> est forte. Touche cette ligne pour voir la liste." },
+    text: () => `Il y a <b>${ARCHITECTURES.length} architectures</b> : ${[...ARCHITECTURES].reverse().map((a) => a.name).join(", ")}. Plus elle est rare, plus sa <b>base</b> est forte. Touche cette ligne pour voir la liste.` },
   { id: "formule", phase: Phase.PLAY, target: [".score-panel .formula"], pose: "explique",
     text: () => "<b>Compute × Scale</b> = ton score du déploiement. Les modules ajoutent du Compute ou du Scale ; les scores de chaque déploiement s’additionnent." },
   { id: "defausser", phase: Phase.PLAY, target: [".discard-btn"], pose: "reflechit",

@@ -10,6 +10,7 @@ const same = (moduleId, count) => Array(count).fill(moduleId);
 
 /** Exemple de pose pour chaque architecture : des groupes de modules. */
 export const ARCHITECTURE_EXAMPLES = {
+  cinqneufs: [same("server", 3), same("micro", 2)],
   datacenter: [same("server", 5)],
   ferme: [same("server", 4)],
   hautedispo: [same("server", 3), same("database", 2)],
@@ -23,10 +24,11 @@ export const ARCHITECTURE_EXAMPLES = {
 
 /** Ce que montre le dessin, en mots (pour les lecteurs d'écran et les infobulles). */
 export const ARCHITECTURE_HINTS = {
+  cinqneufs: "3 fois un module + 2 fois un autre, tous de la même famille",
   datacenter: "5 fois le même module",
   ferme: "4 fois le même module",
   hautedispo: "3 fois un module + 2 fois un autre",
-  stack: "5 modules différents de la même famille",
+  stack: "5 modules de la même famille",
   fullstack: "1 module de chaque famille",
   cluster: "3 fois le même module",
   double: "2 fois un module + 2 fois un autre",

@@ -4,7 +4,7 @@
 
 - Les architectures étaient déjà calquées sur les mains : Monolithe = carte haute (5 × 1), Redondance = paire (10 × 2), Double redondance = double paire (20 × 2), Cluster = brelan (30 × 3), Full-stack = suite (30 × 4), Stack = couleur (35 × 4), Haute dispo = full (40 × 4), Ferme = carré (60 × 7). Les gains par niveau sont aussi ceux de Balatro.
 - Deux écarts corrigés : **Datacenter** (5 identiques = « Five of a Kind ») passe de 100 × 8 à **120 × 12** ; **Full-stack** (suite) gagne **+3 Scale par niveau** au lieu de +2.
-- Pas d'équivalent à la « quinte flush » (100 × 8) : à voir si on crée une architecture pour un Stack avec 5 identiques.
+- **Cinq neufs** (nouvelle, 10ᵉ architecture) : 3 identiques + 2 identiques, tous de la même famille. C'est le « Flush House » de Balatro : 140 × 14, +40 ⚡ +4 × par niveau, au-dessus du Datacenter. Nom : les « cinq neufs » (99,999 % de disponibilité), clin d'œil à une Haute dispo parfaite. Le tutoriel et la liste des architectures la montrent automatiquement.
 - Test de référence régénéré.
 
 ## 26/10 · 8 versions et objectifs façon Balatro
@@ -207,6 +207,7 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 
 | Architecture | Condition | Base niv. 1 | Par niveau |
 |---|---|---|---|
+| Cinq neufs | 3 + 2 identiques, même famille | 140 ⚡ × 14 | +40 ⚡ +4 × |
 | Datacenter | 5 identiques | 120 ⚡ × 12 | +35 ⚡ +3 × |
 | Ferme de serveurs | 4 identiques | 60 ⚡ × 7 | +30 ⚡ +3 × |
 | Haute dispo | 3 + 2 identiques | 40 ⚡ × 4 | +25 ⚡ +2 × |

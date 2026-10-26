@@ -42,6 +42,7 @@ test("les voisins d'une case sont haut, bas, gauche, droite", () => {
 
 test("chaque architecture est reconnue, de la plus forte à la plus faible", () => {
   const cases = [
+    [["server", "server", "server", "micro", "micro"], "cinqneufs"],
     [["server", "server", "server", "server", "server"], "datacenter"],
     [["server", "server", "server", "server", "cdn"], "ferme"],
     [["server", "server", "server", "cdn", "cdn"], "hautedispo"],

@@ -42,5 +42,5 @@ export function popupLines(event) {
 export const ARCHITECTURE_ACCENT = {
   monolithe: "var(--green)", redondance: "var(--cyan)", double: "var(--cyan)",
   cluster: "var(--violet)", fullstack: "var(--violet)", stack: "var(--violet)",
-  hautedispo: "var(--rose)", ferme: "var(--rose)", datacenter: "var(--amber)",
+  hautedispo: "var(--rose)", ferme: "var(--rose)", datacenter: "var(--amber)", cinqneufs: "var(--amber)",
 };

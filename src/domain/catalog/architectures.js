@@ -29,6 +29,9 @@ const firstTwoGroups = (profile) => [...profile.modules[0], ...profile.modules[1
 const everything = (profile) => profile.all;
 
 const DEFINITIONS = [
+  // Le « Flush House » de Balatro : une Haute dispo dont les cinq modules sont de la même famille.
+  { id: "cinqneufs", name: "Cinq neufs", rule: "3 identiques + 2 identiques, de la même famille", base: [140, 14], perLevel: [40, 4],
+    matches: (p) => groupSize(p.modules, 0) >= 3 && groupSize(p.modules, 1) >= 2 && groupSize(p.families, 0) >= 5, members: firstTwoGroups },
   { id: "datacenter", name: "Datacenter", rule: "5 modules identiques", base: [120, 12], perLevel: [35, 3],
     matches: (p) => groupSize(p.modules, 0) >= 5, members: firstGroup("modules") },
   { id: "ferme", name: "Ferme de serveurs", rule: "4 modules identiques", base: [60, 7], perLevel: [30, 3],
