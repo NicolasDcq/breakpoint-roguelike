@@ -26,8 +26,11 @@ const hasOutput = (output) => output.compute || output.scale || output.data || o
  * @param {number} [input.contractsWon]  contrats déjà livrés dans la partie
  * @param {number} [input.maxPlaced]     modules posés au plus pendant ce contrat
  * @param {number} [input.discardsUsed]  défausses déjà utilisées pendant ce contrat
+ * @param {number} [input.deploysPlayed]  déploiements déjà joués dans la partie
+ * @param {number} [input.deploysThisContract]  déploiements déjà joués pendant ce contrat
+ * @param {boolean} [input.isLastDeploy]  vrai si c'est le dernier déploiement du contrat
  */
-export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, money, architectureLevels, parcSize, contractsWon = 0, maxPlaced = 5, discardsUsed = 0 }) {
+export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, money, architectureLevels, parcSize, contractsWon = 0, maxPlaced = 5, discardsUsed = 0, deploysPlayed = 0, deploysThisContract = 0, isLastDeploy = false }) {
   const plugins = pluginIds.map((id) => PLUGINS[id]);
   const placed = cards.filter(Boolean);
   const result = { compute: 0, scale: 1, data: 0, money: 0, events: [], endEvents: [], fired: new Set(), cards, placed, count: placed.length, architecture: null, score: 0 };
@@ -61,7 +64,10 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
   const tracked = (plugin, call) => {
     const before = { compute: result.compute, scale: result.scale, data: result.data };
     const fired = call();
-    return { fired, change: { id: plugin.id, compute: result.compute - before.compute, scale: round2(result.scale - before.scale), data: result.data - before.data } };
+    const change = { id: plugin.id, compute: result.compute - before.compute, scale: round2(result.scale - before.scale), data: result.data - before.data };
+    // Un Plugin qui multiplie Scale : l'animation montre le facteur (×1,3) et non l'écart.
+    if (plugin.scaleTimes && before.scale > 0) change.scaleTimes = round2(result.scale / before.scale);
+    return { fired, change };
   };
 
   // 2. Le plateau, case par case.
@@ -137,10 +143,11 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
   CELLS.forEach((cell) => activate(cell, 0, false));
 
   // 3. Les Plugins de fin.
-  const env = { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed };
-  for (const plugin of plugins) {
+  // Chaque Plugin sait aussi où il est dans la rangée (`isLastPlugin` : le dernier à droite).
+  const env = { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed, deploysPlayed, deploysThisContract, isLastDeploy };
+  for (const [index, plugin] of plugins.entries()) {
     if (!plugin.atEnd) continue;
-    const { fired, change } = tracked(plugin, () => plugin.atEnd(result, env));
+    const { fired, change } = tracked(plugin, () => plugin.atEnd(result, { ...env, isLastPlugin: index === plugins.length - 1 }));
     if (fired) { result.fired.add(plugin.id); result.endEvents.push(change); }
   }
   result.scale = round2(result.scale);

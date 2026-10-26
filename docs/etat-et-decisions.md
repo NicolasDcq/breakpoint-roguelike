@@ -1,5 +1,34 @@
 # État du jeu et décisions
 
+## 26/10 · Vague 4 : 15 Plugins qui multiplient Scale et qui grandissent
+
+Pour coller à la puissance de Balatro, les Plugins multiplient maintenant Scale à chaque rareté, et certains grandissent pendant la partie. On passe de 36 à 51 Plugins. Les ×Scale sont en rouge (couleur de Scale), jamais en jaune (réservé à l'argent).
+
+| Rareté | Plugin | Effet |
+|---|---|---|
+| Commun | Ticket Jira | +0,1 Scale par déploiement joué dans la partie |
+| Commun | Sprint | +4 Compute par déploiement déjà joué dans le contrat |
+| Commun | Hotfix | +1 Scale au dernier déploiement du contrat |
+| Peu commun | Load Balancer | Scale ×1,3 si 2 modules identiques ou plus |
+| Peu commun | Certification | Scale ×1,25 si l'architecture n'est pas un Monolithe |
+| Peu commun | Monitoring | Scale ×1,15 par module Ops posé |
+| Peu commun | Conteneur | Scale ×1,3 si aucun module posé n'est isolé (2 posés au moins) |
+| Rare | Hyperscaler | Scale ×(1 + 0,1 par contrat livré) |
+| Rare | Autoscaling | Scale ×1,5, ou ×2 au dernier déploiement |
+| Rare | Feature Flag | Scale ×1,2 à chaque réactivation d'un module |
+| Rare | Montée en charge | Scale ×1,15 par déploiement déjà joué dans le contrat |
+| Épique | Déploiement final | Scale ×3 s'il est le dernier Plugin à droite |
+| Épique | Rachat de start-up | Scale ×(1 + 0,5 par Plugin épique ou légendaire) |
+| Épique | Pivot | Scale ×(1 + 0,25 par famille différente posée) |
+| Épique | Monorepo | Scale ×2,5 si 3 modules ou plus, tous différents |
+
+- Moteur : l'environnement des Plugins de fin reçoit `deploysPlayed`, `deploysThisContract`, `isLastDeploy` et `isLastPlugin` (calculés par `Run.deployCounts`). Le contexte d'activation a `multiplyScale`. Un Plugin qui multiplie Scale porte `scaleTimes: true` : l'animation affiche « ×1,3 » et non l'écart.
+- L'ordre compte comme dans Balatro : ce qui ajoute à gauche, ce qui multiplie à droite. Le bot range ses Plugins ainsi.
+- Les badges sur les puces suivent la partie (déploiements, contrats livrés, plateau).
+- Sprites dessinés pour les 15 (`ui/plugins/sprites.js`). Le test de couverture de la boutique passe à 300 graines.
+- Golden régénéré (nouveaux Plugins dans le tirage, bot qui range ses Plugins).
+- Bot (80 parties) : toujours 0 % de victoires. Il meurt surtout aux boss des versions 3 et 4 (contrats 9 et 12), à 70-90 % de l'objectif. À décider : baisser un peu les objectifs en attendant, ou donner encore plus de puissance (Plugins légendaires, additifs).
+
 ## 26/10 · Architectures alignées sur les mains de poker de Balatro
 
 - Les architectures étaient déjà calquées sur les mains : Monolithe = carte haute (5 × 1), Redondance = paire (10 × 2), Double redondance = double paire (20 × 2), Cluster = brelan (30 × 3), Full-stack = suite (30 × 4), Stack = couleur (35 × 4), Haute dispo = full (40 × 4), Ferme = carré (60 × 7). Les gains par niveau sont aussi ceux de Balatro.

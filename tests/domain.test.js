@@ -21,6 +21,7 @@ const board = (...ids) => {
   const placed = cards(...ids);
   return [...placed, ...Array(CELL_COUNT - placed.length).fill(null)];
 };
+const round2 = (value) => Math.round(value * 100) / 100;
 const score = (cells, extra = {}) => scoreDeployment({
   cards: cells, pluginIds: [], dataStock: 0, money: 0, parcSize: 20,
   architectureLevels: {}, ...extra,
@@ -234,7 +235,7 @@ test("un colis montre 3 modules ; celui qu'on garde rejoint le parc", () => {
 test("tous les modules peuvent sortir d'un colis, et tous les Plugins en boutique", () => {
   const seenModules = new Set();
   const seenPlugins = new Set();
-  for (let seed = 1; seed <= 150; seed++) {
+  for (let seed = 1; seed <= 300; seed++) {
     const run = Run.start(seed);
     run.phase = Phase.WON;
     run.openShop();
@@ -654,4 +655,103 @@ test("Cache : le cache ne sert qu'à la case qui en a profité", () => {
   // le Worker réactive le Micro (non boosté) : seul le Serveur gagne le ×2
   const server = score(board("server")).compute - 5;
   assert.equal(other.compute - base.compute, server);
+});
+
+// ---------- Vague 4 : Plugins qui multiplient Scale et qui grandissent ----------
+/** Le Scale sans puis avec les Plugins donnés, pour le même plateau. */
+const scaleWith = (cells, pluginIds, extra = {}) => [score(cells, extra).scale, score(cells, { pluginIds, ...extra }).scale];
+const placeAt = (cells) => { const out = Array(CELL_COUNT).fill(null); Object.entries(cells).forEach(([cell, id]) => { out[cell] = cards(id)[0]; }); return out; };
+
+test("les Plugins qui grandissent suivent les déploiements joués", () => {
+  const cells = board("server", "cdn");
+  assert.equal(round2(score(cells, { pluginIds: ["ticketjira"], deploysPlayed: 12 }).scale - score(cells).scale), 1.2);
+  assert.equal(score(cells, { pluginIds: ["ticketjira"] }).scale, score(cells).scale);
+  assert.equal(score(cells, { pluginIds: ["sprint"], deploysThisContract: 3 }).compute - score(cells).compute, 12);
+  assert.equal(score(cells, { pluginIds: ["hotfix"], isLastDeploy: true }).scale - score(cells).scale, 1);
+  assert.equal(score(cells, { pluginIds: ["hotfix"], isLastDeploy: false }).scale, score(cells).scale);
+});
+
+test("Load Balancer : ×1,3 avec deux modules identiques", () => {
+  const [before, after] = scaleWith(board("server", "server", "cdn"), ["loadbalancer"]);
+  assert.equal(after, round2(before * 1.3));
+  const [same, none] = scaleWith(board("server", "cdn"), ["loadbalancer"]);
+  assert.equal(none, same);
+});
+
+test("Certification : ×1,25 sauf pour un Monolithe", () => {
+  const [before, after] = scaleWith(board("server", "server", "cdn"), ["certification"]);
+  assert.equal(after, round2(before * 1.25));
+  const [mono, monoAfter] = scaleWith(board("server", "cdn"), ["certification"]);
+  assert.equal(monoAfter, mono);
+});
+
+test("Monitoring : ×1,15 par module Ops", () => {
+  const [before, after] = scaleWith(board("server", "cache", "worker"), ["monitoring"]);
+  assert.equal(after, round2(before * 1.15 ** 2));
+  const [none, noneAfter] = scaleWith(board("server", "cdn"), ["monitoring"]);
+  assert.equal(noneAfter, none);
+});
+
+test("Conteneur : ×1,3 si aucun module n'est isolé", () => {
+  const [before, after] = scaleWith(board("server", "cdn", "cache"), ["conteneur"]);
+  assert.equal(after, round2(before * 1.3));
+  const apart = placeAt({ 0: "server", 15: "cdn" });
+  const [alone, aloneAfter] = scaleWith(apart, ["conteneur"]);
+  assert.equal(aloneAfter, alone);
+});
+
+test("Hyperscaler, Autoscaling et Montée en charge grandissent avec la partie", () => {
+  const cells = board("server", "cdn");
+  const [base, hyper] = scaleWith(cells, ["hyperscaler"], { contractsWon: 10 });
+  assert.equal(hyper, round2(base * 2));
+  const [, last] = scaleWith(cells, ["autoscaling"], { isLastDeploy: true });
+  const [, usual] = scaleWith(cells, ["autoscaling"]);
+  assert.equal(last, round2(base * 2));
+  assert.equal(usual, round2(base * 1.5));
+  const [, climb] = scaleWith(cells, ["montee"], { deploysThisContract: 2 });
+  assert.equal(climb, round2(base * 1.15 ** 2));
+});
+
+test("Feature Flag multiplie Scale à chaque réactivation", () => {
+  let scale = 3;
+  PLUGINS.featureflag.onRetrigger({ multiplyScale: (factor) => { scale *= factor; } });
+  assert.equal(round2(scale), 3.6);
+  const cells = board("server", "micro", "worker");
+  const [base, flagged] = scaleWith(cells, ["featureflag"]);
+  assert.equal(flagged, round2(base * 1.2));
+});
+
+test("Déploiement final ne joue qu'à droite de la rangée", () => {
+  const cells = board("server", "cdn");
+  const [base, right] = scaleWith(cells, ["pivot", "deploiementfinal"]);
+  const [, left] = scaleWith(cells, ["deploiementfinal", "pivot"]);
+  const pivot = scaleWith(cells, ["pivot"])[1];
+  assert.equal(right, round2(pivot * 3));
+  assert.equal(left, pivot);
+  assert.ok(base < pivot);
+});
+
+test("Rachat de start-up compte les Plugins épiques, Pivot les familles, Monorepo les modules différents", () => {
+  const cells = board("server", "cdn", "cache");
+  const [base, bought] = scaleWith(cells, ["rachat", "pivot"]);
+  const withPivot = scaleWith(cells, ["pivot"])[1];
+  assert.equal(bought, round2(withPivot * 2));
+  assert.equal(withPivot, round2(base * (1 + 0.25 * 3)));
+  const [, mono] = scaleWith(cells, ["monorepo"]);
+  assert.equal(mono, round2(base * 2.5));
+  const [dupBase, dup] = scaleWith(board("server", "server", "cdn"), ["monorepo"]);
+  assert.equal(dup, dupBase);
+});
+
+test("les badges des Plugins de la vague 4 suivent la partie", () => {
+  const run = Run.start(5);
+  run.pluginIds = ["ticketjira", "deploiementfinal", "hyperscaler"];
+  run.architecturePlays = { monolithe: 4 };
+  run.contractIndex = 6;
+  const values = run.pluginValues;
+  assert.equal(values.ticketjira.amount, 0.4);
+  assert.equal(values.hyperscaler.amount, 1.6);
+  assert.equal(values.deploiementfinal.amount, 1);
+  run.pluginIds = ["hyperscaler", "deploiementfinal"];
+  assert.equal(run.pluginValues.deploiementfinal.amount, 3);
 });

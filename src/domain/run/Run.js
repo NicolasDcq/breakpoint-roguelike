@@ -134,7 +134,17 @@ export class Run {
       contractsWon: this.contractIndex,
       maxPlaced: this.limits.maxPlaced,
       discardsUsed: this.limits.discards - this.round.discardsLeft,
+      ...this.deployCounts,
     });
+  }
+
+  /** Où en sont les déploiements : dans la partie, dans ce contrat, et est-ce le dernier ? */
+  get deployCounts() {
+    return {
+      deploysPlayed: Object.values(this.architecturePlays).reduce((sum, plays) => sum + plays, 0),
+      deploysThisContract: this.round ? this.limits.deploys - this.round.deploysLeft : 0,
+      isLastDeploy: this.round ? this.round.deploysLeft === 1 : false,
+    };
   }
 
   /** Déplace un Plugin : l'ordre compte, car les Plugins de fin agissent l'un après l'autre. */
@@ -157,6 +167,7 @@ export class Run {
       contractsWon: this.contractIndex,
       parcSize: this.parc.size,
       money: this.money,
+      ...this.deployCounts,
     });
   }
 

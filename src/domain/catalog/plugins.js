@@ -6,10 +6,13 @@
 // - atEnd(result, env) : à la fin du déploiement ;
 // - contractInterest(money) : $ en plus quand un contrat est livré ;
 // - freeRemoval : retirer un module du parc ne coûte rien.
-// atEnd reçoit l'environnement { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed }.
+// atEnd reçoit l'environnement { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed,
+// deploysPlayed, deploysThisContract, isLastDeploy, isLastPlugin }.
+// `scaleTimes: true` : le Plugin multiplie Scale (l'animation affiche le facteur).
+// Les Plugins de fin agissent de gauche à droite : ceux qui ajoutent d'abord, ceux qui multiplient ensuite.
 
 import { familyOf } from "./modules.js";
-import { GRID_SIZE } from "../board/grid.js";
+import { GRID_SIZE, neighborCells } from "../board/grid.js";
 import { RULES } from "./rules.js";
 
 const countFamily = (cards, family) => cards.filter((card) => familyOf(card.moduleId) === family).length;
@@ -20,6 +23,13 @@ const isFullColumn = (cards, column) => Array.from({ length: GRID_SIZE }, (_, ro
 const mirrorCell = (cell) => Math.floor(cell / GRID_SIZE) * GRID_SIZE + (GRID_SIZE - 1 - (cell % GRID_SIZE));
 const CORNERS = [0, GRID_SIZE - 1, GRID_SIZE * (GRID_SIZE - 1), GRID_SIZE * GRID_SIZE - 1];
 const isCenter = (cell) => rowOf(cell) > 0 && rowOf(cell) < GRID_SIZE - 1 && columnOf(cell) > 0 && columnOf(cell) < GRID_SIZE - 1;
+const countModule = (cards) => {
+  const counts = new Map();
+  cards.forEach((card) => counts.set(card.moduleId, (counts.get(card.moduleId) ?? 0) + 1));
+  return counts;
+};
+const hasNeighbor = (cards, cell) => neighborCells(cell).some((other) => cards[other]);
+const epicCount = (pluginIds) => pluginIds.filter((id) => ["epic", "legendary"].includes(PLUGIN_RARITY[id])).length;
 const onDiagonal = (cell) => rowOf(cell) === columnOf(cell) || rowOf(cell) + columnOf(cell) === GRID_SIZE - 1;
 
 const DEFINITIONS = {
@@ -48,7 +58,7 @@ const DEFINITIONS = {
     },
   },
   growth: {
-    name: "Growth Hacker", rarity: "epic", text: "Scale ×1,5 si au moins 3 familles sont posées.",
+    name: "Growth Hacker", rarity: "epic", scaleTimes: true, text: "Scale ×1,5 si au moins 3 familles sont posées.",
     atEnd: (result) => {
       if (new Set(result.placed.map((card) => familyOf(card.moduleId))).size < 3) return false;
       result.scale *= 1.5;
@@ -146,7 +156,7 @@ const DEFINITIONS = {
     },
   },
   investor: {
-    name: "L'Investisseuse", rarity: "epic", text: "Scale ×(1 + 0,25 par Plugin possédé) : ×2,25 avec 5 Plugins.",
+    name: "L'Investisseuse", rarity: "epic", scaleTimes: true, text: "Scale ×(1 + 0,25 par Plugin possédé) : ×2,25 avec 5 Plugins.",
     atEnd: (result, env) => { result.scale *= 1 + 0.25 * env.pluginIds.length; return true; },
   },
   vc: {
@@ -167,7 +177,7 @@ const DEFINITIONS = {
     },
   },
   overclock: {
-    name: "L'Overclocker", rarity: "epic", text: "Plateau plein (autant de modules que le maximum autorisé) : Scale ×2.",
+    name: "L'Overclocker", rarity: "epic", scaleTimes: true, text: "Plateau plein (autant de modules que le maximum autorisé) : Scale ×2.",
     atEnd: (result, env) => { if (result.count < env.maxPlaced) return false; result.scale *= 2; return true; },
   },
   cleancode: {
@@ -237,6 +247,91 @@ const DEFINITIONS = {
       }
       result.scale += 0.3 * empty;
       return empty > 0;
+    },
+  },
+  // ---------- Vague 4 (Plugins qui multiplient Scale et qui grandissent) ----------
+  ticketjira: {
+    name: "Le Ticket Jira", rarity: "common", text: "+0,1 Scale par déploiement joué depuis le début de la partie.",
+    atEnd: (result, env) => { result.scale += 0.1 * env.deploysPlayed; return env.deploysPlayed > 0; },
+  },
+  sprint: {
+    name: "Le Sprint", rarity: "common", text: "+4 Compute par déploiement déjà joué dans ce contrat.",
+    atEnd: (result, env) => { result.compute += 4 * env.deploysThisContract; return env.deploysThisContract > 0; },
+  },
+  hotfix: {
+    name: "Le Hotfix", rarity: "common", text: "+1 Scale au dernier déploiement du contrat.",
+    atEnd: (result, env) => { if (!env.isLastDeploy) return false; result.scale += 1; return true; },
+  },
+  loadbalancer: {
+    name: "Le Load Balancer", rarity: "uncommon", scaleTimes: true, text: "Scale ×1,3 si 2 modules identiques ou plus sont posés.",
+    atEnd: (result) => {
+      if (![...countModule(result.placed).values()].some((n) => n >= 2)) return false;
+      result.scale *= 1.3;
+      return true;
+    },
+  },
+  certification: {
+    name: "La Certification", rarity: "uncommon", scaleTimes: true, text: "Scale ×1,25 si l'architecture n'est pas un Monolithe.",
+    atEnd: (result) => {
+      if (!result.count || result.architecture.id === "monolithe") return false;
+      result.scale *= 1.25;
+      return true;
+    },
+  },
+  monitoring: {
+    name: "Le Monitoring", rarity: "uncommon", scaleTimes: true, text: "Scale ×1,15 par module Ops posé.",
+    atEnd: (result) => {
+      const count = countFamily(result.placed, "ops");
+      result.scale *= 1.15 ** count;
+      return count > 0;
+    },
+  },
+  conteneur: {
+    name: "Le Conteneur", rarity: "uncommon", scaleTimes: true, text: "Scale ×1,3 si aucun module posé n'est isolé (chacun touche un autre module).",
+    atEnd: (result) => {
+      if (result.count < 2 || result.cards.some((card, cell) => card && !hasNeighbor(result.cards, cell))) return false;
+      result.scale *= 1.3;
+      return true;
+    },
+  },
+  hyperscaler: {
+    name: "L'Hyperscaler", rarity: "rare", scaleTimes: true, text: "Scale ×(1 + 0,1 par contrat livré) : ×3,3 au contrat 23.",
+    atEnd: (result, env) => { result.scale *= 1 + 0.1 * env.contractsWon; return env.contractsWon > 0; },
+  },
+  autoscaling: {
+    name: "L'Autoscaling", rarity: "rare", scaleTimes: true, text: "Scale ×1,5, ou ×2 au dernier déploiement du contrat.",
+    atEnd: (result, env) => { result.scale *= env.isLastDeploy ? 2 : 1.5; return true; },
+  },
+  featureflag: {
+    name: "Le Feature Flag", rarity: "rare", scaleTimes: true, text: "Chaque réactivation d'un module : Scale ×1,2.",
+    onRetrigger: (ctx) => ctx.multiplyScale(1.2),
+  },
+  montee: {
+    name: "La Montée en charge", rarity: "rare", scaleTimes: true, text: "Scale ×1,15 par déploiement déjà joué dans ce contrat.",
+    atEnd: (result, env) => { result.scale *= 1.15 ** env.deploysThisContract; return env.deploysThisContract > 0; },
+  },
+  deploiementfinal: {
+    name: "Le Déploiement final", rarity: "epic", scaleTimes: true, text: "Scale ×3 s'il est le dernier Plugin à droite de la rangée.",
+    atEnd: (result, env) => { if (!env.isLastPlugin) return false; result.scale *= 3; return true; },
+  },
+  rachat: {
+    name: "Le Rachat de start-up", rarity: "epic", scaleTimes: true, text: "Scale ×(1 + 0,5 par Plugin épique ou légendaire possédé).",
+    atEnd: (result, env) => { result.scale *= 1 + 0.5 * epicCount(env.pluginIds); return true; },
+  },
+  pivot: {
+    name: "Le Pivot", rarity: "epic", scaleTimes: true, text: "Scale ×(1 + 0,25 par famille différente posée) : ×2,25 avec 5 familles.",
+    atEnd: (result) => {
+      const count = familiesOf(result.placed).size;
+      result.scale *= 1 + 0.25 * count;
+      return count > 0;
+    },
+  },
+  monorepo: {
+    name: "Le Monorepo", rarity: "epic", scaleTimes: true, text: "Scale ×2,5 si 3 modules ou plus sont posés, tous différents.",
+    atEnd: (result) => {
+      if (result.count < 3 || [...countModule(result.placed).values()].some((n) => n > 1)) return false;
+      result.scale *= 2.5;
+      return true;
     },
   },
 };

@@ -17,6 +17,7 @@ let fireKey = 0;
 function firingOf(entry) {
   const key = ++fireKey;
   if (entry.mult) return { key, kind: "mult", text: `×${fmtDec(entry.mult)}` };
+  if (entry.scaleTimes > 1) return { key, kind: "scale", text: `×${fmtDec(entry.scaleTimes)}` };
   if (entry.compute > 0) return { key, kind: "compute", text: `+${fmtDec(entry.compute)} ⚡` };
   if (entry.scale > 0) return { key, kind: "scale", text: `+${fmtDec(entry.scale)} ×` };
   if (entry.data > 0) return { key, kind: "data", text: `+${entry.data} ◆` };

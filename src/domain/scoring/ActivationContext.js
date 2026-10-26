@@ -18,6 +18,7 @@ export function createActivationContext({ cell, depth, cards, state, output, pen
     fail: (reason) => { output.failure = reason; },
     // Bonus des Plugins : ils s'ajoutent au total, sans multiplicateur.
     bonusScale: (value) => { state.result.scale += value; },
+    multiplyScale: (factor) => { state.result.scale *= factor; },
     bonusData: (value) => { state.stock.data += value; state.result.data += value; },
     // Ce que le module voit du plateau.
     neighbors: () => neighborCells(cell).filter(filled).map((index) => cards[index]),

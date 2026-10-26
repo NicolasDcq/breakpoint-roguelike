@@ -63,6 +63,13 @@ function playTurn(service) {
   service.deploy();
 }
 
+/** Comme un joueur : les Plugins qui ajoutent à gauche, ceux qui multiplient Scale à droite, le Déploiement final tout au bout. */
+function orderPlugins(run) {
+  const weight = (id) => (id === "deploiementfinal" ? 2 : PLUGINS[id].scaleTimes ? 1 : 0);
+  const wanted = [...run.pluginIds].sort((a, b) => weight(a) - weight(b));
+  wanted.forEach((id, index) => run.movePlugin(run.pluginIds.indexOf(id), index));
+}
+
 function shop(service, random) {
   service.openShop();
   const { run } = service;
@@ -81,6 +88,7 @@ function shop(service, random) {
     service.pickFromPack(choose[slot.packId](run.openPack.choices));
   });
   run.offers.forEach((offer, index) => { if (offer.kind === OfferKind.PLUGIN) service.buyOffer(index); });
+  orderPlugins(run);
   service.nextContract();
 }
 
