@@ -8,7 +8,9 @@ const archName = (view) => ARCHITECTURE_BY_ID[view.preview.architecture.id].name
 const hasPack = (id) => (view) => view.packSlots.some((slot) => slot.packId === id && !slot.sold);
 
 export const TUTORIAL_STEPS = [
-  { id: "objectif", phase: Phase.PLAY, target: [".topbar .contract"], pose: "explique",
+  { id: "presentation", phase: Phase.PLAY, target: [], pose: "salut",
+    text: () => "Salut, moi c’est <b>Loup Niel</b>, ton CTO ! Je te guide pour livrer ton <b>premier contrat</b>, puis on passe à la boutique." },
+  { id: "objectif", phase: Phase.PLAY, target: [".topbar"], pose: "explique",
     text: () => `Voilà ton <b>contrat</b> : atteins l’<b>objectif de Performance</b> avec <b>${RULES.deploysPerContract} déploiements</b> et <b>${RULES.discardsPerContract} défausses</b>. Un contrat livré te rapporte de l’argent.` },
   { id: "poser", phase: Phase.PLAY, target: [".board", ".hand-row"], interactive: true, pose: "explique",
     done: (view) => view.placedCount >= 2,
