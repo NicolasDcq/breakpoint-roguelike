@@ -233,7 +233,7 @@ test("un colis montre 3 modules ; celui qu'on garde rejoint le parc", () => {
 test("tous les modules peuvent sortir d'un colis, et tous les Plugins en boutique", () => {
   const seenModules = new Set();
   const seenPlugins = new Set();
-  for (let seed = 1; seed <= 60; seed++) {
+  for (let seed = 1; seed <= 150; seed++) {
     const run = Run.start(seed);
     run.phase = Phase.WON;
     run.openShop();
@@ -417,7 +417,7 @@ test("la valeur actuelle des Plugins suit la partie et le plateau", () => {
   run.contractIndex = 3;
   const values = run.pluginValues;
   assert.deepEqual(values.veteran, { kind: "compute", amount: 9, mode: "add" });
-  assert.deepEqual(values.hoarder, { kind: "compute", amount: run.parc.size, mode: "add" });
+  assert.deepEqual(values.hoarder, { kind: "compute", amount: Math.floor(run.parc.size / 2), mode: "add" });
   assert.deepEqual(values.investor, { kind: "scale", amount: 1 + 0.25 * run.pluginIds.length, mode: "times" });
   assert.deepEqual(values.cloudarch, { kind: "mult", amount: 1.5, mode: "times" });
   assert.equal(values.janitor, undefined, "pas de badge quand le chiffre ne change jamais");
@@ -447,10 +447,10 @@ test("on réordonne les Plugins par glisser-déposer, et l'ordre change le score
   assert.ok(before > after, "Compute ×2 après +3 vaut plus que l'inverse");
 });
 
-test("retirer un module garde 8 modules au moins", () => {
+test("retirer un module garde le minimum de modules", () => {
   const run = Run.start(5);
   run.phase = Phase.SHOP;
-  run.money = 100;
+  run.money = 100000;
   while (run.parc.size > RULES.minParcSize) assert.ok(run.removeCard(run.parc.cards[0].uid).ok);
   assert.equal(run.removeCard(run.parc.cards[0].uid).reason, Refusal.PARC_TOO_SMALL);
 });

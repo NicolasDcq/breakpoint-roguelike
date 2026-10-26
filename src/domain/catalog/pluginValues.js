@@ -18,7 +18,7 @@ const times = (kind, amount) => ({ kind, amount, mode: "times" });
 
 export const PLUGIN_VALUES = Object.freeze({
   veteran: (ctx) => add("compute", 3 * ctx.contractsWon),
-  hoarder: (ctx) => add("compute", ctx.parcSize),
+  hoarder: (ctx) => add("compute", Math.floor(ctx.parcSize / 2)),
   mentor: (ctx) => add("compute", 5 * ctx.pluginIds.filter((id) => RARITY_OF(id) === "common").length),
   investor: (ctx) => times("scale", 1 + 0.25 * ctx.pluginIds.length),
   intern: (ctx) => add("compute", 3 * ctx.placed.length),

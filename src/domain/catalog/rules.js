@@ -2,14 +2,14 @@
 
 export const RULES = Object.freeze({
   /** Graine de la partie du tutoriel : une main avec deux paires (Server et Lambda), donc une vraie Redondance. */
-  tutorialSeed: 6,
+  tutorialSeed: 27,
   handSize: 7,
   maxPlaced: 5,
   deploysPerContract: 4,
   discardsPerContract: 3,
   startMoney: 4,
   startData: 0,
-  minParcSize: 8,
+  minParcSize: 16,
   maxPlugins: 5,
   removeStartPrice: 2,
   rerollStartPrice: 1,
@@ -26,7 +26,7 @@ export const RULES = Object.freeze({
   cardUpgradeCost: { 1: 3, 2: 6 },
   maxCardLevel: 3,
   /** Taille du parc de départ (voir les profils dans starters.js). */
-  startParcSize: 20,
+  startParcSize: 40,
   /** Paiement d'un contrat livré, selon sa lettre. */
   contractPay: { A: 4, B: 5, C: 7 },
 });

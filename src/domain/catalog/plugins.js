@@ -72,8 +72,8 @@ const DEFINITIONS = {
     contractInterest: (money) => Math.min(5, Math.floor(money / 5)),
   },
   hoarder: {
-    name: "La Collectionneuse", rarity: "uncommon", text: "+1 Compute par module de ton parc, à chaque déploiement.",
-    atEnd: (result, env) => { result.compute += env.parcSize; return true; },
+    name: "La Collectionneuse", rarity: "uncommon", text: "+1 Compute par tranche de 2 modules de ton parc, à chaque déploiement.",
+    atEnd: (result, env) => { result.compute += Math.floor(env.parcSize / 2); return true; },
   },
   caffeine: {
     name: "Codeur sous Caféine", rarity: "common", text: "Le premier module posé (plus petit numéro) produit ×3.",

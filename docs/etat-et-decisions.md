@@ -1,5 +1,13 @@
 # État du jeu et décisions
 
+## 26/10 · Parcs de 40 modules
+
+- **Profondeur façon Balatro** : le parc de départ passe de 20 à 40 modules (`RULES.startParcSize`), pour une main de 7. Chaque profil est doublé en gardant son identité (au moins 14 modules Calcul). Minimum de parc : 16 (`minParcSize`).
+- **La Collectionneuse** : +1 Compute par tranche de 2 modules du parc (même force qu'avant : 20 au départ).
+- Partie du tutoriel : nouvelle graine (27), toujours deux paires de Calcul en main.
+- Test de référence régénéré. Bot (80 parties) : 19 % de victoires (26 % avant). Équilibrage à revoir plus tard : coût d'amélioration des modules, prix de retrait, profils.
+- Tests : le Plugin coverage passe à 150 graines, le test de retrait donne assez d'argent.
+
 ## 26/10 · Le Cache resserre son résultat aux réactivations
 
 - Quand le Cache booste un producteur, le moteur retient le facteur pour cette case (`state.cached` dans `ScoringEngine`). Chaque réactivation de la même case, pendant le même déploiement, reprend ce facteur : un cache qui sert le même résultat. Vidé à chaque déploiement.
