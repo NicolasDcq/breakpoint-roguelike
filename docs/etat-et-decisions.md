@@ -27,7 +27,16 @@ Pour coller à la puissance de Balatro, les Plugins multiplient maintenant Scale
 - Les badges sur les puces suivent la partie (déploiements, contrats livrés, plateau).
 - Sprites dessinés pour les 15 (`ui/plugins/sprites.js`). Le test de couverture de la boutique passe à 300 graines.
 - Golden régénéré (nouveaux Plugins dans le tirage, bot qui range ses Plugins).
-- Bot (80 parties) : toujours 0 % de victoires. Il meurt surtout aux boss des versions 3 et 4 (contrats 9 et 12), à 70-90 % de l'objectif. À décider : baisser un peu les objectifs en attendant, ou donner encore plus de puissance (Plugins légendaires, additifs).
+- Bot (80 parties) : 0 % avant la Vague 4. Voir la section suivante pour les valeurs relevées.
+
+## 26/10 · Plugins additifs relevés (façon Balatro)
+
+Un Joker de Balatro donne souvent +4 Mult et des dizaines de jetons. Les anciens Plugins (+3 Compute, +0,3 Scale) ne se voyaient pas à côté des bases d'architecture. Toutes les valeurs additives sont relevées :
+
+- **Compute** : Stagiaire +10 par module, Vétéran +10 par contrat livré, Mentor +20 par Plugin gris, Collectionneuse +1 par module du parc, Monétique +60, Testeur +40, Coin Café +25 par coin, Alternante +30 par famille, Tandem +40 par ligne, Clean Code +80, Sprint +20 par déploiement du contrat.
+- **Scale** : Ingé Réseau +2 par module Réseau, Chef de produit +2 par module Business, Scrum Master +4, Relecteur +2, Pool de connexions +3 par ligne vide, SRE +2 par réactivation, Ticket Jira +0,5 par déploiement joué, Hotfix +6 au dernier déploiement.
+- Les multiplicateurs, l'argent et les effets de position ne changent pas.
+- Golden régénéré. Bot (80 parties) : **1 % de victoires** (0 % avant), et il va beaucoup plus loin : la plupart des défaites arrivent aux contrats 12 à 15 (boss des versions 4 et 5) au lieu de 9 à 12. Le bot ne choisit pas ses Plugins ni leur place : un vrai joueur fera mieux.
 
 ## 26/10 · Architectures alignées sur les mains de poker de Balatro
 

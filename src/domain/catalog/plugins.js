@@ -34,8 +34,8 @@ const onDiagonal = (cell) => rowOf(cell) === columnOf(cell) || rowOf(cell) + col
 
 const DEFINITIONS = {
   intern: {
-    name: "Le Stagiaire", rarity: "common", text: "+3 Compute par module posé.",
-    atEnd: (result) => { result.compute += 3 * result.count; return true; },
+    name: "Le Stagiaire", rarity: "common", text: "+10 Compute par module posé.",
+    atEnd: (result) => { result.compute += 10 * result.count; return true; },
   },
   cloudarch: {
     name: "L'Architecte Cloud", rarity: "rare", text: "Les modules Calcul produisent ×1,5.",
@@ -50,10 +50,10 @@ const DEFINITIONS = {
     afterActivation: (card, ctx) => { if (familyOf(card.moduleId) === "stockage") ctx.bonusData(1); },
   },
   netops: {
-    name: "Ingé Réseau", rarity: "uncommon", text: "+0,4 Scale par module Réseau posé.",
+    name: "Ingé Réseau", rarity: "uncommon", text: "+2 Scale par module Réseau posé.",
     atEnd: (result) => {
       const count = countFamily(result.placed, "reseau");
-      result.scale += 0.4 * count;
+      result.scale += 2 * count;
       return count > 0;
     },
   },
@@ -74,16 +74,16 @@ const DEFINITIONS = {
     },
   },
   sre: {
-    name: "La SRE", rarity: "uncommon", text: "Chaque réactivation ajoute +0,3 Scale.",
-    onRetrigger: (ctx) => ctx.bonusScale(0.3),
+    name: "La SRE", rarity: "uncommon", text: "Chaque réactivation ajoute +2 Scale.",
+    onRetrigger: (ctx) => ctx.bonusScale(2),
   },
   accountant: {
     name: "Le Comptable", rarity: "common", text: "Fin de contrat : +1 $ par tranche de 5 $ en caisse (max +5).",
     contractInterest: (money) => Math.min(5, Math.floor(money / 5)),
   },
   hoarder: {
-    name: "La Collectionneuse", rarity: "uncommon", text: "+1 Compute par tranche de 2 modules de ton parc, à chaque déploiement.",
-    atEnd: (result, env) => { result.compute += Math.floor(env.parcSize / 2); return true; },
+    name: "La Collectionneuse", rarity: "uncommon", text: "+1 Compute par module de ton parc, à chaque déploiement.",
+    atEnd: (result, env) => { result.compute += env.parcSize; return true; },
   },
   caffeine: {
     name: "Codeur sous Caféine", rarity: "common", text: "Le premier module posé (plus petit numéro) produit ×3.",
@@ -95,30 +95,30 @@ const DEFINITIONS = {
   },
   // ---------- Vague 2 ----------
   veteran: {
-    name: "Le Vétéran", rarity: "common", text: "+3 Compute par contrat déjà livré dans la partie.",
-    atEnd: (result, env) => { if (!env.contractsWon) return false; result.compute += 3 * env.contractsWon; return true; },
+    name: "Le Vétéran", rarity: "common", text: "+10 Compute par contrat déjà livré dans la partie.",
+    atEnd: (result, env) => { if (!env.contractsWon) return false; result.compute += 10 * env.contractsWon; return true; },
   },
   mentor: {
-    name: "La Mentor", rarity: "common", text: "+5 Compute par Plugin gris que tu possèdes.",
+    name: "La Mentor", rarity: "common", text: "+20 Compute par Plugin gris que tu possèdes.",
     atEnd: (result, env) => {
       const commons = env.pluginIds.filter((id) => PLUGIN_RARITY[id] === "common").length;
-      result.compute += 5 * commons;
+      result.compute += 20 * commons;
       return commons > 0;
     },
   },
   scrum: {
-    name: "Le Scrum Master", rarity: "common", text: "Si 4 modules ou plus sont posés : +0,5 Scale.",
-    atEnd: (result) => { if (result.count < 4) return false; result.scale += 0.5; return true; },
+    name: "Le Scrum Master", rarity: "common", text: "Si 4 modules ou plus sont posés : +4 Scale.",
+    atEnd: (result) => { if (result.count < 4) return false; result.scale += 4; return true; },
   },
   secuchief: {
     name: "Le Responsable Sécu", rarity: "common", text: "Fin de contrat : +2 $.",
     contractInterest: () => 2,
   },
   productchief: {
-    name: "Chef de produit", rarity: "uncommon", text: "+0,3 Scale par module Business posé.",
+    name: "Chef de produit", rarity: "uncommon", text: "+2 Scale par module Business posé.",
     atEnd: (result) => {
       const count = countFamily(result.placed, "business");
-      result.scale += 0.3 * count;
+      result.scale += 2 * count;
       return count > 0;
     },
   },
@@ -133,8 +133,8 @@ const DEFINITIONS = {
     },
   },
   monetique: {
-    name: "La Monétique", rarity: "uncommon", text: "Si 2 modules Business ou plus sont posés : +15 Compute.",
-    atEnd: (result) => { if (countFamily(result.placed, "business") < 2) return false; result.compute += 15; return true; },
+    name: "La Monétique", rarity: "uncommon", text: "Si 2 modules Business ou plus sont posés : +60 Compute.",
+    atEnd: (result) => { if (countFamily(result.placed, "business") < 2) return false; result.compute += 60; return true; },
   },
   symmetric: {
     name: "Le Symétrique", rarity: "rare", text: "Un module posé sur la case miroir (gauche-droite) d'un autre module : les deux produisent ×2.",
@@ -144,14 +144,14 @@ const DEFINITIONS = {
     },
   },
   tandem: {
-    name: "Le Tandem", rarity: "rare", text: "+10 Compute par ligne qui a 2 modules de la même famille ou plus.",
+    name: "Le Tandem", rarity: "rare", text: "+40 Compute par ligne qui a 2 modules de la même famille ou plus.",
     atEnd: (result) => {
       let rows = 0;
       for (let row = 0; row < GRID_SIZE; row++) {
         const line = result.cards.slice(row * GRID_SIZE, (row + 1) * GRID_SIZE).filter(Boolean);
         if (familiesOf(line).size < line.length) rows++;
       }
-      result.compute += 10 * rows;
+      result.compute += 40 * rows;
       return rows > 0;
     },
   },
@@ -181,10 +181,10 @@ const DEFINITIONS = {
     atEnd: (result, env) => { if (result.count < env.maxPlaced) return false; result.scale *= 2; return true; },
   },
   cleancode: {
-    name: "Le Clean Code", rarity: "epic", text: "Si tu n'as pas défaussé pendant ce contrat : +20 Compute et Scale ×1,5.",
+    name: "Le Clean Code", rarity: "epic", text: "Si tu n'as pas défaussé pendant ce contrat : +80 Compute et Scale ×1,5.",
     atEnd: (result, env) => {
       if (env.discardsUsed > 0) return false;
-      result.compute += 20;
+      result.compute += 80;
       result.scale *= 1.5;
       return true;
     },
@@ -195,34 +195,34 @@ const DEFINITIONS = {
   },
   // ---------- Vague 3 (raretés façon Balatro) ----------
   tester: {
-    name: "Le Testeur", rarity: "common", text: "+6 Compute si un module Ops est posé.",
+    name: "Le Testeur", rarity: "common", text: "+40 Compute si un module Ops est posé.",
     atEnd: (result) => {
       if (countFamily(result.placed, "ops") === 0) return false;
-      result.compute += 6;
+      result.compute += 40;
       return true;
     },
   },
   corner: {
-    name: "Le Coin Café", rarity: "common", text: "+5 Compute par module posé dans un coin.",
+    name: "Le Coin Café", rarity: "common", text: "+25 Compute par module posé dans un coin.",
     atEnd: (result) => {
       const count = CORNERS.filter((cell) => result.cards[cell]).length;
-      result.compute += 5 * count;
+      result.compute += 25 * count;
       return count > 0;
     },
   },
   proofreader: {
-    name: "Le Relecteur", rarity: "common", text: "+0,2 Scale par module de niveau 2 ou plus posé.",
+    name: "Le Relecteur", rarity: "common", text: "+2 Scale par module de niveau 2 ou plus posé.",
     atEnd: (result) => {
       const count = result.placed.filter((card) => card.level >= 2).length;
-      result.scale += 0.2 * count;
+      result.scale += 2 * count;
       return count > 0;
     },
   },
   alternate: {
-    name: "L'Alternante", rarity: "uncommon", text: "+8 Compute par famille différente posée.",
+    name: "L'Alternante", rarity: "uncommon", text: "+30 Compute par famille différente posée.",
     atEnd: (result) => {
       const count = familiesOf(result.placed).size;
-      result.compute += 8 * count;
+      result.compute += 30 * count;
       return count > 0;
     },
   },
@@ -239,28 +239,28 @@ const DEFINITIONS = {
     multiplier: (card, ctx) => (ctx.isRetrigger() ? 1.5 : 1),
   },
   pool: {
-    name: "Le Pool de connexions", rarity: "rare", text: "+0,3 Scale par ligne du plateau sans module.",
+    name: "Le Pool de connexions", rarity: "rare", text: "+3 Scale par ligne du plateau sans module.",
     atEnd: (result) => {
       let empty = 0;
       for (let row = 0; row < GRID_SIZE; row++) {
         if (!result.cards.slice(row * GRID_SIZE, (row + 1) * GRID_SIZE).some(Boolean)) empty++;
       }
-      result.scale += 0.3 * empty;
+      result.scale += 3 * empty;
       return empty > 0;
     },
   },
   // ---------- Vague 4 (Plugins qui multiplient Scale et qui grandissent) ----------
   ticketjira: {
-    name: "Le Ticket Jira", rarity: "common", text: "+0,1 Scale par déploiement joué depuis le début de la partie.",
-    atEnd: (result, env) => { result.scale += 0.1 * env.deploysPlayed; return env.deploysPlayed > 0; },
+    name: "Le Ticket Jira", rarity: "common", text: "+0,5 Scale par déploiement joué depuis le début de la partie.",
+    atEnd: (result, env) => { result.scale += 0.5 * env.deploysPlayed; return env.deploysPlayed > 0; },
   },
   sprint: {
-    name: "Le Sprint", rarity: "common", text: "+4 Compute par déploiement déjà joué dans ce contrat.",
-    atEnd: (result, env) => { result.compute += 4 * env.deploysThisContract; return env.deploysThisContract > 0; },
+    name: "Le Sprint", rarity: "common", text: "+20 Compute par déploiement déjà joué dans ce contrat.",
+    atEnd: (result, env) => { result.compute += 20 * env.deploysThisContract; return env.deploysThisContract > 0; },
   },
   hotfix: {
-    name: "Le Hotfix", rarity: "common", text: "+1 Scale au dernier déploiement du contrat.",
-    atEnd: (result, env) => { if (!env.isLastDeploy) return false; result.scale += 1; return true; },
+    name: "Le Hotfix", rarity: "common", text: "+6 Scale au dernier déploiement du contrat.",
+    atEnd: (result, env) => { if (!env.isLastDeploy) return false; result.scale += 6; return true; },
   },
   loadbalancer: {
     name: "Le Load Balancer", rarity: "uncommon", scaleTimes: true, text: "Scale ×1,3 si 2 modules identiques ou plus sont posés.",

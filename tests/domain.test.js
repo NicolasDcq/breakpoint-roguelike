@@ -95,7 +95,7 @@ test("le Cache booste le producteur suivant", () => {
 
 test("un Plugin de fin agit après le plateau", () => {
   const result = score(board("server"), { pluginIds: ["intern"] });
-  assert.equal(result.compute, 5 + 8 + 3);
+  assert.equal(result.compute, 5 + 8 + 10);
   assert.deepEqual(result.fired, ["intern"]);
 });
 
@@ -355,11 +355,11 @@ test("les nouveaux Plugins de la vague 3 font ce qu'ils disent", () => {
   const cells = (entries) => Array.from({ length: CELL_COUNT }, (_, index) => entries[index] ?? null);
   const one = cells({ 0: card("server") });
   const base = score(one).compute;
-  assert.equal(withPlugin("corner", one).compute, base + 5, "un module dans un coin");
+  assert.equal(withPlugin("corner", one).compute, base + 25, "un module dans un coin");
   assert.equal(withPlugin("corner", cells({ 5: card("server") })).compute, base, "pas dans un coin");
-  assert.equal(withPlugin("alternate", one).compute, base + 8);
-  assert.equal(withPlugin("pool", one).scale, score(one).scale + 0.3 * (GRID_SIZE - 1));
-  assert.equal(withPlugin("proofreader", cells({ 0: card("server", 2) })).scale, score(cells({ 0: card("server", 2) })).scale + 0.2);
+  assert.equal(withPlugin("alternate", one).compute, base + 30);
+  assert.equal(withPlugin("pool", one).scale, score(one).scale + 3 * (GRID_SIZE - 1));
+  assert.equal(withPlugin("proofreader", cells({ 0: card("server", 2) })).scale, score(cells({ 0: card("server", 2) })).scale + 2);
   assert.equal(withPlugin("tester", one).compute, base, "pas d'Ops posé");
 });
 
@@ -418,12 +418,12 @@ test("la valeur actuelle des Plugins suit la partie et le plateau", () => {
   run.pluginIds = ["veteran", "hoarder", "investor", "intern", "cloudarch", "janitor"].slice(0, RULES.maxPlugins);
   run.contractIndex = 3;
   const values = run.pluginValues;
-  assert.deepEqual(values.veteran, { kind: "compute", amount: 9, mode: "add" });
-  assert.deepEqual(values.hoarder, { kind: "compute", amount: Math.floor(run.parc.size / 2), mode: "add" });
+  assert.deepEqual(values.veteran, { kind: "compute", amount: 30, mode: "add" });
+  assert.deepEqual(values.hoarder, { kind: "compute", amount: run.parc.size, mode: "add" });
   assert.deepEqual(values.investor, { kind: "scale", amount: 1 + 0.25 * run.pluginIds.length, mode: "times" });
   assert.deepEqual(values.cloudarch, { kind: "mult", amount: 1.5, mode: "times" });
   assert.equal(values.janitor, undefined, "pas de badge quand le chiffre ne change jamais");
-  assert.equal(values.intern.amount, 3 * run.round.board.placedCount, "suit le plateau en cours");
+  assert.equal(values.intern.amount, 10 * run.round.board.placedCount, "suit le plateau en cours");
 });
 
 test("le déploiement dit quels Plugins s'activent à chaque case et à la fin", () => {
@@ -432,7 +432,7 @@ test("le déploiement dit quels Plugins s'activent à chaque case et à la fin",
   assert.deepEqual(result.events[0].plugins.map((entry) => entry.id), ["cloudarch"]);
   assert.equal(result.events[0].plugins[0].mult, 1.5);
   const end = Object.fromEntries(result.endEvents.map((entry) => [entry.id, entry.compute]));
-  assert.deepEqual(end, { intern: 3, corner: 5 });
+  assert.deepEqual(end, { intern: 10, corner: 25 });
 });
 
 test("on réordonne les Plugins par glisser-déposer, et l'ordre change le score", () => {
@@ -526,14 +526,14 @@ const gain = (cells, pluginIds, extra = {}) => {
 test("Plugins à condition de fin : Vétéran, Mentor, Scrum Master, Monétique, Clean Code", () => {
   const four = board("server", "server", "saas", "saas");
   let g = gain(four, ["veteran"], { contractsWon: 3 });
-  assert.equal(g.with.compute - g.without.compute, 9, "Vétéran : +3 par contrat livré");
+  assert.equal(g.with.compute - g.without.compute, 30, "Vétéran : +10 par contrat livré");
   g = gain(four, ["mentor", "intern", "growth"]);
-  assert.equal(g.with.compute - score(four, { pluginIds: ["intern", "growth"] }).compute, 10, "Mentor : 2 communs");
+  assert.equal(g.with.compute - score(four, { pluginIds: ["intern", "growth"] }).compute, 40, "Mentor : 2 communs");
   g = gain(four, ["scrum"]);
-  assert.equal(Math.round((g.with.scale - g.without.scale) * 10) / 10, 0.5, "Scrum : 4 modules posés");
+  assert.equal(Math.round((g.with.scale - g.without.scale) * 10) / 10, 4, "Scrum : 4 modules posés");
   assert.ok(!gain(board("server", "server", "saas"), ["scrum"]).fired.includes("scrum"));
   g = gain(four, ["monetique"]);
-  assert.equal(g.with.compute - g.without.compute, 15, "Monétique : 2 Business");
+  assert.equal(g.with.compute - g.without.compute, 60, "Monétique : 2 Business");
   assert.ok(gain(four, ["cleancode"]).with.score > gain(four, ["cleancode"]).without.score);
   assert.ok(!gain(four, ["cleancode"], { discardsUsed: 1 }).fired.includes("cleancode"), "Clean Code : aucune défausse");
 });
@@ -565,7 +565,7 @@ test("Plugins de position : IA Générative, Diagonale, Symétrique, Tandem", ()
   assert.equal(sym.events.find((e) => e.cell === 3).multiplier, 2);
   assert.equal(sym.events.find((e) => e.cell === 5).multiplier, 1, "5 sans miroir en 6 : rien");
   const tandem = gain(at({ 0: "server", 2: "micro", 4: "server", 9: "cdn", 10: "saas" }), ["tandem"]);
-  assert.equal(tandem.with.compute - tandem.without.compute, 10, "seule la 1re ligne a 2 Calcul");
+  assert.equal(tandem.with.compute - tandem.without.compute, 40, "seule la 1re ligne a 2 Calcul");
 });
 
 test("La Pipeline : un module Ops réactive le module posé juste après", () => {
@@ -664,10 +664,10 @@ const placeAt = (cells) => { const out = Array(CELL_COUNT).fill(null); Object.en
 
 test("les Plugins qui grandissent suivent les déploiements joués", () => {
   const cells = board("server", "cdn");
-  assert.equal(round2(score(cells, { pluginIds: ["ticketjira"], deploysPlayed: 12 }).scale - score(cells).scale), 1.2);
+  assert.equal(round2(score(cells, { pluginIds: ["ticketjira"], deploysPlayed: 12 }).scale - score(cells).scale), 6);
   assert.equal(score(cells, { pluginIds: ["ticketjira"] }).scale, score(cells).scale);
-  assert.equal(score(cells, { pluginIds: ["sprint"], deploysThisContract: 3 }).compute - score(cells).compute, 12);
-  assert.equal(score(cells, { pluginIds: ["hotfix"], isLastDeploy: true }).scale - score(cells).scale, 1);
+  assert.equal(score(cells, { pluginIds: ["sprint"], deploysThisContract: 3 }).compute - score(cells).compute, 60);
+  assert.equal(score(cells, { pluginIds: ["hotfix"], isLastDeploy: true }).scale - score(cells).scale, 6);
   assert.equal(score(cells, { pluginIds: ["hotfix"], isLastDeploy: false }).scale, score(cells).scale);
 });
 
@@ -749,7 +749,7 @@ test("les badges des Plugins de la vague 4 suivent la partie", () => {
   run.architecturePlays = { monolithe: 4 };
   run.contractIndex = 6;
   const values = run.pluginValues;
-  assert.equal(values.ticketjira.amount, 0.4);
+  assert.equal(values.ticketjira.amount, 2);
   assert.equal(values.hyperscaler.amount, 1.6);
   assert.equal(values.deploiementfinal.amount, 1);
   run.pluginIds = ["hyperscaler", "deploiementfinal"];
