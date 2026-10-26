@@ -13,7 +13,7 @@ export function presentRun(run, { started = true } = {}) {
   return {
     seed: run.seed,
     phase: run.phase,
-    /** Reprendre : une partie lancée, ni perdue ni gagnée (les 12 contrats livrés). */
+    /** Reprendre : une partie lancée, ni perdue ni gagnée (tous les contrats livrés). */
     inProgress: started && run.phase !== Phase.LOST && run.phase !== Phase.VICTORY,
     contractIndex: run.contractIndex,
     contract: run.contract,

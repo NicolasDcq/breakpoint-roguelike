@@ -113,11 +113,11 @@ test("une partie est générée par sa graine : même graine, même partie", () 
   assert.ok(new Set(recipes.map((recipe) => recipe.contracts[2].boss)).size > 1, "les boss changent");
 });
 
-test("une partie a 12 contrats et 4 boss différents sur les contrats C", () => {
+test("une partie a 24 contrats et 8 boss différents sur les contrats C", () => {
   const { contracts } = generateRun(new Rng(7));
-  assert.equal(contracts.length, 12);
+  assert.equal(contracts.length, 24);
   const bosses = contracts.filter((contract) => contract.letter === "C").map((contract) => contract.boss);
-  assert.equal(new Set(bosses).size, 4);
+  assert.equal(new Set(bosses).size, 8);
   assert.ok(contracts.filter((contract) => contract.letter !== "C").every((contract) => !contract.boss));
 });
 

@@ -7,13 +7,13 @@
 
 const DEFINITIONS = {
   fewDeploys: { name: "Client pressé", rule: "3 déploiements seulement.", deploys: 3, targetFactor: 1 },
-  broken: { name: "Panne", rule: "la case 6 ne s'active pas.", blockedCell: 5, blockedLabel: "Panne", targetFactor: 1.05 },
+  broken: { name: "Panne", rule: "la case 6 ne s'active pas.", blockedCell: 5, blockedLabel: "Panne", targetFactor: 1 },
   noServer: { name: "Panne de courant", rule: "les Serveurs ne produisent rien.", blockedModule: "server", blockedLabel: "Coupure", targetFactor: 1 },
-  fewModules: { name: "Budget serré", rule: "3 modules posés au maximum.", maxPlaced: 3, targetFactor: 0.85 },
-  noNetwork: { name: "Réseau saturé", rule: "les modules Réseau ne produisent rien.", blockedFamily: "reseau", blockedLabel: "Saturé", targetFactor: 1.05 },
-  smallHand: { name: "Équipe réduite", rule: "5 cartes en main au lieu de 7.", handSize: 5, targetFactor: 0.95 },
+  fewModules: { name: "Budget serré", rule: "3 modules posés au maximum.", maxPlaced: 3, targetFactor: 0.95 },
+  noNetwork: { name: "Réseau saturé", rule: "les modules Réseau ne produisent rien.", blockedFamily: "reseau", blockedLabel: "Saturé", targetFactor: 1 },
+  smallHand: { name: "Équipe réduite", rule: "5 cartes en main au lieu de 7.", handSize: 5, targetFactor: 1 },
   noDiscard: { name: "Gel des changements", rule: "aucune défausse.", discards: 0, targetFactor: 1 },
-  noPlugins: { name: "Audit de sécurité", rule: "les Plugins sont coupés.", disablesPlugins: true, targetFactor: 0.9 },
+  noPlugins: { name: "Audit de sécurité", rule: "les Plugins sont coupés.", disablesPlugins: true, targetFactor: 0.95 },
 };
 
 export const BOSSES = Object.freeze(Object.fromEntries(Object.entries(DEFINITIONS).map(([id, boss]) => [id, Object.freeze({ id, ...boss, text: `${boss.name} : ${boss.rule}` })])));

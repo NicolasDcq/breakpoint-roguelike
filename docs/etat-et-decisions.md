@@ -1,5 +1,12 @@
 # État du jeu et décisions
 
+## 26/10 · 8 versions et objectifs façon Balatro
+
+- **8 versions × 3 contrats = 24 contrats** (`VERSIONS = 8`), comme les 8 antes de Balatro. 8 boss différents, un par version. 8 listes de clients (`CLIENT_NAMES`), de plus en plus gros.
+- **Objectifs** : base de version `[150, 400, 1000, 2500, 5500, 10000, 17500, 25000]` (la courbe de Balatro divisée par 2), puis A ×1, B ×1,5, boss C ×2 (`VERSION_BASES`, `LETTER_FACTORS`). Le boss est toujours le plus dur : les règles de boss ne baissent plus l'objectif que de 5 % au plus. Variation de ±8 % par partie, comme avant.
+- Dernier objectif : environ 50 000. Test de référence régénéré, graine du tutoriel changée (18).
+- **Constat avec le bot (40 parties)** : 0 victoire, il tombe entre les contrats 7 et 12. Le moteur ne fait pas encore monter le score aussi vite que la courbe : il manque des sources de croissance (Plugins qui multiplient le Scale, légendaires, niveaux d'architectures). À équilibrer avant de distribuer aux testeurs.
+
 ## 26/10 · Parcs de 40 modules
 
 - **Profondeur façon Balatro** : le parc de départ passe de 20 à 40 modules (`RULES.startParcSize`), pour une main de 7. Chaque profil est doublé en gardant son identité (au moins 14 modules Calcul). Minimum de parc : 16 (`minParcSize`).

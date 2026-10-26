@@ -4,5 +4,5 @@ export const Phase = Object.freeze({
   WON: "won", // contrat livré, avant la boutique
   SHOP: "shop", // la boutique
   LOST: "lost", // partie perdue
-  VICTORY: "victory", // les 12 contrats livrés
+  VICTORY: "victory", // tous les contrats livrés
 });
