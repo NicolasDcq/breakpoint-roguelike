@@ -1,7 +1,7 @@
 // L'écran de jeu. Il lit la vue de la partie et transmet les actions du joueur au service.
 
 import { useState } from "react";
-import { ARCHITECTURE_BY_ID, MODULES, PACKS, PLUGINS, Phase } from "../domain/index.js";
+import { ARCHITECTURE_BY_ID, MODULES, PACKS, PLUGINS, Phase, RULES } from "../domain/index.js";
 import { useGame, useGameView } from "./GameContext.jsx";
 import { refusalMessage } from "./messages.js";
 import { fmt, fmtDec } from "./format.js";
@@ -17,6 +17,8 @@ import { TerminalModal } from "./terminal/TerminalModal.jsx";
 import { BoardView, HandRow } from "./components/BoardView.jsx";
 import { ArchitectureList } from "./components/ArchitectureList.jsx";
 import { TerminalTray } from "./components/TerminalTray.jsx";
+import { GameHud } from "./components/GameHud.jsx";
+import { ModuleDetail } from "./components/ModuleDetail.jsx";
 import { FamilyBar } from "./components/FamilyBar.jsx";
 import { SideDetail } from "./components/SideDetail.jsx";
 import { ModuleSheet } from "./components/ModuleSheet.jsx";
@@ -38,6 +40,7 @@ export function App() {
   const [marked, setMarked] = useState([]);
   const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
+  const [hoverUid, setHoverUid] = useState(null);
   const firstVisit = preferences.get(RULES_SEEN) !== "1" && preferences.get(TUTO_SEEN) !== "1";
   const [overlay, setOverlay] = useState(null);
   const [terminal, setTerminal] = useState(null);
@@ -191,26 +194,43 @@ export function App() {
   );
 
   if (!mobile) {
+    const hoverCard = [...view.board, ...view.hand].find((card) => card && String(card.uid) === hoverUid) ?? view.board.find(Boolean) ?? null;
+    const upgradeCard = (uid) => { if (attempt(game.upgradeCard(uid), "upgrade")) showToast("Module amélioré."); };
     return (
       <div className={`app gd-app ${view.contract.boss ? "boss-mode" : ""}`}>
-        <aside className="hud gd-hud">{hud}</aside>
-        <div className="gd-center">
+        <GameHud
+          view={view}
+          animation={animation}
+          selectionCount={marked.length}
+          discarding={discarding}
+          onDiscard={discard}
+          onDeploy={deploy}
+          onParc={() => open("parc")}
+          onArchitectures={() => open("archs")}
+          onSkip={skip}
+          onSpeed={setSpeed}
+          onRules={() => open("rules")}
+          onRestart={() => open("confirm")}
+        />
+        <div className="gd-center" onPointerOver={(event) => { const uid = event.target.closest?.("[data-uid]")?.dataset.uid; if (uid) setHoverUid(uid); }}>
           <div className="gd-strip">
-            <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} compact onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
+            <section className="gd-pan gd-plugins" aria-label="Plugins">
+              <header className="gd-panel-head"><span className="gd-label">Plugins · {view.pluginIds.length}/{RULES.maxPlugins}</span></header>
+              <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} compact onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
+            </section>
             <TerminalTray view={view} locked={busy} onUse={useCommand} />
           </div>
           <div className="gd-mid">
             <div className="gd-piles" aria-label="Piles">
-              <div className="gd-pile"><span className="gd-label">Pioche</span><b className="num">{view.drawCount}</b></div>
-              <div className="gd-pile used"><span className="gd-label">Défausse</span><b className="num">{view.playedCount}</b></div>
-              <FamilyBar board={view.board} />
+              <div className="gd-pile"><span className="gd-stack"><b className="num">{view.drawCount}</b></span><span className="gd-label">Pioche</span></div>
+              <div className="gd-pile used"><span className="gd-stack"><b className="num">{view.playedCount}</b></span><span className="gd-label">Défausse</span></div>
             </div>
             <div className="gd-board">
               <BoardView view={view} marked={marked} discarding={discarding} animation={animation} locked={busy} drag={drag} dragProps={dragProps} withHand={false} />
             </div>
             <aside className="gd-info">
               <ArchitectureList view={view} onShowAll={() => open("archs")} />
-              <SideDetail marked={marked} discarding={discarding} desktop />
+              <ModuleDetail view={view} card={hoverCard} locked={busy} onUpgrade={upgradeCard} />
             </aside>
           </div>
           <HandRow view={view} marked={marked} discarding={discarding} locked={busy} drag={drag} dragProps={dragProps} />

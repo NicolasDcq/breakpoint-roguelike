@@ -18,7 +18,7 @@ function Resource({ kind, value, label, icon }) {
   );
 }
 
-function SoundToggle() {
+export function SoundToggle() {
   const { sound } = useGame();
   const [muted, setMuted] = useState(sound.isMuted);
   useEffect(() => sound.onMuteChange(setMuted), [sound]);

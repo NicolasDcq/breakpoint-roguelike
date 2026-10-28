@@ -312,3 +312,4 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 - Mobile inchangé. Fichiers : `App.jsx` (branche desktop), `ArchitectureList.jsx`, `TerminalTray.jsx`, `29-game-desktop.css`.
 - Reste : panneau « Détail module » avec Améliorer (pour l'instant la fiche s'ouvre au toucher).
 - 28/10 (suite) : le plateau s'adapte à la place disponible (container query, ratio 1,25) et reste centré ; colonnes latérales élastiques (`clamp`) ; le panneau de score est collé en bas de la colonne HUD, près de la main. Vérifié en 1366×768 et 2556×1306.
+- 28/10 (refonte fidèle à A2) : colonne HUD dédiée (`GameHud`) avec Déployer en bas ; bandeau Plugins + Terminal en panneaux ; piles en tas de cartes ; liste des architectures + panneau Détail avec Améliorer (`ModuleDetail`, module survolé via `data-uid`) ; échelle `--u` par paliers selon la taille d'écran.

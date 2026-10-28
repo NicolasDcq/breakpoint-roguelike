@@ -90,6 +90,7 @@ export function BoardView({ view, marked, discarding, animation, locked, drag, d
                 <Tooltip content={<ModuleTip card={card} />} disabled={locked || Boolean(drag)} className="tile-wrap">
                   <div
                     className={`${tileClasses(card)} ${isSource(drag, "cell", card.uid) ? "drag-source" : ""}`}
+                    data-uid={card.uid}
                     tabIndex={0}
                     role="button"
                     aria-label={`${MODULES[card.moduleId].name} niveau ${card.level}, case ${cell + 1}. Toucher pour voir sa fiche, glisser pour le déplacer.`}
@@ -163,6 +164,7 @@ export function HandRow({ view, marked, discarding, locked, drag, dragProps }) {
               <Tooltip content={<ModuleTip card={card} />} disabled={locked || Boolean(drag)} className="tile-wrap">
                 <div
                   className={`${tileClasses(card)} ${isSource(drag, "hand", card.uid) ? "drag-source" : ""}`}
+                  data-uid={card.uid}
                   tabIndex={0}
                   role="button"
                   aria-label={`${MODULES[card.moduleId].name}, niveau ${card.level}, dans ta main. Toucher pour voir sa fiche, glisser pour le poser.`}
