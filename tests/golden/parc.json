@@ -3,74 +3,74 @@
     {
       "seed": 1,
       "phase": "lost",
-      "contractIndex": 14,
-      "chain": "0aeb551e8ad891f7"
+      "contractIndex": 12,
+      "chain": "45cf0cdab6a88d6d"
     },
     {
       "seed": 2,
       "phase": "lost",
-      "contractIndex": 14,
-      "chain": "6a5b29b5183cb6f4"
+      "contractIndex": 11,
+      "chain": "5097329ae8e87a9e"
     },
     {
       "seed": 3,
       "phase": "lost",
-      "contractIndex": 13,
-      "chain": "07ede253594bcc85"
+      "contractIndex": 8,
+      "chain": "6ea8ca0763da2232"
     },
     {
       "seed": 4,
       "phase": "lost",
       "contractIndex": 8,
-      "chain": "6261b752ad64d189"
+      "chain": "bb72e519a0aa02cf"
     },
     {
       "seed": 5,
       "phase": "lost",
       "contractIndex": 8,
-      "chain": "64a4f3f03018c647"
+      "chain": "2650178c48cfef03"
     },
     {
       "seed": 6,
       "phase": "lost",
-      "contractIndex": 13,
-      "chain": "5eb10ce0f207b88d"
+      "contractIndex": 14,
+      "chain": "7b65c57e4a5d86b8"
     },
     {
       "seed": 7,
       "phase": "lost",
-      "contractIndex": 20,
-      "chain": "85fa395c41c89889"
+      "contractIndex": 14,
+      "chain": "d7805f1a82b26d2e"
     },
     {
       "seed": 8,
       "phase": "lost",
-      "contractIndex": 20,
-      "chain": "e28078d00bfa1ae3"
+      "contractIndex": 14,
+      "chain": "177555b8334d5aa1"
     },
     {
       "seed": 9,
       "phase": "lost",
       "contractIndex": 14,
-      "chain": "ff72b67c038956b3"
+      "chain": "b11706d8df8f9ec9"
     },
     {
       "seed": 10,
       "phase": "lost",
-      "contractIndex": 17,
-      "chain": "2331f824bbb39cdd"
+      "contractIndex": 11,
+      "chain": "64857fc22cfb67d9"
     },
     {
       "seed": 11,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "043fe7dd0439fe79"
+      "contractIndex": 13,
+      "chain": "d3a5b3967112a610"
     },
     {
       "seed": 12,
       "phase": "lost",
-      "contractIndex": 13,
-      "chain": "7bb2dbe642404dc8"
+      "contractIndex": 14,
+      "chain": "72c88a8480b73f0c"
     }
   ]
 }

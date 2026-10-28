@@ -9,7 +9,7 @@ import { STARTERS } from "../src/domain/catalog/starters.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
 import { createCard } from "../src/domain/parc/Card.js";
-import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PACK_IDS, PLUGINS, pluginSellPrice, RARITIES, drawPlugins, drawPluginPack, MODULE_IDS, CardPlace } from "../src/domain/index.js";
+import { Run, Phase, Refusal, RULES, familyOf, OfferKind, Board, PACKS, PACK_IDS, PLUGINS, pluginSellPrice, RARITIES, drawPlugins, drawPluginPack, MODULE_IDS, CardPlace, COMMANDS, COMMAND_IDS } from "../src/domain/index.js";
 import { GameService } from "../src/application/GameService.js";
 import { presentRun } from "../src/application/RunPresenter.js";
 import { MemoryRunRepository } from "../src/infrastructure/storage/MemoryRunRepository.js";
@@ -240,8 +240,9 @@ test("tous les modules peuvent sortir d'un colis, et tous les Plugins en boutiqu
     run.phase = Phase.WON;
     run.openShop();
     run.money = 1000;
-    run.offers.forEach((offer) => seenPlugins.add(offer.id));
-    for (let roll = 0; roll < 3; roll++) { run.reroll(); run.offers.forEach((offer) => seenPlugins.add(offer.id)); }
+    const note = (offer) => { if (offer.kind === OfferKind.PLUGIN) seenPlugins.add(offer.id); };
+    run.offers.forEach(note);
+    for (let roll = 0; roll < 5; roll++) { run.reroll(); run.offers.forEach(note); }
     forceSlots(run, "colis", "colis");
     run.buyPack(0);
     run.openPack.choices.forEach((id) => seenModules.add(id));
@@ -449,12 +450,287 @@ test("on réordonne les Plugins par glisser-déposer, et l'ordre change le score
   assert.ok(before > after, "Compute ×2 après +3 vaut plus que l'inverse");
 });
 
-test("retirer un module garde le minimum de modules", () => {
-  const run = Run.start(5);
-  run.phase = Phase.SHOP;
-  run.money = 100000;
-  while (run.parc.size > RULES.minParcSize) assert.ok(run.removeCard(run.parc.cards[0].uid).ok);
-  assert.equal(run.removeCard(run.parc.cards[0].uid).reason, Refusal.PARC_TOO_SMALL);
+// ---------- Le Terminal : commandes à usage unique ----------
+
+/** Une partie à la boutique, avec ces commandes dans le Terminal et assez d'argent. */
+const shopWith = (commands, seed = 5) => {
+  const run = Run.start(seed);
+  run.phase = Phase.WON;
+  run.openShop();
+  run.commandIds = [...commands];
+  run.money = 50;
+  return run;
+};
+
+test("le Terminal : 9 commandes, 2 emplacements, un seul prix, pas de rareté", () => {
+  assert.equal(COMMAND_IDS.length, 9);
+  assert.equal(RULES.terminal.slots, 2);
+  COMMAND_IDS.forEach((id) => assert.equal(COMMANDS[id].rarity, undefined));
+  const run = Run.start(1);
+  run.phase = Phase.WON;
+  for (let seed = 1; seed <= 200; seed++) {
+    const shop = Run.start(seed);
+    shop.phase = Phase.WON;
+    shop.openShop();
+    shop.offers.filter((offer) => offer.kind === OfferKind.COMMAND).forEach((offer) => {
+      assert.equal(offer.price, RULES.terminal.price);
+      assert.ok(COMMAND_IDS.includes(offer.id));
+    });
+  }
+});
+
+test("une offre de la boutique peut devenir une commande : elle prend un emplacement du Terminal", () => {
+  let found = null;
+  for (let seed = 1; seed <= 300 && !found; seed++) {
+    const run = Run.start(seed);
+    run.phase = Phase.WON;
+    run.openShop();
+    const index = run.offers.findIndex((offer) => offer.kind === OfferKind.COMMAND);
+    if (index >= 0) found = { run, index };
+  }
+  assert.ok(found, "au moins une offre est une commande");
+  const { run, index } = found;
+  run.money = 10;
+  const id = run.offers[index].id;
+  assert.ok(run.buy(index).ok);
+  assert.deepEqual(run.commandIds, [id]);
+  assert.equal(run.money, 10 - RULES.terminal.price);
+  assert.equal(run.pluginIds.length, 0, "ce n'est pas un Plugin");
+  assert.equal(run.buy(index).reason, Refusal.ALREADY_SOLD);
+});
+
+test("le Terminal plein refuse une commande de plus, et l'argent ne part pas", () => {
+  const run = shopWith(["cp", "rm"]);
+  run.offers = [{ kind: OfferKind.COMMAND, id: "ping", price: 4, sold: false }];
+  assert.equal(run.buy(0).reason, Refusal.NO_COMMAND_SLOT);
+  assert.equal(run.money, 50);
+  assert.equal(run.offers[0].sold, false);
+});
+
+test("Le Concierge rend les commandes de la boutique 1 $ moins chères", () => {
+  const run = shopWith([]);
+  run.pluginIds = ["janitor"];
+  run.offers = [{ kind: OfferKind.COMMAND, id: "ping", price: 4, sold: false }];
+  assert.equal(run.priceOfOffer(run.offers[0]), 3);
+  assert.equal(presentRun(run).offers[0].price, 3);
+  run.money = 3;
+  assert.ok(run.buy(0).ok);
+  assert.equal(run.money, 0);
+});
+
+test("le Pack Terminal donne une commande tirée au hasard, sans choix, moins cher qu'une commande", () => {
+  assert.ok(PACKS.terminal.price < RULES.terminal.price);
+  const seen = new Set();
+  for (let seed = 1; seed <= 300; seed++) {
+    const run = shopWith([], seed);
+    run.packSlots = [{ packId: "terminal", sold: false }, { packId: "terminal", sold: false }];
+    const result = run.buyPack(0);
+    assert.ok(result.ok);
+    assert.equal(run.openPack, null, "pas d'ouverture à choisir");
+    assert.equal(run.commandIds.length, 1);
+    assert.equal(run.commandIds[0], result.value.commandId);
+    assert.equal(run.money, 50 - PACKS.terminal.price);
+    seen.add(run.commandIds[0]);
+  }
+  assert.equal(seen.size, COMMAND_IDS.length, "toutes les commandes peuvent sortir d'un pack");
+  const full = shopWith(["cp", "rm"]);
+  full.packSlots = [{ packId: "terminal", sold: false }];
+  assert.equal(full.buyPack(0).reason, Refusal.NO_COMMAND_SLOT);
+  assert.equal(full.money, 50);
+  assert.equal(full.packSlots[0].sold, false);
+});
+
+test("ping : +1 déploiement pendant le contrat, pas à la boutique", () => {
+  const run = Run.start(3);
+  run.commandIds = ["ping", "ping"];
+  const before = run.round.deploysLeft;
+  assert.ok(run.useCommand(0).ok);
+  assert.equal(run.round.deploysLeft, before + 1);
+  assert.equal(run.limits.deploys, RULES.deploysPerContract + 1);
+  assert.deepEqual(run.commandIds, ["ping"], "la commande est consommée");
+  const shop = shopWith(["ping"]);
+  assert.equal(shop.useCommand(0).reason, Refusal.COMMAND_NOT_NOW);
+  assert.deepEqual(shop.commandIds, ["ping"], "refusée : pas consommée");
+  run.goToNextContract?.();
+});
+
+test("ssh : +1 module posé pour le contrat en cours seulement", () => {
+  const run = Run.start(4);
+  run.commandIds = ["ssh"];
+  for (let cell = 0; cell < RULES.maxPlaced; cell++) assert.ok(run.place(run.round.hand[0], cell).ok);
+  assert.equal(run.place(run.round.hand[0], RULES.maxPlaced).reason, Refusal.BOARD_FULL);
+  assert.ok(run.useCommand(0).ok);
+  assert.equal(run.limits.maxPlaced, RULES.maxPlaced + 1);
+  assert.ok(run.place(run.round.hand[0], RULES.maxPlaced).ok);
+  run.startRound();
+  assert.equal(run.limits.maxPlaced, RULES.maxPlaced, "le bonus ne dure pas au contrat suivant");
+});
+
+test("motherlode double l'argent (20 $ au plus), mysqldump double la Data (10 ◆ au plus)", () => {
+  const run = shopWith(["motherlode", "motherlode"]);
+  run.money = 7;
+  assert.ok(run.useCommand(0).ok);
+  assert.equal(run.money, 14);
+  run.money = 35;
+  assert.ok(run.useCommand(0).ok);
+  assert.equal(run.money, 55, "plafond : +20 $");
+  const dump = shopWith(["mysqldump", "mysqldump"]);
+  dump.data = 4;
+  assert.ok(dump.useCommand(0).ok);
+  assert.equal(dump.data, 8);
+  dump.data = 30;
+  assert.ok(dump.useCommand(0).ok);
+  assert.equal(dump.data, 40, "plafond : +10 ◆");
+});
+
+test("cp, rm et ln -s tirent une main de modules du parc et ne visent que ces modules", () => {
+  const run = shopWith(["cp"]);
+  const result = run.useCommand(0);
+  assert.ok(result.ok);
+  assert.equal(result.value.hand.length, RULES.terminal.handSize);
+  assert.equal(new Set(result.value.hand).size, RULES.terminal.handSize);
+  assert.ok(result.value.hand.every((uid) => run.card(uid)));
+  assert.deepEqual(run.commandIds, ["cp"], "pas consommée avant le choix");
+  const outside = run.parc.uids().find((uid) => !result.value.hand.includes(uid));
+  assert.equal(run.applyCommand([outside]).reason, Refusal.BAD_TARGETS);
+  assert.equal(run.applyCommand([]).reason, Refusal.BAD_TARGETS);
+  assert.equal(run.applyCommand(result.value.hand.slice(0, 2)).reason, Refusal.BAD_TARGETS, "cp vise un seul module");
+  const source = run.card(result.value.hand[0]);
+  const before = run.parc.size;
+  assert.ok(run.applyCommand([source.uid]).ok);
+  assert.equal(run.parc.size, before + 1);
+  assert.equal(run.parc.cards.at(-1).moduleId, source.moduleId);
+  assert.equal(run.parc.cards.at(-1).level, 1, "la copie est de niveau 1");
+  assert.deepEqual(run.commandIds, []);
+  assert.equal(run.commandSession, null);
+  assert.equal(run.applyCommand([source.uid]).reason, Refusal.NO_COMMAND_SESSION);
+});
+
+test("renoncer à une commande ciblée ne la consomme pas", () => {
+  const run = shopWith(["rm"]);
+  run.useCommand(0);
+  assert.ok(run.cancelCommand().ok);
+  assert.deepEqual(run.commandIds, ["rm"]);
+  assert.equal(run.commandSession, null);
+});
+
+test("rm supprime jusqu'à 2 modules, mais le parc garde son minimum", () => {
+  const run = shopWith(["rm", "rm"]);
+  const { hand } = run.useCommand(0).value;
+  assert.equal(run.applyCommand(hand.slice(0, 3)).reason, Refusal.BAD_TARGETS, "2 modules au plus");
+  const before = run.parc.size;
+  assert.ok(run.applyCommand(hand.slice(0, 2)).ok);
+  assert.equal(run.parc.size, before - 2);
+  assert.ok(hand.slice(0, 2).every((uid) => !run.card(uid)));
+  const small = shopWith(["rm"]);
+  while (small.parc.size > RULES.minParcSize + 1) small.parc.remove(small.parc.cards[0].uid);
+  const picked = small.useCommand(0).value.hand.slice(0, 2);
+  assert.equal(small.applyCommand(picked).reason, Refusal.PARC_TOO_SMALL);
+  assert.deepEqual(small.commandIds, ["rm"], "refusée : pas consommée");
+  assert.ok(small.applyCommand(picked.slice(0, 1)).ok, "un seul module passe");
+});
+
+test("ln -s : un module compte comme n'importe quel autre pour l'architecture, et garde ses effets", () => {
+  const plain = board("server", "server", "server", "server", "cdn");
+  assert.equal(detectArchitecture(plain.filter(Boolean), familyOf).id, "ferme");
+  const wildCards = [...cards("server", "server", "server", "server"), { ...createCard("w1", "cdn"), wild: true }];
+  assert.equal(detectArchitecture(wildCards, familyOf, MODULE_IDS).id, "datacenter", "le joker devient un Serveur");
+  const mixed = [...cards("server", "cdn", "database", "saas"), { ...createCard("w2", "cache"), wild: true }];
+  assert.equal(detectArchitecture(mixed, familyOf, MODULE_IDS).id, "fullstack", "le joker apporte la famille qui manque");
+  const cells = [...wildCards, ...Array(CELL_COUNT - 5).fill(null)];
+  const result = score(cells);
+  assert.equal(result.architecture.id, "datacenter");
+  const asCdn = score([...cards("server", "server", "server", "server"), createCard("w1", "cdn"), ...Array(CELL_COUNT - 5).fill(null)]);
+  assert.notEqual(asCdn.architecture.id, "datacenter", "sans la commande, c'est une Ferme");
+});
+
+test("ln -s dure jusqu'à la fin du prochain contrat", () => {
+  const run = shopWith(["ln -s"]);
+  const { hand } = run.useCommand(0).value;
+  assert.ok(run.applyCommand([hand[0]]).ok);
+  assert.equal(run.wildUid, hand[0]);
+  run.goToNextContract();
+  assert.equal(run.wildUid, hand[0], "toujours là pendant le contrat");
+  run.place(run.round.hand[0], 0);
+  run.round.score = run.contract.target;
+  assert.ok(run.deploy().ok);
+  assert.equal(run.wildUid, null, "contrat livré : le joker disparaît");
+});
+
+test("apt upgrade monte l'architecture la plus jouée, à égalité la dernière jouée", () => {
+  const none = shopWith(["apt upgrade"]);
+  assert.equal(none.useCommand(0).reason, Refusal.NO_ARCHITECTURE_PLAYED);
+  assert.deepEqual(none.commandIds, ["apt upgrade"]);
+  const run = shopWith(["apt upgrade", "apt upgrade"]);
+  run.architecturePlays = { redondance: 3, cluster: 3, monolithe: 1 };
+  run.architectureOrder = ["cluster", "redondance"];
+  const result = run.useCommand(0);
+  assert.ok(result.ok);
+  assert.equal(result.value.architectureId, "redondance", "à égalité : la jouée en dernier");
+  assert.equal(run.architectureLevels.redondance, 2);
+  run.architecturePlays = { redondance: 3, cluster: 5 };
+  assert.equal(run.useCommand(0).value.architectureId, "cluster");
+});
+
+test("un déploiement note l'ordre des architectures jouées", () => {
+  const run = Run.start(6);
+  run.place(run.round.hand[0], 0);
+  assert.ok(run.deploy().ok);
+  assert.equal(run.architectureOrder.length, 1);
+  assert.equal(run.architectureOrder[0], Object.keys(run.architecturePlays)[0]);
+});
+
+test("!! rejoue la dernière commande, si elle s'utilise à cette étape", () => {
+  const empty = shopWith(["!!"]);
+  assert.equal(empty.useCommand(0).reason, Refusal.NO_LAST_COMMAND);
+  const run = shopWith(["motherlode", "!!"]);
+  run.money = 5;
+  run.useCommand(0);
+  assert.equal(run.money, 10);
+  assert.equal(run.lastCommand, "motherlode");
+  assert.ok(run.useCommand(0).ok, "!! est maintenant en emplacement 0");
+  assert.equal(run.money, 20);
+  assert.deepEqual(run.commandIds, []);
+  const wrong = shopWith(["!!"]);
+  wrong.lastCommand = "ping";
+  assert.equal(wrong.useCommand(0).reason, Refusal.COMMAND_NOT_NOW, "ping ne se rejoue pas à la boutique");
+  const targeted = shopWith(["cp", "!!"]);
+  targeted.useCommand(0);
+  targeted.applyCommand([targeted.commandSession.hand[0]]);
+  const second = targeted.useCommand(0);
+  assert.ok(second.ok);
+  assert.equal(second.value.commandId, "cp", "!! rejoue cp avec une nouvelle main");
+  assert.equal(second.value.hand.length, RULES.terminal.handSize);
+});
+
+test("le Terminal se sauvegarde avec la partie", () => {
+  const run = shopWith(["cp", "!!"]);
+  run.useCommand(0);
+  run.wildUid = run.parc.cards[0].uid;
+  run.lastCommand = "motherlode";
+  const copy = Run.fromSnapshot(JSON.parse(JSON.stringify(run.toSnapshot())));
+  assert.deepEqual(copy.toSnapshot(), run.toSnapshot());
+  assert.deepEqual(copy.commandSession, run.commandSession);
+  assert.equal(copy.wildUid, run.wildUid);
+});
+
+test("le présentateur montre le Terminal : commandes, emplacements, main tirée", () => {
+  const run = shopWith(["cp"]);
+  run.useCommand(0);
+  const view = presentRun(run);
+  assert.deepEqual(view.commands, ["cp"]);
+  assert.equal(view.commandSlots, 2);
+  assert.equal(view.commandSession.commandId, "cp");
+  assert.equal(view.commandSession.hand.length, RULES.terminal.handSize);
+});
+
+test("le service lance, applique et annule les commandes, et les sauvegarde", () => {
+  const game = service();
+  game.run.commandIds = ["ping", "cp"];
+  assert.ok(game.useCommand(0).ok);
+  assert.deepEqual(game.getView().commands, ["cp"]);
+  assert.equal(game.useCommand(0).reason, Refusal.COMMAND_NOT_NOW, "cp s'utilise entre deux contrats");
+  assert.ok(game.cancelCommand().ok);
 });
 
 test("une partie sauvegardée se recharge à l'identique", () => {

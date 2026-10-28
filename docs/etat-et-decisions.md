@@ -1,5 +1,35 @@
 # État du jeu et décisions
 
+## 28/10 · Le Terminal : 9 commandes à usage unique (comme les tarots de Balatro)
+
+Pour des parties différentes : de quoi transformer son parc en cours de partie. Maquettes : canvas « Terminal des commandes » (7 artboards) et prototype animé. Décisions prises avec Nicolas le 28/10 (`consommables-terminal.md` dans le projet claude.ai).
+
+- **Thème** : des commandes de terminal. 9 commandes, **pas de rareté**, couleur unique verte, un seul prix : **4 $** (`RULES.terminal.price`).
+- **Terminal** : 2 emplacements au plus (`RULES.terminal.slots`). Une commande se consomme quand on l'utilise.
+- **Comment on les obtient** : une offre de Plugin de la boutique peut devenir une commande (25 %, `RULES.shop.commandChance`) ; ou le **Pack Terminal** (3 $, un des types de l'arrivage) : 1 commande tirée au hasard, sans choix, qui rejoint le Terminal tout de suite. Le Concierge (Plugin) rend les commandes de la boutique 1 $ moins chères (il remplace l'ancien « retrait gratuit »).
+- **Le retrait de modules en boutique disparaît** (service, prix croissant, `removeCard`) : `rm` est le seul moyen d'amincir le parc.
+- **Étapes** : `ping` et `ssh` pendant un contrat ; `cp`, `rm`, `ln -s`, `motherlode`, `mysqldump` et `apt upgrade` à la boutique ; `!!` aux deux, et rejoue la dernière commande si elle s'utilise à cette étape.
+
+| Commande | Effet |
+|---|---|
+| `ping` | +1 déploiement pour le contrat en cours |
+| `ssh` | +1 module posé pour le contrat en cours |
+| `!!` | Rejoue la dernière commande utilisée (nouvelle cible si elle en a une) |
+| `ln -s` | Un module compte comme n'importe quel autre pour les architectures (joker), jusqu'à la fin du prochain contrat ; il garde ses propres effets |
+| `cp` | Copie un module du parc (la copie est de niveau 1, `RULES.terminal.copyKeepsLevel`) |
+| `rm` | Supprime jusqu'à 2 modules du parc (16 modules au moins) |
+| `motherlode` | Double l'argent, +20 $ au plus |
+| `mysqldump` | Double la Data, +10 ◆ au plus |
+| `apt upgrade` | +1 niveau à l'architecture la plus jouée (à égalité, la jouée en dernier) |
+
+- **Commandes ciblées** (`cp`, `rm`, `ln -s`) : le domaine tire une main de 8 modules au hasard dans le parc (`Run.useCommand`), le joueur en choisit 1 (2 pour `rm`) puis exécute (`Run.applyCommand`) ou renonce (`Run.cancelCommand`, la commande n'est pas consommée).
+- **Moteur** : catalogue `domain/catalog/commands.js` (étapes, cibles), effets dans `domain/run/commandEffects.js`, état dans `Run` (`commandIds`, `lastCommand`, `commandSession`, `contractBonus`, `wildUid`, `architectureOrder`). Sauvegarde passée en version 6 (les anciennes parties ne se reprennent plus). `detectArchitecture` accepte une carte `wild`.
+- **Interface** : fenêtre de terminal animée (`ui/terminal/TerminalModal.jsx` : tape la commande, sortie, effet), **plein écran avec une croix de fermeture sur téléphone** ; les modules de la main tirée gardent la tuile du jeu ; cartes de commande sans broches dorées (`CommandCard`) ; rail Terminal sous les Plugins en partie (`TerminalRail`, visible dès qu'on a une commande, grisé quand la commande ne s'utilise pas à cette étape) ; section « Ton terminal » en boutique ; Pack Terminal dans l'arrivage ; règles et tutoriel mis à jour.
+- **Tests** : 19 tests de domaine sur le Terminal ; golden régénéré (le tirage de la boutique change). Le bot ne se sert pas encore du Terminal (il laisse le Pack Terminal).
+- Bot (80 parties) : 0 % avec et 1 % sans (même ordre de grandeur : l'équilibre du bot est déjà bas depuis la Vague 4).
+- **À régler au bot** : le prix unique (4 $), le Pack Terminal (3 $), le plafond de `motherlode` (20 $) très généreux dans une économie où un contrat paye 4 à 7 $, la fréquence d'une offre qui devient commande.
+- **Écarté ou en attente** : `git revert`, `sudo` ; les commandes de réserve (`rm -rf`, `tar`, `alias`, `make`, `grep`, `sort`, `reboot`, `kill -9`, `fork`, `wget`, `touch`, `curl`, `docker run`, `nohup`, `rsync`, `systemctl restart`, `xargs`) ; les bonus permanents sur un module deviendront des **puces dans des sockets** (brainstorming à refaire) ; `chmod +x` reviendra avec les éditions.
+
 ## 26/10 · Vague 4 : 15 Plugins qui multiplient Scale et qui grandissent
 
 Pour coller à la puissance de Balatro, les Plugins multiplient maintenant Scale à chaque rareté, et certains grandissent pendant la partie. On passe de 36 à 51 Plugins. Les ×Scale sont en rouge (couleur de Scale), jamais en jaune (réservé à l'argent).

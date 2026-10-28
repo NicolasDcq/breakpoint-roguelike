@@ -1,6 +1,6 @@
 // Fenêtres d'information : règles, architectures, parc, Plugin, nouvelle partie.
 
-import { ARCHITECTURES, CELL_COUNT, CardPlace, GRID_SIZE, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
+import { ARCHITECTURES, CELL_COUNT, CardPlace, GRID_SIZE, PACKS, PLUGINS, RULES, architectureBase } from "../../domain/index.js";
 import { Modal } from "../common/Modal.jsx";
 import { tileClasses } from "../visuals.js";
 import { ArchitecturePills } from "../components/ArchitectureLine.jsx";
@@ -20,7 +20,7 @@ export function RulesModal({ onClose }) {
         <li><b>Seuls les modules Calcul produisent du Compute.</b> Les autres apportent Scale, Data, $ ou réactivations, sauf si leur effet dit autre chose.</li>
         <li><b>{RULES.deploysPerContract} déploiements et {RULES.discardsPerContract} défausses par contrat.</b> Une carte jouée ou défaussée ne revient qu’au contrat suivant ; pioche vide, contrat perdu.</li>
         <li><b>Chaque partie est différente</b> : profil de départ, clients, objectifs et boss sont tirés au hasard. Tu découvres les boss d’une version en y arrivant.</li>
-        <li><b>En boutique</b> : l’arrivage (2 emplacements au hasard : colis de modules, boosters de plans ou Pack de Plugins ; tu en gardes une carte), des Plugins (jusqu’à {RULES.maxPlugins}, plus ou moins rares) et le retrait de modules.</li>
+        <li><b>En boutique</b> : l’arrivage (2 emplacements au hasard : colis de modules, boosters de plans ou Pack de Plugins ; tu en gardes une carte), des Plugins (jusqu’à {RULES.maxPlugins}, plus ou moins rares) et des <b>commandes du Terminal</b> ({RULES.terminal.slots} emplacements, {RULES.terminal.price} $ pièce, un Pack Terminal à {PACKS.terminal.price} $ en donne une au hasard). Une commande se consomme : <b>cp</b>, <b>rm</b>, <b>ln -s</b>, <b>motherlode</b>, <b>mysqldump</b> et <b>apt upgrade</b> s’utilisent à la boutique ; <b>ping</b> (+1 déploiement) et <b>ssh</b> (+1 module posé) pendant un contrat ; <b>!!</b> rejoue la dernière.</li>
         <li><b>Améliorer un module</b> : touche-le en partie (en main ou posé) et paie en Data ◆. Il garde son niveau pour toute la partie.</li>
       </ol>
       <div className="legend">

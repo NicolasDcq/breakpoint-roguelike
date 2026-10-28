@@ -40,7 +40,7 @@ export const TUTORIAL_STEPS = [
   { id: "plugins", phase: Phase.SHOP, target: [".shop-jokers"], pose: "explique",
     text: () => `Les <b>Plugins</b> jouent à la fin de chaque déploiement, de gauche à droite (tu peux les glisser pour changer l’ordre). Cinq raretés : <b>gris, vert, bleu, violet, doré</b>. Plus c’est rare, plus c’est cher. ${RULES.maxPlugins} emplacements ; la revente rend la moitié.` },
   { id: "services", phase: Phase.SHOP, target: [".shop-services", ".fu-parc"], pose: "cafe",
-    text: (view) => `<b>Retirer</b> un module (${view.removePrice} $) affine ton parc. <b>Relancer</b> (${view.rerollPrice} $) renouvelle les Plugins en vente, pas l’arrivage. Le <b>Parc</b> montre tous tes modules.` },
+    text: (view) => `<b>Relancer</b> (${view.rerollPrice} $) renouvelle les offres en vente, pas l’arrivage. Une offre peut être une <b>commande</b> du Terminal (2 emplacements) ; <b>rm</b> y affine ton parc. Le <b>Parc</b> montre tous tes modules.` },
   { id: "suivant", phase: Phase.SHOP, target: [".fu-next"], interactive: true, pose: "salut",
     text: () => "Quand tu es prêt, passe au <b>contrat suivant</b>. Tes achats restent pour toute la partie." },
 

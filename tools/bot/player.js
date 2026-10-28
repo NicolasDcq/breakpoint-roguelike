@@ -84,6 +84,8 @@ function shop(service, random) {
   run.packSlots.forEach((slot, index) => {
     if (slot.sold || run.money < PACKS[slot.packId].price + 2) return;
     if (PACKS[slot.packId].reward === "plugin" && run.pluginIds.length >= RULES.maxPlugins) return;
+    // Le bot ne se sert pas encore du Terminal : il laisse le Pack Terminal.
+    if (PACKS[slot.packId].reward === "command") return;
     service.buyPack(index);
     service.pickFromPack(choose[slot.packId](run.openPack.choices));
   });

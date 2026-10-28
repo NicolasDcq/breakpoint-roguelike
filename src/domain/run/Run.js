@@ -11,12 +11,14 @@ import { Parc } from "../parc/Parc.js";
 import { pluginValuesFor } from "../catalog/pluginValues.js";
 import { CardPlace, Round } from "../round/Round.js";
 import { scoreDeployment } from "../scoring/ScoringEngine.js";
-import { OfferKind, removalPrice, rollOffers, rollPackSlots } from "../shop/Shop.js";
+import { OfferKind, rollOffers, rollPackSlots } from "../shop/Shop.js";
 import { PACKS, drawPack } from "../catalog/packs.js";
+import { COMMANDS } from "../catalog/commands.js";
+import { COMMAND_EFFECTS } from "./commandEffects.js";
 import { Phase } from "./Phase.js";
 import { generateRun } from "../generation/RunGenerator.js";
 
-const SNAPSHOT_VERSION = 5;
+const SNAPSHOT_VERSION = 6;
 
 /**
  * Ce que rapporte une carte gardée, selon le genre de paquet.
@@ -62,7 +64,12 @@ export class Run {
       pluginIds: [],
       architectureLevels: Object.fromEntries(ARCHITECTURE_IDS.map((id) => [id, 1])),
       architecturePlays: {},
-      removePrice: RULES.removeStartPrice,
+      architectureOrder: [],
+      commandIds: [],
+      lastCommand: null,
+      commandSession: null,
+      contractBonus: { deploys: 0, maxPlaced: 0 },
+      wildUid: null,
       rerollPrice: RULES.rerollStartPrice,
       offers: [],
       packSlots: [],
@@ -98,13 +105,15 @@ export class Run {
     return BOSSES[this.contract.boss]?.text ?? null;
   }
 
+  /** Les limites du contrat : normales, ajustées par le boss, puis par les commandes ping et ssh. */
   get limits() {
-    return bossLimits(this.contract.boss, {
+    const base = bossLimits(this.contract.boss, {
       deploys: RULES.deploysPerContract,
       maxPlaced: RULES.maxPlaced,
       handSize: RULES.handSize,
       discards: RULES.discardsPerContract,
     });
+    return { ...base, deploys: base.deploys + this.contractBonus.deploys, maxPlaced: base.maxPlaced + this.contractBonus.maxPlaced };
   }
 
   /** Les Plugins qui agissent en ce moment (un boss peut les couper). */
@@ -116,9 +125,13 @@ export class Run {
     return this.parc.find(uid);
   }
 
-  /** Les 16 cases avec leur carte (ou null). */
+  /** Les 16 cases avec leur carte (ou null). La carte touchée par ln -s porte le drapeau `wild`. */
   cardsOn(board = this.round.board) {
-    return board.cells.map((uid) => (uid ? this.card(uid) : null));
+    return board.cells.map((uid) => {
+      if (!uid) return null;
+      const card = this.card(uid);
+      return uid === this.wildUid ? { ...card, wild: true } : card;
+    });
   }
 
   /** Le détail du déploiement si on déployait ce plateau maintenant. Ne change rien. */
@@ -171,13 +184,11 @@ export class Run {
     });
   }
 
-  get currentRemovePrice() {
-    return removalPrice(this.pluginIds, this.removePrice);
-  }
-
   // ---------- Contrat en cours ----------
 
   startRound() {
+    this.contractBonus = { deploys: 0, maxPlaced: 0 };
+    this.commandSession = null;
     this.round = Round.start({
       shuffledUids: this.rng.shuffle(this.parc.uids()),
       deploys: this.limits.deploys,
@@ -215,7 +226,9 @@ export class Run {
     if (!this.round.deploysLeft) return refuse(Refusal.NO_DEPLOY_LEFT);
     const result = this.preview();
     const { id } = result.architecture;
+    this.commandSession = null;
     this.architecturePlays[id] = (this.architecturePlays[id] ?? 0) + 1;
+    this.architectureOrder = [...this.architectureOrder.filter((other) => other !== id), id];
     this.data = Math.max(0, this.data + result.data);
     this.money = Math.max(0, this.money + result.money);
     this.round.recordDeploy(result.score);
@@ -227,6 +240,7 @@ export class Run {
     if (this.round.score >= this.contract.target) {
       this.payContract();
       this.phase = this.nextContract ? Phase.WON : Phase.VICTORY;
+      this.wildUid = null;
     } else if (!this.round.deploysLeft) {
       this.phase = Phase.LOST;
     } else {
@@ -248,6 +262,7 @@ export class Run {
   openShop() {
     if (this.phase !== Phase.WON) return refuse(Refusal.WRONG_PHASE);
     this.phase = Phase.SHOP;
+    this.commandSession = null;
     this.rerollPrice = RULES.rerollStartPrice;
     this.offers = rollOffers(this.rng, this.pluginIds);
     this.packSlots = rollPackSlots(this.rng);
@@ -270,9 +285,17 @@ export class Run {
     if (!slot) return refuse(Refusal.UNKNOWN_PACK);
     if (slot.sold) return refuse(Refusal.NO_PACK_LEFT);
     const pack = PACKS[slot.packId];
+    const isCommand = pack.reward === "command";
+    if (isCommand && this.terminalFull) return refuse(Refusal.NO_COMMAND_SLOT);
     if (this.money < pack.price) return refuse(Refusal.NOT_ENOUGH_MONEY);
     this.money -= pack.price;
     this.packSlots = this.packSlots.map((other, index) => (index === slotIndex ? { ...other, sold: true } : other));
+    if (isCommand) {
+      // Le Pack Terminal ne propose pas de choix : la commande tirée rejoint le Terminal.
+      const [commandId] = drawPack(this.rng, slot.packId);
+      this.commandIds = [...this.commandIds, commandId];
+      return ok({ commandId });
+    }
     this.openPack = { packId: slot.packId, choices: drawPack(this.rng, slot.packId, this.pluginIds) };
     return ok(this.openPack);
   }
@@ -302,6 +325,7 @@ export class Run {
     const offer = this.offers[offerIndex];
     if (!offer) return refuse(Refusal.UNKNOWN_OFFER);
     if (offer.sold) return refuse(Refusal.ALREADY_SOLD);
+    if (offer.kind === OfferKind.COMMAND) return this.buyCommandOffer(offerIndex, offer);
     const replacing = replacePluginId !== null;
     if (replacing && !this.pluginIds.includes(replacePluginId)) return refuse(Refusal.UNKNOWN_PLUGIN);
     const refund = replacing ? pluginSellPrice(replacePluginId) : 0;
@@ -325,17 +349,80 @@ export class Run {
     return ok();
   }
 
-  removeCard(uid) {
-    const blocked = this.shopBlocked();
-    if (blocked) return blocked;
-    if (!this.card(uid)) return refuse(Refusal.UNKNOWN_CARD);
-    if (this.parc.size <= RULES.minParcSize) return refuse(Refusal.PARC_TOO_SMALL);
-    const price = this.currentRemovePrice;
+  // ---------- Terminal ----------
+
+  get terminalFull() {
+    return this.commandIds.length >= RULES.terminal.slots;
+  }
+
+  /** Les Plugins rendent les commandes de la boutique moins chères (Le Concierge). */
+  get commandDiscount() {
+    return this.pluginIds.reduce((sum, id) => sum + (PLUGINS[id].commandDiscount ?? 0), 0);
+  }
+
+  /** Le prix réel d'une offre de boutique (les commandes profitent des remises). */
+  priceOfOffer(offer) {
+    return offer.kind === OfferKind.COMMAND ? Math.max(0, offer.price - this.commandDiscount) : offer.price;
+  }
+
+  buyCommandOffer(offerIndex, offer) {
+    if (this.terminalFull) return refuse(Refusal.NO_COMMAND_SLOT);
+    const price = this.priceOfOffer(offer);
     if (this.money < price) return refuse(Refusal.NOT_ENOUGH_MONEY);
     this.money -= price;
-    if (price) this.removePrice++;
-    this.parc.remove(uid);
+    this.offers = this.offers.map((other, index) => (index === offerIndex ? { ...other, sold: true } : other));
+    this.commandIds = [...this.commandIds, offer.id];
+    return ok(offer);
+  }
+
+  /**
+   * Lance la commande d'un emplacement du Terminal.
+   * Sans cible, elle agit tout de suite. Avec des cibles (cp, rm, ln -s), on reçoit une main de modules
+   * tirée au hasard dans le parc : il faut ensuite choisir (applyCommand) ou renoncer (cancelCommand).
+   * `!!` rejoue la dernière commande, si elle peut s'utiliser à cette étape.
+   */
+  useCommand(slot) {
+    const id = this.commandIds[slot];
+    if (!id) return refuse(Refusal.UNKNOWN_COMMAND);
+    if (this.phase === Phase.SHOP && this.openPack) return refuse(Refusal.PACK_PENDING);
+    if (!COMMANDS[id].phases.includes(this.phase)) return refuse(Refusal.COMMAND_NOT_NOW);
+    let commandId = id;
+    if (COMMANDS[id].repeats) {
+      if (!this.lastCommand) return refuse(Refusal.NO_LAST_COMMAND);
+      commandId = this.lastCommand;
+      if (!COMMANDS[commandId].phases.includes(this.phase)) return refuse(Refusal.COMMAND_NOT_NOW);
+    }
+    if (COMMANDS[commandId].targets) {
+      const hand = this.rng.sample(this.parc.uids(), Math.min(RULES.terminal.handSize, this.parc.size));
+      this.commandSession = { slot, commandId, hand };
+      return ok({ commandId, hand });
+    }
+    return this.finishCommand(slot, commandId, []);
+  }
+
+  /** Applique la commande ciblée sur les modules choisis dans la main tirée au hasard. */
+  applyCommand(uids) {
+    const session = this.commandSession;
+    if (!session) return refuse(Refusal.NO_COMMAND_SESSION);
+    const { min, max } = COMMANDS[session.commandId].targets;
+    const targets = [...new Set(uids)];
+    if (targets.length < min || targets.length > max || !targets.every((uid) => session.hand.includes(uid))) return refuse(Refusal.BAD_TARGETS);
+    return this.finishCommand(session.slot, session.commandId, targets);
+  }
+
+  /** Renonce à une commande ciblée : elle n'est pas consommée. */
+  cancelCommand() {
+    this.commandSession = null;
     return ok();
+  }
+
+  finishCommand(slot, commandId, targets) {
+    const result = COMMAND_EFFECTS[commandId](this, targets);
+    if (!result.ok) return result;
+    this.commandSession = null;
+    this.commandIds = this.commandIds.filter((_, index) => index !== slot);
+    this.lastCommand = commandId;
+    return ok({ commandId, ...result.value });
   }
 
   /** Améliore un module en partie, quand il est en main ou posé : ça coûte de la Data. */
@@ -369,7 +456,8 @@ export class Run {
       version: SNAPSHOT_VERSION,
       seed: this.seed, rngState: this.rng.state, starterId: this.starterId, contracts: this.contracts, parc: this.parc.toJSON(), contractIndex: this.contractIndex,
       money: this.money, data: this.data, pluginIds: this.pluginIds, architectureLevels: this.architectureLevels,
-      architecturePlays: this.architecturePlays, removePrice: this.removePrice, rerollPrice: this.rerollPrice,
+      architecturePlays: this.architecturePlays, architectureOrder: this.architectureOrder, commandIds: this.commandIds, lastCommand: this.lastCommand,
+      commandSession: this.commandSession, contractBonus: this.contractBonus, wildUid: this.wildUid, rerollPrice: this.rerollPrice,
       offers: this.offers, packSlots: this.packSlots, openPack: this.openPack, lastPay: this.lastPay, phase: this.phase, round: this.round.toJSON(),
     };
   }

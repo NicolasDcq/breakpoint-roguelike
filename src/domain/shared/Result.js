@@ -28,4 +28,11 @@ export const Refusal = Object.freeze({
   NO_PACK_LEFT: "no-pack-left",
   PACK_PENDING: "pack-pending",
   NOT_IN_PACK: "not-in-pack",
+  UNKNOWN_COMMAND: "unknown-command",
+  NO_COMMAND_SLOT: "no-command-slot",
+  COMMAND_NOT_NOW: "command-not-now",
+  NO_LAST_COMMAND: "no-last-command",
+  NO_COMMAND_SESSION: "no-command-session",
+  BAD_TARGETS: "bad-targets",
+  NO_ARCHITECTURE_PLAYED: "no-architecture-played",
 });

@@ -4,7 +4,7 @@
 // 3. Les Plugins de fin agissent en dernier.
 
 import { CELLS } from "../board/grid.js";
-import { MODULES, familyOf } from "../catalog/modules.js";
+import { MODULES, MODULE_IDS, familyOf } from "../catalog/modules.js";
 import { PLUGINS } from "../catalog/plugins.js";
 import { blockedBy } from "../catalog/bosses.js";
 import { architectureBase, detectArchitecture } from "../catalog/architectures.js";
@@ -51,7 +51,7 @@ export function scoreDeployment({ cards, pluginIds, bossId = null, dataStock, mo
   };
 
   // 1. La base : l'architecture.
-  const found = detectArchitecture(placed, familyOf);
+  const found = detectArchitecture(placed, familyOf, MODULE_IDS);
   const level = architectureLevels[found.id] ?? 1;
   const base = architectureBase(found.id, level);
   result.architecture = { id: found.id, level, ...base, members: found.members };

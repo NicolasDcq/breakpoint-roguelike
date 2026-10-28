@@ -63,8 +63,26 @@ export function architectureBase(id, level) {
 }
 
 /** L'architecture la plus forte formée par ces modules, et les modules qui la forment. */
-export function detectArchitecture(cards, familyOf) {
+const strongest = (cards, familyOf) => {
   const profile = profileOf(cards, familyOf);
-  const found = ARCHITECTURES.find((architecture) => architecture.matches(profile));
-  return { id: found.id, members: found.members(profile) };
+  const index = ARCHITECTURES.findIndex((architecture) => architecture.matches(profile));
+  return { index, id: ARCHITECTURES[index].id, members: ARCHITECTURES[index].members(profile) };
+};
+
+/**
+ * Une carte `wild` (commande ln -s) compte comme n'importe quel module : on essaie chacun
+ * de `wildModuleIds` à sa place et on garde la meilleure architecture. Ses effets restent les siens.
+ */
+export function detectArchitecture(cards, familyOf, wildModuleIds = []) {
+  const wild = cards.find((card) => card.wild);
+  if (!wild || !wildModuleIds.length) {
+    const { id, members } = strongest(cards, familyOf);
+    return { id, members };
+  }
+  let best = null;
+  for (const moduleId of wildModuleIds) {
+    const found = strongest(cards.map((card) => (card === wild ? { ...card, moduleId } : card)), familyOf);
+    if (!best || found.index < best.index) best = found;
+  }
+  return { id: best.id, members: best.members };
 }

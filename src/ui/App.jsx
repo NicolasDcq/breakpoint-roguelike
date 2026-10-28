@@ -12,6 +12,8 @@ import { useTileDrag } from "./hooks/useTileDrag.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { ScorePanel } from "./components/ScorePanel.jsx";
 import { PluginRail } from "./components/PluginRail.jsx";
+import { TerminalRail } from "./components/TerminalRail.jsx";
+import { TerminalModal } from "./terminal/TerminalModal.jsx";
 import { BoardView } from "./components/BoardView.jsx";
 import { FamilyBar } from "./components/FamilyBar.jsx";
 import { SideDetail } from "./components/SideDetail.jsx";
@@ -35,12 +37,12 @@ export function App() {
   const [discarding, setDiscarding] = useState(false);
   const [sheet, setSheet] = useState(null);
   const firstVisit = preferences.get(RULES_SEEN) !== "1" && preferences.get(TUTO_SEEN) !== "1";
-  const [shopMode, setShopMode] = useState(null);
   const [overlay, setOverlay] = useState(null);
+  const [terminal, setTerminal] = useState(null);
   const [tuto, setTuto] = useState(false);
   const [offerTuto, setOfferTuto] = useState(firstVisit);
   const endTuto = () => { preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); setTuto(false); setOfferTuto(false); };
-  const startTuto = () => { game.startTutorial(); setMarked([]); setShopMode(null); setTuto(true); setOfferTuto(false); preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); };
+  const startTuto = () => { game.startTutorial(); setMarked([]); setTerminal(null); setTuto(true); setOfferTuto(false); preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); };
   const [toast, showToast] = useToast();
   const { animation, play, setSpeed, skip } = useDeployAnimation({ game, sound });
   const busy = Boolean(animation);
@@ -110,14 +112,30 @@ export function App() {
     else showToast(`${MODULES[choiceId].name} rejoint ton parc.`);
   };
 
-  const newRun = () => { game.newRun(); stopDiscarding(); setShopMode(null); setTuto(false); close(); };
+  const newRun = () => { game.newRun(); stopDiscarding(); setTerminal(null); setTuto(false); close(); };
+
+  /** Ouvre le terminal sur la commande d'un emplacement (en refusant d'abord si elle ne s'utilise pas maintenant). */
+  const useCommand = (slot) => {
+    const id = view.commands[slot];
+    const result = game.useCommand(slot);
+    if (!attempt(result, "click")) return;
+    setTerminal({ slot, id, commandId: result.value.commandId, value: result.value });
+  };
+  const closeTerminal = (cancel) => {
+    if (cancel) game.cancelCommand();
+    setTerminal(null);
+  };
 
   const shopActions = {
     buy: (index, replacePluginId = null) => attempt(game.buyOffer(index, replacePluginId), replacePluginId ? "sell" : "cash"),
-    buyPack: (slotIndex) => attempt(game.buyPack(slotIndex), "cash"),
+    buyPack: (slotIndex) => {
+      const result = game.buyPack(slotIndex);
+      if (!attempt(result, "cash")) return false;
+      if (result.value.commandId) showToast(`Pack Terminal : tu obtiens ${result.value.commandId}.`);
+      return true;
+    },
+    useCommand,
     reroll: () => attempt(game.rerollShop(), "reroll"),
-    setMode: setShopMode,
-    remove: (uid) => { if (attempt(game.removeCard(uid), "sell")) { showToast("Module retiré du parc."); setShopMode(null); } },
     showParc: () => open("parc"),
     next: () => { attempt(game.nextContract()); stopDiscarding(); },
   };
@@ -128,8 +146,8 @@ export function App() {
   }
 
   const phaseScreen = !busy && !overlay && {
-    [Phase.WON]: <WonModal view={view} onShop={() => { setShopMode(null); attempt(game.openShop(), "cash"); }} />,
-    [Phase.SHOP]: <ShopModal view={view} mode={shopMode} actions={shopActions} desktop={!mobile} />,
+    [Phase.WON]: <WonModal view={view} onShop={() => { attempt(game.openShop(), "cash"); }} />,
+    [Phase.SHOP]: <ShopModal view={view} actions={shopActions} desktop={!mobile} />,
     [Phase.LOST]: <EndModal view={view} onNewRun={newRun} />,
     [Phase.VICTORY]: <EndModal view={view} onNewRun={newRun} />,
   }[view.phase];
@@ -156,6 +174,7 @@ export function App() {
       </aside>
       <div className="stage">
         <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} compact={mobile} onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
+        {view.commands.length > 0 && <TerminalRail view={view} locked={busy} onUse={useCommand} />}
         <main className="workspace">
           <section className="board-col">
             <div className="board-head">
@@ -182,6 +201,7 @@ export function App() {
       {overlay?.name === "confirm" && <ConfirmNewRun onYes={newRun} onNo={close} />}
       {tuto && <Tutorial view={view} hidden={busy || Boolean(overlay)} onQuit={endTuto} onNewRun={() => { endTuto(); newRun(); }} />}
       {offerTuto && !tuto && <TutorialOffer onStart={startTuto} onSkip={endTuto} />}
+      {terminal && <TerminalModal view={view} session={terminal} game={game} sound={sound} showToast={showToast} onClose={closeTerminal} />}
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>
   );

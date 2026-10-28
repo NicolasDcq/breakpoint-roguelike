@@ -23,9 +23,11 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 | `board/` | géométrie 4×4 (`grid.js`, taille réglable avec `GRID_SIZE`) et `Board` (objet valeur) |
 | `round/` | `Round` : un contrat en cours (pioche, main, plateau, essais) |
 | `scoring/` | `ScoringEngine` (calcul pur d'un déploiement) et `ActivationContext` (ce qu'un module a le droit de faire) |
-| `shop/` | service de boutique : Plugins tirés selon leur rareté, prix du retrait (l'arrivage est dans `catalog/packs.js`) |
+| `shop/` | service de boutique : offres tirées (Plugins selon leur rareté, ou commandes du Terminal) ; l'arrivage est dans `catalog/packs.js` |
 | `generation/` | `RunGenerator` : la recette d'une partie tirée de sa graine (profil de départ, contrats, boss) |
 | `run/` | `Run` : la racine de l'agrégat. Toute commande passe par elle et rend un `Result` |
+
+Les **commandes du Terminal** (consommables) : le catalogue est dans `catalog/commands.js` (étapes où on les utilise, cibles), leurs effets dans `run/commandEffects.js`, et `Run` tient l'état (emplacements, dernière commande, main tirée d'une commande ciblée).
 
 `domain/index.js` est la porte d'entrée : les autres couches n'importent que ce fichier (sauf les tests, qui testent aussi les pièces internes).
 
@@ -67,6 +69,7 @@ Code pur et déterministe : aucun React, aucun DOM, aucun `localStorage`. Tout l
 - **Un module** : une entrée dans `domain/catalog/modules.js` (famille, prix, `lines`, `effect`).
 - **Un Plugin** : une entrée dans `domain/catalog/plugins.js` avec ses crochets et sa rareté, et son dessin (grille 16×16 et couleurs) dans `ui/plugins/sprites.js`.
 - **Un genre de paquet** : une entrée dans `domain/catalog/packs.js` (prix, nombre par boutique, lot de cartes, récompense).
+- **Une commande du Terminal** : une entrée dans `domain/catalog/commands.js` (nom, texte, étapes, cibles éventuelles) et son effet dans `domain/run/commandEffects.js`. Si elle a besoin d'une animation spéciale, une scène dans `ui/terminal/TerminalModal.jsx`.
 - **Une architecture** : une entrée dans `domain/catalog/architectures.js`, à sa place dans l'ordre de force.
 - **Un boss** : une entrée dans `domain/catalog/bosses.js` ; le générateur le tirera tout seul.
 - **Un profil de départ** : une entrée dans `domain/catalog/starters.js` (20 modules).

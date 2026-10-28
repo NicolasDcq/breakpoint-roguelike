@@ -4,14 +4,21 @@
 import { PLUGINS, drawPlugins } from "../catalog/plugins.js";
 import { PACK_IDS } from "../catalog/packs.js";
 import { RULES } from "../catalog/rules.js";
+import { COMMAND_IDS } from "../catalog/commands.js";
 
-export const OfferKind = Object.freeze({ PLUGIN: "plugin" });
+export const OfferKind = Object.freeze({ PLUGIN: "plugin", COMMAND: "command" });
 
 const offer = (kind, id, price) => ({ kind, id, price, sold: false });
 
-/** Tire les Plugins de la boutique parmi tous ceux qu'on n'a pas, selon leur rareté. */
+/**
+ * Tire les offres de la boutique : des Plugins (selon leur rareté), mais une offre peut
+ * devenir une commande du Terminal (RULES.shop.commandChance). Toutes les commandes coûtent le même prix.
+ */
 export function rollOffers(rng, ownedPluginIds) {
-  return drawPlugins(rng, ownedPluginIds, RULES.shop.plugins).map((id) => offer(OfferKind.PLUGIN, id, PLUGINS[id].price));
+  return drawPlugins(rng, ownedPluginIds, RULES.shop.plugins).map((id) =>
+    (rng.next() < RULES.shop.commandChance
+      ? offer(OfferKind.COMMAND, rng.sample(COMMAND_IDS, 1)[0], RULES.terminal.price)
+      : offer(OfferKind.PLUGIN, id, PLUGINS[id].price)));
 }
 
 /** Les emplacements de paquets de l'arrivage : chacun tire son type au hasard (un type peut sortir deux fois). */
@@ -21,7 +28,3 @@ export function rollPackSlots(rng) {
     sold: false,
   }));
 }
-
-/** Prix pour retirer un module du parc. */
-export const removalPrice = (pluginIds, currentPrice) =>
-  (pluginIds.some((id) => PLUGINS[id].freeRemoval) ? 0 : currentPrice);

@@ -42,13 +42,17 @@ export function presentRun(run, { started = true } = {}) {
     parc: run.parc.cards,
     /** Où est chaque carte du parc pendant le contrat (tout est en pioche hors contrat). */
     placeOf: (uid) => (run.phase === Phase.PLAY ? round.whereIs(uid) : CardPlace.DRAW),
-    offers: run.offers,
+    offers: run.offers.map((offer) => ({ ...offer, price: run.priceOfOffer(offer) })),
     packSlots: run.packSlots,
     openPack: run.openPack,
     lastPay: run.lastPay,
-    removePrice: run.currentRemovePrice,
+    /** Le Terminal : les commandes gardées, l'emplacement de chacune, et la main tirée d'une commande ciblée en cours. */
+    commands: run.commandIds,
+    commandSlots: RULES.terminal.slots,
+    lastCommand: run.lastCommand,
+    commandSession: run.commandSession,
+    wildUid: run.wildUid,
     rerollPrice: run.rerollPrice,
-    canRemove: run.parc.size > RULES.minParcSize,
     upgradeCostOf: (card) => upgradeCost(card.level),
   };
 }

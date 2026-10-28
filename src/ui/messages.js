@@ -14,6 +14,11 @@ const MESSAGES = {
   [Refusal.NOT_AT_HAND]: () => "On améliore un module quand il est en main ou posé.",
   [Refusal.NO_PACK_LEFT]: () => "Plus rien de ce genre dans l'arrivage.",
   [Refusal.PACK_PENDING]: () => "Choisis d'abord une carte dans le paquet ouvert.",
+  [Refusal.NO_COMMAND_SLOT]: () => `Terminal plein (${RULES.terminal.slots} commandes) : utilises-en une d'abord.`,
+  [Refusal.COMMAND_NOT_NOW]: (view) => (view.phase === "play" ? "Cette commande s'utilise entre deux contrats, à la boutique." : "Cette commande s'utilise pendant un contrat."),
+  [Refusal.NO_LAST_COMMAND]: () => "Aucune commande à rejouer : utilises-en une d'abord.",
+  [Refusal.BAD_TARGETS]: () => "Choisis des modules dans la main tirée.",
+  [Refusal.NO_ARCHITECTURE_PLAYED]: () => "Aucune architecture jouée pour le moment.",
 };
 
 export const refusalMessage = (reason, view) => MESSAGES[reason]?.(view) ?? "Action impossible.";

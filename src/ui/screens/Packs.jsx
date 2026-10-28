@@ -57,6 +57,21 @@ function PluginPackArt({ scale = 1, shake = false, big = false }) {
   );
 }
 
+/** Pack Terminal : une commande tirée au hasard, sans choix. */
+function TerminalPackArt({ scale = 1, shake = false }) {
+  return (
+    <div className={`pk pk-term ${shake ? "shake" : ""}`} style={{ transform: `scale(${scale})` }} aria-hidden="true">
+      <div className="pk-edge" style={{ clipPath: PACK_CLIP }} />
+      <div className="pk-body" style={{ clipPath: PACK_CLIP }} />
+      <div className="pk-label">
+        <span className="pk-glyph">$_</span>
+        <b>PACK<br />TERMINAL</b>
+        <span className="pk-count">1 COMMANDE · AU HASARD</span>
+      </div>
+    </div>
+  );
+}
+
 function BoxArt({ small, open }) {
   return (
     <div className={`zb ${small ? "zb-small" : ""} ${open ? "zb-open" : ""}`} aria-hidden="true">
@@ -86,6 +101,11 @@ const PACK_LOOK = {
     thumb: () => <div className="zbw"><BoxArt small /></div>,
     effect: `${PACKS.colis.choices} modules tirés parmi tous : tu en gardes un pour ton parc, ou aucun.`,
     sheetClass: "box-sheet",
+  },
+  terminal: {
+    thumb: () => <TerminalPackArt scale={0.5} />,
+    effect: "1 commande tirée au hasard, sans choix : elle rejoint ton Terminal tout de suite.",
+    sheetClass: "",
   },
   booster: {
     thumb: () => <BoosterArt scale={0.5} />,

@@ -5,7 +5,7 @@
 // - onRetrigger(ctx) : à chaque réactivation ;
 // - atEnd(result, env) : à la fin du déploiement ;
 // - contractInterest(money) : $ en plus quand un contrat est livré ;
-// - freeRemoval : retirer un module du parc ne coûte rien.
+// - commandDiscount : les commandes du Terminal en boutique coûtent ce nombre de $ de moins.
 // atEnd reçoit l'environnement { parcSize, pluginIds, contractsWon, maxPlaced, discardsUsed,
 // deploysPlayed, deploysThisContract, isLastDeploy, isLastPlugin }.
 // `scaleTimes: true` : le Plugin multiplie Scale (l'animation affiche le facteur).
@@ -90,8 +90,8 @@ const DEFINITIONS = {
     multiplier: (card, ctx) => (ctx.isFirstPlaced() ? 3 : 1),
   },
   janitor: {
-    name: "Le Concierge", rarity: "common", text: "Retirer un module du parc coûte 0 $.",
-    freeRemoval: true,
+    name: "Le Concierge", rarity: "common", text: "Les commandes du Terminal coûtent 1 $ de moins en boutique.",
+    commandDiscount: 1,
   },
   // ---------- Vague 2 ----------
   veteran: {
