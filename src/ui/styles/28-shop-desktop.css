@@ -1,0 +1,204 @@
+/* La boutique sur ordinateur (ShopDesktop) : étagères, vraies cartes, gros boutons à gauche. */
+
+.overlay:has(> .sd-modal) { padding: 14px; overflow: auto; place-items: center; }
+.modal.sd-modal {
+  width: min(1260px, 100%);
+  max-height: calc(100dvh - 28px);
+  box-sizing: border-box;
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(214, 170, 72, .08) 31px 33px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(214, 170, 72, .06) 47px 49px),
+    #10183a;
+  box-shadow: inset 0 0 0 2px #26305a, 0 30px 80px -20px #000000e6;
+}
+.sd-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.sd-title {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #efe6ff;
+  text-shadow: 0 0 6px #ffb020, 0 0 16px #ffb020, 3px 3px 0 #05070f;
+}
+.sd-sub { display: block; margin-top: 4px; font-size: 12px; opacity: .8; }
+.sd-wallet { display: flex; gap: 10px; font-size: 22px; }
+.sd-wallet > span {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 12px;
+  background: #05070f;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px #26305a;
+}
+.sd-body { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 16px; align-items: stretch; min-height: 0; }
+
+/* Colonne de gauche */
+.sd-side { display: flex; flex-direction: column; gap: 10px; }
+.sd-next {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 12px;
+  background: #141c38;
+  box-shadow: inset 0 0 0 2px #26305a, 0 4px 0 rgba(0, 0, 0, .5);
+}
+.sd-next-label { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+.sd-next-name { font-size: 17px; line-height: 1.15; }
+.sd-next-target { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; opacity: .95; }
+.sd-next-target b { font-size: 26px; color: #ffb020; text-shadow: 2px 2px 0 #05070f; }
+.sd-next-rule { justify-self: start; }
+.sd-side-note { font-size: 11px; text-align: center; opacity: .7; }
+.sd-side-fill { flex: 1; min-height: 4px; }
+.sd-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 12px;
+  background: #2a3566;
+  color: #eef2ff;
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  box-shadow: 0 5px 0 var(--ink, #05070f);
+  cursor: pointer;
+  transition: transform .08s, box-shadow .08s, filter .15s;
+}
+.sd-btn:not(:disabled):hover { filter: brightness(1.12); }
+.sd-btn:not(:disabled):active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink, #05070f); }
+.sd-btn:disabled { opacity: .45; cursor: default; }
+.sd-btn.reroll { background: #ffb020; color: #05070f; }
+.sd-btn.reroll b { padding: 0 8px; border-radius: 7px; background: #05070f; color: #ffb020; }
+.sd-btn.go { min-height: 64px; background: #2bd96b; color: #05070f; font-size: 22px; text-transform: uppercase; }
+.sd-btn.parc { min-height: 46px; }
+
+/* Étagères */
+.sd-main { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 16px; align-items: stretch; }
+.sd-right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.sd-shelf {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 20px;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 12px;
+  background: #0e1630;
+  box-shadow: inset 0 0 0 2px #26305a, 0 4px 0 rgba(0, 0, 0, .5);
+}
+.sd-shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.sd-shelf-head h3 { margin: 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #ffcf4a; text-shadow: 2px 2px 0 #05070f; }
+.sd-shelf-head span { font-size: 11px; opacity: .7; }
+.sd-shelf-body { display: flex; gap: 16px; align-items: flex-start; justify-content: space-around; flex: 1; }
+.sd-shelf-board {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 7px;
+  height: 7px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #b8862e, #e0b24a, #b8862e);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .5);
+}
+.sd-offers .sd-shelf-body { padding-top: 6px; }
+
+/* Une offre : la carte et son étiquette de prix */
+.sd-offer, .sd-pack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform .15s;
+}
+.sd-offer:not(:disabled):hover, .sd-pack:not(:disabled):hover { transform: translateY(-6px); }
+.sd-offer:focus-visible, .sd-pack:focus-visible { outline: 3px solid #ffb020; outline-offset: 6px; border-radius: 12px; }
+.sd-offer:disabled, .sd-pack:disabled { cursor: default; }
+.sd-offer.sold, .sd-pack.sold { opacity: .5; }
+.sd-offer.poor:not(.sold) > :first-child, .sd-pack.poor:not(.sold) .sd-pack-art { filter: saturate(.55) brightness(.85); }
+.sd-price {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 14px;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 9px;
+  background: #05070f;
+  color: #ffb020;
+  font-size: 19px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px #3a3320;
+}
+.sd-price.short { color: #ff6b7e; box-shadow: 0 4px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px #5a2433; }
+
+/* Arrivage : le paquet posé sur l'étagère */
+.sd-arrivage .sd-shelf-body { gap: 14px; }
+.sd-pack { flex: 1; min-width: 0; gap: 6px; text-align: center; }
+.sd-pack-art { display: grid; place-items: center; height: 158px; width: 100%; }
+.sd-pack-art > * { zoom: .74; flex: none; }
+.sd-pack-empty { font-size: 42px; opacity: .4; }
+.sd-pack-name { font-size: 15px; line-height: 1.1; }
+.sd-pack-effect { font-size: 11px; line-height: 1.25; opacity: .85; max-width: 210px; min-height: 42px; }
+.sd-pack .sd-price { margin-top: 2px; }
+
+/* Terminal */
+.sd-terminal .sd-shelf-body { gap: 12px; align-items: stretch; }
+.sd-term {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 96px;
+  padding: 8px 10px;
+  border: 3px solid var(--ink, #05070f);
+  border-radius: 10px;
+  background: #06130d;
+  box-shadow: inset 0 0 0 2px #2bd96b, 0 4px 0 rgba(0, 0, 0, .5);
+}
+.sd-term.empty { align-items: center; justify-content: center; border-style: dashed; background: transparent; box-shadow: none; color: #7d8bc0; font-size: 12px; }
+.sd-term-cmd { font: 800 17px var(--mono); color: #2bd96b; }
+.sd-term-cmd::before { content: "$ "; color: #7d8bc0; }
+.sd-term-fx { font-size: 11px; line-height: 1.2; color: #c9d1f2; }
+.sd-btn.use { min-height: 36px; font-size: 14px; background: #2bd96b; color: #05070f; }
+.sd-btn.use.off { background: #2a3566; color: #eef2ff; }
+
+/* Écrans bas (portable) : on resserre */
+@media (max-height: 800px) {
+  .modal.sd-modal { padding: 10px 16px 14px; gap: 8px; }
+  .sd-title { font-size: 28px; }
+  .sd-sub { display: none; }
+  .sd-pack-art { height: 140px; }
+  .sd-pack-art > * { zoom: .64; }
+  .sd-pack-effect { min-height: 0; }
+  .sd-main, .sd-right { gap: 12px; }
+}
+
+/* Les cartes d'offre sont en grand, centrées sur leur étagère. */
+.sd-offers .sd-shelf-body { align-items: center; padding-top: 0; }
+.sd-offer > .puce, .sd-offer > .cmd-card { zoom: 1.28; }
+.sd-btn.go { font-size: 19px; white-space: nowrap; }
+@media (max-height: 800px) {
+  .sd-offer > .puce, .sd-offer > .cmd-card { zoom: 1.12; }
+}

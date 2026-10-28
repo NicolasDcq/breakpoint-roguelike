@@ -115,6 +115,16 @@ const PACK_LOOK = {
   },
 };
 
+/** Le paquet en grand (boutique sur ordinateur) : l'illustration de chaque genre de paquet. */
+export function PackArt({ packId }) {
+  if (packId === "colis") return <BoxArt />;
+  if (packId === "booster") return <BoosterArt />;
+  if (packId === "terminal") return <TerminalPackArt />;
+  return <PluginPackArt big={packId === "gros"} />;
+}
+
+export const packEffect = (packId) => PACK_LOOK[packId].effect;
+
 /** Dans la boutique : l'arrivage (2 emplacements tirés au hasard). */
 export function PackOffers({ view, onBuy }) {
   return (

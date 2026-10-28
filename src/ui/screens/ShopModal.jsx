@@ -9,6 +9,7 @@ import { Tooltip } from "../common/Tooltip.jsx";
 import { CommandCard, CommandChip, CommandTip } from "../components/CommandCard.jsx";
 import { commandUsable } from "../components/TerminalRail.jsx";
 import { PluginCard, PluginChip, PluginTip } from "../components/PluginCard.jsx";
+import { ShopDesktop } from "./ShopDesktop.jsx";
 
 const priceLabel = (offer, money, soldLabel) => (offer.sold ? soldLabel : `${offer.price} $`);
 const priceClass = (offer, money) => `price num ${money >= offer.price ? "" : "short"}`;
@@ -73,6 +74,23 @@ function TerminalSlots({ view, onUse }) {
 export function ShopModal({ view, actions, desktop }) {
   const next = view.nextContract;
   const [replacing, setReplacing] = useState(null);
+  const replaceModal = replacing !== null && (
+    <ReplacePluginModal
+      view={view}
+      desktop={desktop}
+      offer={view.offers[replacing]}
+      onClose={() => setReplacing(null)}
+      onReplace={(pluginId) => { if (actions.buy(replacing, pluginId)) setReplacing(null); }}
+    />
+  );
+  if (desktop) {
+    return (
+      <>
+        <ShopDesktop view={view} actions={actions} onReplace={setReplacing} />
+        {replaceModal}
+      </>
+    );
+  }
   return (
     <Modal className="shop-modal parc-shop">
       <div className="fu-head">
