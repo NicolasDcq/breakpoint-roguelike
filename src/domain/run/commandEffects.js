@@ -8,7 +8,7 @@ import { RULES } from "../catalog/rules.js";
 import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 
 /** L'architecture la plus jouée de la partie ; à égalité, la jouée en dernier. Null si aucune. */
-function mostPlayedArchitecture(run) {
+export function mostPlayedArchitecture(run) {
   const plays = (id) => run.architecturePlays[id] ?? 0;
   const played = ARCHITECTURE_IDS.filter((id) => plays(id) > 0);
   if (!played.length) return null;

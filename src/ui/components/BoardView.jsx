@@ -3,6 +3,7 @@
 // (ou l'échange) ; le glisser vers la main le reprend. Toucher une tuile ouvre sa fiche.
 
 import { createPortal } from "react-dom";
+import { useRef } from "react";
 import { BOSSES, CELLS, GRID_SIZE, MODULES, upgradeCost } from "../../domain/index.js";
 import { Tooltip } from "../common/Tooltip.jsx";
 import { tileClasses } from "../visuals.js";
@@ -52,7 +53,7 @@ function Hand({ view, marked, discarding, locked, drag, dragProps }) {
   );
 }
 
-export function BoardView({ view, marked, discarding, animation, locked, drag, dragProps }) {
+export function BoardView({ view, marked, discarding, animation, locked, drag, dragProps, withHand = true }) {
   const blockedCell = BOSSES[view.contract.boss]?.blockedCell;
   const highlight = animation?.highlight ?? (view.placedCount && view.preview.architecture.id !== "monolithe" ? view.preview.architecture.members : []);
   const activeCell = animation?.firing?.cell ?? null;
@@ -61,7 +62,7 @@ export function BoardView({ view, marked, discarding, animation, locked, drag, d
   const handFull = drag?.source.kind === "hand" && view.placedCount >= view.limits.maxPlaced;
   return (
     <div className={`board ${locked ? "running" : ""}`} style={{ "--grid": GRID_SIZE }}>
-      <Hand view={view} marked={marked} discarding={discarding} locked={locked} drag={drag} dragProps={dragProps} />
+      {withHand && <Hand view={view} marked={marked} discarding={discarding} locked={locked} drag={drag} dragProps={dragProps} />}
       <svg className="trace" viewBox={`0 0 ${TRACE_WIDTH} ${TRACE_HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
         <path className="trace-bus" d={busPath()} />
         {returnPaths().map((path) => <path key={path} className="trace-return" d={path} />)}
@@ -113,5 +114,67 @@ export function BoardView({ view, marked, discarding, animation, locked, drag, d
         document.body,
       )}
     </div>
+  );
+}
+
+/**
+ * Les emplacements de la main sur ordinateur : chaque carte garde son emplacement tant qu'elle est en main.
+ * Quand elle part sur le plateau, son emplacement reste vide (rien ne se décale) ; une carte piochée
+ * prend le premier emplacement libre.
+ */
+function useStableHand(hand, size) {
+  const slots = useRef([]);
+  const present = new Set(hand.map((card) => card.uid));
+  let next = Array.from({ length: size }, (_, index) => (slots.current[index] && present.has(slots.current[index]) ? slots.current[index] : null));
+  const seated = new Set(next.filter(Boolean));
+  for (const card of hand) {
+    if (seated.has(card.uid)) continue;
+    const free = next.indexOf(null);
+    if (free < 0) break;
+    next[free] = card.uid;
+    seated.add(card.uid);
+  }
+  slots.current = next;
+  return next.map((uid) => (uid ? hand.find((card) => card.uid === uid) : null));
+}
+
+export function HandRow({ view, marked, discarding, locked, drag, dragProps }) {
+  const over = drag?.over?.kind === "hand" && drag.source.kind === "cell";
+  const slots = useStableHand(view.hand, view.limits.handSize);
+  let kept = view.placedCount; // les premiers emplacements vides sont ceux des modules posés
+  return (
+    <section className={`gd-hand drawer-row hand-row ${over ? "drop-over" : ""} ${discarding ? "discarding" : ""}`} data-drop="hand" aria-label="Main">
+      <header className="gd-hand-head">
+        <span className="gd-label">Main · {view.hand.length}</span>
+        <span className="gd-hint">
+          {discarding
+            ? `Défausse : touche les cartes à jeter (${marked.length}), puis Confirmer`
+            : `Pioche ${view.drawCount} · posés ${view.placedCount}/${view.limits.maxPlaced} · glisse un module sur le plateau`}
+        </span>
+      </header>
+      <div className="gd-hand-cells" style={{ "--hand": slots.length }}>
+        {slots.map((card, index) => {
+          if (!card) {
+            const posed = kept-- > 0;
+            return <div key={`empty${index}`} className={`gd-hand-empty ${posed ? "posed" : ""}`}>{posed ? "posé" : ""}</div>;
+          }
+          return (
+            <div key={card.uid} className={`slot drawer-slot filled ${marked.includes(card.uid) ? "picked" : ""}`}>
+              <Tooltip content={<ModuleTip card={card} />} disabled={locked || Boolean(drag)} className="tile-wrap">
+                <div
+                  className={`${tileClasses(card)} ${isSource(drag, "hand", card.uid) ? "drag-source" : ""}`}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${MODULES[card.moduleId].name}, niveau ${card.level}, dans ta main. Toucher pour voir sa fiche, glisser pour le poser.`}
+                  {...dragProps({ kind: "hand", uid: card.uid })}
+                >
+                  <ModuleFace card={card} upgradable={!locked && canUpgrade(card, view)} />
+                </div>
+              </Tooltip>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

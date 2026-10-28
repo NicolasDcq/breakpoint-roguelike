@@ -1,7 +1,7 @@
 // Présentateur : transforme la partie en données simples pour l'affichage.
 // L'interface lit cette vue ; elle ne touche jamais l'agrégat directement.
 
-import { CardPlace, Phase, RULES, upgradeCost } from "../domain/index.js";
+import { CardPlace, Phase, RULES, mostPlayedArchitecture, upgradeCost } from "../domain/index.js";
 
 /**
  * @param {object} run
@@ -30,6 +30,8 @@ export function presentRun(run, { started = true } = {}) {
     pluginValues: run.pluginValues,
     architectureLevels: run.architectureLevels,
     architecturePlays: run.architecturePlays,
+    /** L'architecture que apt upgrade monterait (la plus jouée ; à égalité, la jouée en dernier), ou null. */
+    nextUpgradeId: mostPlayedArchitecture(run),
     score: round.score,
     deploysLeft: round.deploysLeft,
     discardsLeft: round.discardsLeft,

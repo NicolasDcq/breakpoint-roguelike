@@ -14,7 +14,9 @@ import { ScorePanel } from "./components/ScorePanel.jsx";
 import { PluginRail } from "./components/PluginRail.jsx";
 import { TerminalRail } from "./components/TerminalRail.jsx";
 import { TerminalModal } from "./terminal/TerminalModal.jsx";
-import { BoardView } from "./components/BoardView.jsx";
+import { BoardView, HandRow } from "./components/BoardView.jsx";
+import { ArchitectureList } from "./components/ArchitectureList.jsx";
+import { TerminalTray } from "./components/TerminalTray.jsx";
 import { FamilyBar } from "./components/FamilyBar.jsx";
 import { SideDetail } from "./components/SideDetail.jsx";
 import { ModuleSheet } from "./components/ModuleSheet.jsx";
@@ -150,22 +152,78 @@ export function App() {
 
   const side = <SideDetail marked={marked} discarding={discarding} desktop={!mobile} />;
 
+  const hud = (
+    <>
+      <TopBar view={view} onRules={() => open("rules")} onRestart={() => open("confirm")} />
+      <ScorePanel
+        view={view}
+        animation={animation}
+        selectionCount={marked.length}
+        discarding={discarding}
+        onDiscard={discard}
+        onDeploy={deploy}
+        onParc={() => open("parc")}
+        onArchitectures={() => open("archs")}
+        onSkip={skip}
+        onSpeed={setSpeed}
+      />
+    </>
+  );
+
+  const overlays = (
+    <>
+      {phaseScreen || null}
+      {!busy && !overlay && view.phase === Phase.SHOP && view.openPack && (
+        <PackOpening key={view.openPack.choices.join()} view={view} onPick={pickFromPack} />
+      )}
+      {sheetCard && !busy && (
+        <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} onClose={() => setSheet(null)} actions={sheetActions} />
+      )}
+      {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
+      {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}
+      {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
+      {overlay?.name === "plugin" && <PluginModal id={overlay.id} value={view.pluginValues[overlay.id] ?? null} onClose={close} />}
+      {overlay?.name === "confirm" && <ConfirmNewRun onYes={newRun} onNo={close} />}
+      {tuto && <Tutorial view={view} hidden={busy || Boolean(overlay)} onQuit={endTuto} onNewRun={() => { endTuto(); newRun(); }} />}
+      {offerTuto && !tuto && <TutorialOffer onStart={startTuto} onSkip={endTuto} />}
+      {terminal && <TerminalModal view={view} session={terminal} game={game} sound={sound} showToast={showToast} onClose={closeTerminal} />}
+    </>
+  );
+
+  if (!mobile) {
+    return (
+      <div className={`app gd-app ${view.contract.boss ? "boss-mode" : ""}`}>
+        <aside className="hud gd-hud">{hud}</aside>
+        <div className="gd-center">
+          <div className="gd-strip">
+            <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} compact onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
+            <TerminalTray view={view} locked={busy} onUse={useCommand} />
+          </div>
+          <div className="gd-mid">
+            <div className="gd-piles" aria-label="Piles">
+              <div className="gd-pile"><span className="gd-label">Pioche</span><b className="num">{view.drawCount}</b></div>
+              <div className="gd-pile used"><span className="gd-label">Défausse</span><b className="num">{view.playedCount}</b></div>
+              <FamilyBar board={view.board} />
+            </div>
+            <div className="gd-board">
+              <BoardView view={view} marked={marked} discarding={discarding} animation={animation} locked={busy} drag={drag} dragProps={dragProps} withHand={false} />
+            </div>
+            <aside className="gd-info">
+              <ArchitectureList view={view} onShowAll={() => open("archs")} />
+              <SideDetail marked={marked} discarding={discarding} desktop />
+            </aside>
+          </div>
+          <HandRow view={view} marked={marked} discarding={discarding} locked={busy} drag={drag} dragProps={dragProps} />
+        </div>
+        {overlays}
+      </div>
+    );
+  }
+
   return (
     <div className={`app ${view.contract.boss ? "boss-mode" : ""} ${mobile ? "is-mobile" : ""}`}>
       <aside className="hud">
-        <TopBar view={view} onRules={() => open("rules")} onRestart={() => open("confirm")} />
-        <ScorePanel
-          view={view}
-          animation={animation}
-          selectionCount={marked.length}
-          discarding={discarding}
-          onDiscard={discard}
-          onDeploy={deploy}
-          onParc={() => open("parc")}
-          onArchitectures={() => open("archs")}
-          onSkip={skip}
-          onSpeed={setSpeed}
-        />
+        {hud}
         {!mobile && side}
       </aside>
       <div className="stage">
@@ -183,22 +241,7 @@ export function App() {
           {mobile && side}
         </main>
       </div>
-      {phaseScreen || null}
-      {!busy && !overlay && view.phase === Phase.SHOP && view.openPack && (
-        <PackOpening key={view.openPack.choices.join()} view={view} onPick={pickFromPack} />
-      )}
-      {sheetCard && !busy && (
-        <ModuleSheet card={sheetCard} place={sheetPlace} view={view} desktop={!mobile} onClose={() => setSheet(null)} actions={sheetActions} />
-      )}
-      {overlay?.name === "rules" && <RulesModal onClose={() => { preferences.set(RULES_SEEN, "1"); close(); }} />}
-      {overlay?.name === "archs" && <ArchitecturesModal view={view} onClose={close} />}
-      {overlay?.name === "parc" && <ParcModal view={view} onClose={close} />}
-      {overlay?.name === "plugin" && <PluginModal id={overlay.id} value={view.pluginValues[overlay.id] ?? null} onClose={close} />}
-      {overlay?.name === "confirm" && <ConfirmNewRun onYes={newRun} onNo={close} />}
-      {tuto && <Tutorial view={view} hidden={busy || Boolean(overlay)} onQuit={endTuto} onNewRun={() => { endTuto(); newRun(); }} />}
-      {offerTuto && !tuto && <TutorialOffer onStart={startTuto} onSkip={endTuto} />}
-      {terminal && <TerminalModal view={view} session={terminal} game={game} sound={sound} showToast={showToast} onClose={closeTerminal} />}
-      {toast && <div className="toast" role="status">{toast}</div>}
+      {overlays}
     </div>
   );
 }

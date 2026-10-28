@@ -304,3 +304,10 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 
 - Effets qui multiplient le Scale (ils profiteront de la base de l'architecture).
 - Reprendre de `main-old` ce qui a du sens : éditions, tutoriel, profil.
+
+## 28/10 — Écran de jeu desktop (maquette A2)
+- Ordinateur : colonne HUD à gauche (300 px) ; au centre un bandeau fin (Plugins en petites cartes + Terminal vert avec bouton Utiliser), puis piles | plateau réduit (max 720 px) | liste des architectures, et la main en bas.
+- La main garde des emplacements fixes : un module posé laisse un trou « posé », rien ne se décale (`HandRow`, `useStableHand`).
+- Liste des architectures : base à ton niveau, nombre de parties jouées (`×N`), la formée en vert, et l'architecture que `apt upgrade` monterait en jaune (`view.nextUpgradeId`, via `mostPlayedArchitecture`).
+- Mobile inchangé. Fichiers : `App.jsx` (branche desktop), `ArchitectureList.jsx`, `TerminalTray.jsx`, `29-game-desktop.css`.
+- Reste : panneau « Détail module » avec Améliorer (pour l'instant la fiche s'ouvre au toucher).

@@ -1,0 +1,131 @@
+/* Écran de jeu sur ordinateur (maquette A2) :
+   colonne HUD à gauche ; au centre un bandeau fin (Plugins + Terminal), puis piles | plateau | architectures,
+   et la main en bas avec des emplacements fixes. */
+
+@media (min-width: 1181px) {
+  .app.gd-app {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 14px;
+    height: 100vh;
+    min-height: 620px;
+    padding: 12px 14px;
+    box-sizing: border-box;
+  }
+  .gd-hud { overflow-y: auto; min-height: 0; }
+  .gd-center {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    min-width: 0;
+    min-height: 0;
+  }
+  .gd-label { font: 700 11px/1 "Pixelify Sans", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--gold, #ffcf4a); }
+  .gd-count { font-size: 11px; color: #9fb0d0; }
+  .gd-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .gd-link { background: none; border: 0; color: #9fb0d0; font: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; }
+
+  /* Bandeau fin */
+  .gd-strip { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+  .gd-strip .puce-rail.compact, .gd-strip > .puce-rail { margin: 0; }
+  .gd-terminal {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 6px 10px; min-width: 250px;
+    border: 3px solid #05070f; border-radius: 8px;
+    background: linear-gradient(180deg, #0f2a1b, #0a1c12);
+    box-shadow: 3px 3px 0 #05070f;
+  }
+  .gd-terminal .gd-label { color: #2bd96b; }
+  .gd-terminal-cards { display: flex; align-items: center; gap: 8px; }
+  .gd-terminal-wrap { display: block; }
+  .gd-terminal-card {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    transform: scale(.72); transform-origin: left center; margin-right: -26px;
+    transition: transform .12s;
+  }
+  .gd-terminal-card.up { transform: scale(.72) translateY(-10px); filter: drop-shadow(0 0 6px #2bd96b); }
+  .gd-terminal-card.off { opacity: .55; }
+  .gd-terminal-empty {
+    width: 64px; height: 56px; display: grid; place-items: center;
+    border: 2px dashed #2bd96b55; border-radius: 6px; color: #2bd96b88; font-size: 11px;
+  }
+  .gd-use {
+    margin-left: auto; padding: 8px 12px; cursor: pointer;
+    font: 700 12px "Pixelify Sans", monospace; text-transform: uppercase;
+    color: #05070f; background: #2bd96b; border: 3px solid #05070f; border-radius: 6px; box-shadow: 2px 2px 0 #05070f;
+  }
+
+  /* Milieu */
+  .gd-mid {
+    align-self: stretch;
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 320px;
+    gap: 12px;
+    min-height: 0;
+    align-items: start;
+    overflow: hidden;
+  }
+  .gd-piles { display: flex; flex-direction: column; gap: 8px; }
+  .gd-pile {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px;
+    border: 3px solid #05070f; border-radius: 8px; background: #11193a; box-shadow: 3px 3px 0 #05070f;
+  }
+  .gd-pile b { font-size: 26px; color: #e8eefc; }
+  .gd-pile.used b { color: #9fb0d0; }
+  .gd-piles .family-bar { flex-direction: column; align-items: stretch; }
+  .gd-board { min-width: 0; display: flex; justify-content: center; min-height: 0; }
+  .gd-board .board {
+    width: 100%;
+    max-width: min(100%, 720px, calc((100vh - 360px) * 1.25));
+    margin: 0;
+    height: auto;
+    --pad-x: 14px;
+    --pad-y: 12px;
+  }
+  .gd-board .board .slots { height: auto; min-height: 0; aspect-ratio: 1.25 / 1; grid-template-rows: repeat(var(--grid, 4), minmax(0, 1fr)); }
+  .gd-info { overflow-y: auto; max-height: 100%; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  .gd-info .side { display: block; }
+  .gd-archs {
+    padding: 10px 12px; border: 3px solid #05070f; border-radius: 8px;
+    background: #0e1530; box-shadow: 3px 3px 0 #05070f;
+  }
+  .gd-arch-cols, .gd-arch { display: grid; grid-template-columns: minmax(0, 1fr) 46px 62px; align-items: center; gap: 6px; }
+  .gd-arch-cols { font-size: 10px; color: #7f90b3; text-transform: uppercase; text-align: right; margin-bottom: 4px; }
+  .gd-arch-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+  .gd-arch { padding: 2px 6px; border-radius: 5px; font-size: 12px; color: #b9c6e4; border: 2px solid transparent; }
+  .gd-arch-name { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .gd-arch-name i { font-style: normal; font-size: 10px; color: #7f90b3; }
+  .gd-arch-name em { font-style: normal; font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; background: #2bd96b; color: #05070f; }
+  .gd-arch-name em.apt { background: #ffcf4a; }
+  .gd-arch-plays, .gd-arch-base { text-align: right; }
+  .gd-arch-plays { color: #e8eefc; font-weight: 700; }
+  .gd-arch:not(.played) { opacity: .6; }
+  .gd-arch.formed { border-color: #2bd96b; background: #12301f; color: #e8fff1; opacity: 1; }
+  .gd-arch.next:not(.formed) { border-color: #ffcf4a88; }
+  .gd-arch-note { margin: 8px 0 0; font-size: 11px; color: #7f90b3; }
+
+  /* La main : emplacements fixes */
+  .gd-hand {
+    position: static; left: auto; top: auto; bottom: auto; width: auto; margin: 0;
+    display: block;
+    padding: 8px 12px 10px;
+    border: 3px solid #05070f; border-radius: 8px;
+    background: #0e1530; box-shadow: 3px 3px 0 #05070f;
+  }
+  .gd-hand.drop-over { outline: 3px solid #2bd96b; }
+  .gd-hand-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .gd-hint { font-size: 11px; color: #9fb0d0; }
+  .gd-hand-cells {
+    display: grid;
+    grid-template-columns: repeat(var(--hand), minmax(0, 1fr));
+    gap: 10px;
+    height: clamp(96px, 17vh, 150px);
+  }
+  .gd-hand-cells .drawer-slot { height: 100%; min-height: 0; }
+  .gd-hand-empty {
+    border: 2px dashed #2a3860; border-radius: 8px; display: grid; place-items: center;
+    font-size: 11px; color: #3b4a76; text-transform: uppercase;
+  }
+  .gd-hand-empty.posed { color: #5a6aa0; }
+}

@@ -11,6 +11,7 @@ export { PLUGINS, RARITIES, drawPlugins, drawPluginPack, pluginSellPrice } from 
 export { BOSSES } from "./catalog/bosses.js";
 export { STARTERS } from "./catalog/starters.js";
 export { PACKS, PACK_IDS } from "./catalog/packs.js";
+export { mostPlayedArchitecture } from "./run/commandEffects.js";
 export { COMMANDS, COMMAND_IDS } from "./catalog/commands.js";
 export { ARCHITECTURES, ARCHITECTURE_BY_ID, architectureBase } from "./catalog/architectures.js";
 export { CELLS, GRID_SIZE, CELL_COUNT, neighborCells } from "./board/grid.js";
