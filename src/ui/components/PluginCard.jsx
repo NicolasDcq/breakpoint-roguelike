@@ -25,13 +25,13 @@ const VALUE_CLASS = { compute: "v-compute", scale: "v-scale", retry: "v-retry", 
 export const valueClass = (kind) => VALUE_CLASS[kind] ?? "v-compute";
 
 /** Le badge sous une puce : ce que le Plugin apporte en ce moment. */
-function ValueBadge({ value, firing }) {
+export function ValueBadge({ value, firing }) {
   if (!value) return null;
   return <span className={`puce-val ${valueClass(value.kind)} ${firing ? "up" : ""}`}>{valueText(value)}</span>;
 }
 
 /** La bulle qui monte d'une puce quand son Plugin s'active. */
-function FiringPop({ firing }) {
+export function FiringPop({ firing }) {
   if (!firing) return null;
   return <span key={firing.key} className={`puce-pop ${valueClass(firing.kind)}`} aria-hidden="true">{firing.text}</span>;
 }

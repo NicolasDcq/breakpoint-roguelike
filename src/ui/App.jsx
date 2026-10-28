@@ -216,7 +216,7 @@ export function App() {
           <div className="gd-strip">
             <section className="gd-pan gd-plugins" aria-label="Plugins">
               <header className="gd-panel-head"><span className="gd-label">Plugins · {view.pluginIds.length}/{RULES.maxPlugins}</span></header>
-              <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
+              <PluginRail pluginIds={view.pluginIds} values={view.pluginValues} fired={animation?.fired} firing={animation?.pluginFiring} locked={busy} cards onOpen={(id) => open("plugin", { id })} onMove={(from, to) => attempt(game.movePlugin(from, to), "click")} />
             </section>
             <TerminalTray view={view} locked={busy} onUse={useCommand} />
           </div>

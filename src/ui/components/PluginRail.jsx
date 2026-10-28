@@ -5,9 +5,9 @@
 import { PLUGINS, RULES } from "../../domain/index.js";
 import { Tooltip } from "../common/Tooltip.jsx";
 import { usePluginDrag } from "../hooks/usePluginDrag.js";
-import { PluginChip, PluginMini, PluginTip } from "./PluginCard.jsx";
+import { FiringPop, PluginCard, PluginChip, PluginMini, PluginTip } from "./PluginCard.jsx";
 
-export function PluginRail({ pluginIds, values = {}, fired = [], firing = null, locked = false, compact, onOpen, onMove }) {
+export function PluginRail({ pluginIds, values = {}, fired = [], firing = null, locked = false, compact, cards = false, onOpen, onMove }) {
   const slots = RULES.maxPlugins;
   const { drag, dragProps } = usePluginDrag({ locked, onTap: onOpen, onMove });
   const style = { "--slots": slots };
@@ -37,6 +37,29 @@ export function PluginRail({ pluginIds, values = {}, fired = [], firing = null, 
       {item(drag.id, drag.from, !compact)}
     </div>
   );
+  if (cards) {
+    return (
+      <section className="gd-plugin-cards" style={style} aria-label="Plugins">
+        {Array.from({ length: slots }, (_, index) => {
+          const id = pluginIds[index];
+          if (!id) return <span key={`empty${index}`} className="gd-free">Libre</span>;
+          return (
+            <button
+              key={id}
+              type="button"
+              className={`puce-rail-btn gd-pcard ${drag?.from === index ? "dragging" : ""} ${drag && drag.over === index && drag.from !== index ? "over" : ""} ${firing?.[id] ? "firing" : ""}`}
+              aria-label={PLUGINS[id].name}
+              {...dragProps(id, index)}
+            >
+              <PluginCard id={id} order={index + 1} pulse={fired.includes(id)} value={values[id] ?? null} />
+              <FiringPop firing={firing?.[id] ?? null} />
+            </button>
+          );
+        })}
+        {ghost}
+      </section>
+    );
+  }
   if (compact) {
     return (
       <section className="puce-rail compact" style={style} aria-label="Plugins">
