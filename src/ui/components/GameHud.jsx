@@ -17,6 +17,9 @@ export function GameHud({ view, animation, selectionCount, discarding, onDiscard
   const score = running ? totals.score : view.preview.score;
   const remaining = Math.max(0, contract.target - view.score);
   const enough = !running && view.placedCount > 0 && remaining > 0 && view.preview.score >= remaining;
+  const ratio = remaining > 0 && view.placedCount ? score / remaining : 0;
+  const heat = ratio >= 5 ? 3 : ratio >= 2 ? 2 : ratio >= 1 ? 1 : 0;
+  const flames = heat > 0 && <span className="flames" aria-hidden="true"><i /><i /><i /><i /><i /></span>;
   const placed = view.preview.count > 0;
   const { level } = view.preview.architecture;
   const archName = placed ? ARCHITECTURE_BY_ID[view.preview.architecture.id].name : "Aucune";
@@ -42,15 +45,15 @@ export function GameHud({ view, animation, selectionCount, discarding, onDiscard
         <div className="gd-bar" role="progressbar" aria-valuemin={0} aria-valuemax={contract.target} aria-valuenow={view.score}><i style={{ width: `${progress}%` }} /></div>
         {bossRule && <span className="rule-chip gd-rule">{bossRule}</span>}
       </section>
-      <section className={`gd-pan score-panel gd-score ${running ? "running" : "forecast"}`} aria-live="polite">
+      <section className={`gd-pan score-panel gd-score ${running ? "running" : "forecast"} ${heat ? `on-fire heat-${heat}` : ""}`} aria-live="polite">
         <button type="button" className="gd-score-head arch-line" onClick={onArchitectures} aria-label="Voir les architectures">
           <span className="gd-small">{placed ? <>{archName} · niveau {level}</> : "Pose des modules"}</span>
           <span className="gd-prev">{running ? "Perf" : "Prévu"} <b className="num">{view.placedCount || running ? fmt(score) : "—"}</b></span>
         </button>
         <div className="formula gd-formula">
-          <div className="term compute"><span className="term-label">Compute</span><span key={`c${computeText}`} className={`term-value num ${lengthClass(computeText)}`}>{computeText}</span></div>
+          <div className="term compute">{flames}<span className="term-label">Compute</span><span key={`c${computeText}`} className={`term-value num ${lengthClass(computeText)}`}>{computeText}</span></div>
           <span className="op">×</span>
-          <div className="term scale"><span className="term-label">Scale</span><span key={`s${scaleText}`} className={`term-value num ${lengthClass(scaleText)}`}>{scaleText}</span></div>
+          <div className="term scale">{flames}<span className="term-label">Scale</span><span key={`s${scaleText}`} className={`term-value num ${lengthClass(scaleText)}`}>{scaleText}</span></div>
         </div>
         {running ? (
           <div className="gd-run">
