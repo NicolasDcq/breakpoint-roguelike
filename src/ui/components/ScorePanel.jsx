@@ -1,5 +1,6 @@
 // Panneau du score : base de l'architecture, formule, et boutons d'action.
 
+import { SPEEDS } from "../gameSpeed.js";
 import { fmt, fmtDec } from "../format.js";
 import { ArchitectureLine } from "./ArchitectureLine.jsx";
 
@@ -53,7 +54,7 @@ export function ScorePanel({ view, animation, selectionCount, discarding, onDisc
           <>
             <span className="chain num">{animation.step} activation{animation.step > 1 ? "s" : ""}</span>
             <div className="speed" role="group" aria-label="Vitesse">
-              {[1, 2, 4].map((speed) => (
+              {SPEEDS.map((speed) => (
                 <button key={speed} className={animation.speed === speed ? "on" : ""} onClick={() => onSpeed(speed)}>×{speed}</button>
               ))}
             </div>

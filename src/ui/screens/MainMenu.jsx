@@ -6,6 +6,7 @@ import { useGame, useGameView } from "../GameContext.jsx";
 import { MOBILE_QUERY, useMediaQuery } from "../hooks/useMediaQuery.js";
 import { PluginCard } from "../components/PluginCard.jsx";
 import { ConfirmNewRun } from "./InfoModals.jsx";
+import { SPEEDS, loadSpeed, saveSpeed } from "../gameSpeed.js";
 
 // Pose des cartes : téléphone (en éventail, qui se chevauchent) et ordinateur (dispersées).
 const PHONE_FAN = [
@@ -13,12 +14,12 @@ const PHONE_FAN = [
   { id: "genai", rot: 0, delay: 0 },
   { id: "cloudarch", rot: 9, delay: -0.8 },
 ];
+// Ordinateur : le menu est au centre, les cartes se répartissent de chaque côté.
 const DESKTOP_FAN = [
-  { id: "intern", rot: -9, delay: -0.2, x: 0, y: 80 },
-  { id: "cloudarch", rot: 0, delay: -0.9, x: 190, y: 30 },
-  { id: "genai", rot: 8, delay: -1.6, x: 380, y: 100 },
-  { id: "dba", rot: -5, delay: -2.1, x: 90, y: 370 },
-  { id: "vc", rot: 6, delay: -0.6, x: 290, y: 390 },
+  { id: "intern", rot: -9, delay: -0.2, side: "left", top: "14%", near: false },
+  { id: "dba", rot: -5, delay: -2.1, side: "left", top: "56%", near: true },
+  { id: "cloudarch", rot: 8, delay: -0.9, side: "right", top: "12%", near: true },
+  { id: "genai", rot: 6, delay: -1.6, side: "right", top: "54%", near: false },
 ];
 
 /** Le chemin doré en pointillés qui traverse le fond (décor). */
@@ -42,8 +43,30 @@ function Title() {
   );
 }
 
+/** L'onglet Paramètres : pour le moment, la vitesse du jeu (×1, ×2, ×3), gardée pour toutes les parties. */
+function Settings({ preferences }) {
+  const [speed, setSpeed] = useState(() => loadSpeed(preferences));
+  const choose = (value) => { saveSpeed(preferences, value); setSpeed(value); };
+  return (
+    <div className="menu-settings">
+      <div className="menu-setting">
+        <div className="menu-setting-text">
+          <b>Vitesse du jeu</b>
+          <span>Rythme des animations de déploiement. Ton choix est gardé pour toutes tes parties.</span>
+        </div>
+        <div className="menu-speed" role="radiogroup" aria-label="Vitesse du jeu">
+          {SPEEDS.map((value) => (
+            <button key={value} type="button" role="radio" aria-checked={speed === value} className={speed === value ? "on" : ""} onClick={() => choose(value)}>×{value}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MainMenu({ onPlay, onTutorial }) {
-  const { game } = useGame();
+  const { game, preferences } = useGame();
+  const [tab, setTab] = useState("play");
   const view = useGameView();
   const mobile = useMediaQuery(MOBILE_QUERY);
   const [confirming, setConfirming] = useState(false);
@@ -97,16 +120,20 @@ export function MainMenu({ onPlay, onTutorial }) {
   return (
     <main className="main-menu is-desktop">
       <Route viewBox="0 0 1440 900" d="M-10 230 H300 L340 270 H900 L940 230 H1450 M-10 690 H200 L240 650 H1100 L1140 690 H1450" dash="18 82" width={4} />
-      <div className="menu-left">
+      {DESKTOP_FAN.map(({ id, rot, delay, side, top, near }) => (
+        <div key={id} className={`menu-card menu-card-${side} ${near ? "near" : ""}`} style={{ "--r": `${rot}deg`, animationDelay: `${delay}s`, top }} aria-hidden="true">
+          <PluginCard id={id} />
+        </div>
+      ))}
+      <div className="menu-center">
         <Title />
-        <div className="menu-actions">{actions}</div>
-      </div>
-      <div className="menu-fan">
-        {DESKTOP_FAN.map(({ id, rot, delay, x, y }) => (
-          <div key={id} className="menu-card" style={{ "--r": `${rot}deg`, animationDelay: `${delay}s`, left: x, top: y }}>
-            <PluginCard id={id} />
-          </div>
-        ))}
+        <div className="menu-tabs" role="tablist" aria-label="Menu">
+          <button type="button" role="tab" aria-selected={tab === "play"} className={tab === "play" ? "on" : ""} onClick={() => setTab("play")}>JOUER</button>
+          <button type="button" role="tab" aria-selected={tab === "settings"} className={tab === "settings" ? "on" : ""} onClick={() => setTab("settings")}>PARAMÈTRES</button>
+        </div>
+        <div className="menu-panel" role="tabpanel">
+          {tab === "play" ? <div className="menu-actions">{actions}</div> : <Settings preferences={preferences} />}
+        </div>
       </div>
       {confirm}
     </main>

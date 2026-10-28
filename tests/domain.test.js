@@ -1104,3 +1104,18 @@ test("les badges des Plugins de la vague 4 suivent la partie", () => {
   run.pluginIds = ["hyperscaler", "deploiementfinal"];
   assert.equal(run.pluginValues.deploiementfinal.amount, 3);
 });
+
+test("la vitesse du jeu : ×1 par défaut, ×2 et ×3 gardés, une valeur inconnue est ignorée", async () => {
+  const { SPEEDS, loadSpeed, saveSpeed } = await import("../src/ui/gameSpeed.js");
+  const store = new Map();
+  const preferences = { get: (key) => store.get(key) ?? null, set: (key, value) => store.set(key, value) };
+  assert.deepEqual(SPEEDS, [1, 2, 3]);
+  assert.equal(loadSpeed(preferences), 1);
+  saveSpeed(preferences, 3);
+  assert.equal(loadSpeed(preferences), 3);
+  saveSpeed(preferences, 4);
+  assert.equal(loadSpeed(preferences), 3, "×4 n'existe plus : on garde ×3");
+  store.set("speed", "banane");
+  assert.equal(loadSpeed(preferences), 1);
+  assert.equal(loadSpeed(undefined), 1);
+});

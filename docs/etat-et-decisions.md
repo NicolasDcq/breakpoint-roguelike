@@ -1,5 +1,11 @@
 # État du jeu et décisions
 
+## 28/10 · Menu principal centré sur ordinateur, avec un onglet Paramètres
+
+- Sur ordinateur, le menu est **centré** (titre, onglets, boutons), les cartes à puce flottent de chaque côté. Deux onglets : **Jouer** (nouvelle partie / reprendre, tutoriel) et **Paramètres**.
+- Paramètre : **vitesse du jeu ×1, ×2 ou ×3** (avant : ×1, ×2, ×4 pendant l'animation seulement). Elle est gardée dans les préférences (`ui/gameSpeed.js`, clé `speed`) et appliquée à chaque déploiement ; les boutons de vitesse de l'animation en jeu la changent aussi et elle reste.
+- Le menu du téléphone ne change pas.
+
 ## 28/10 · Le Terminal : 9 commandes à usage unique (comme les tarots de Balatro)
 
 Pour des parties différentes : de quoi transformer son parc en cours de partie. Maquettes : canvas « Terminal des commandes » (7 artboards) et prototype animé. Décisions prises avec Nicolas le 28/10 (`consommables-terminal.md` dans le projet claude.ai).

@@ -1,11 +1,12 @@
 // Animation d'un déploiement : d'abord la base (l'architecture), puis chaque case
 // qui s'active fait monter la formule. À la fin, le déploiement est joué pour de vrai.
-// Vitesse ×1, ×2, ×4, et « Passer » pour aller au résultat.
+// Vitesse ×1, ×2, ×3 (réglage du menu, gardé pour toutes les parties), et « Passer » pour aller au résultat.
 
 import { useCallback, useRef, useState } from "react";
 import { ARCHITECTURE_BY_ID } from "../../domain/index.js";
 import { fmtDec } from "../format.js";
 import { popupLines } from "../visuals.js";
+import { loadSpeed, saveSpeed } from "../gameSpeed.js";
 
 const prefersReducedMotion = () => globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
@@ -25,7 +26,7 @@ function firingOf(entry) {
 }
 const firingMap = (entries) => (entries.length ? Object.fromEntries(entries.map((entry) => [entry.id, firingOf(entry)])) : null);
 
-export function useDeployAnimation({ game, sound }) {
+export function useDeployAnimation({ game, sound, preferences }) {
   const [animation, setAnimation] = useState(null);
   const running = useRef(false);
   const speed = useRef(1);
@@ -35,13 +36,15 @@ export function useDeployAnimation({ game, sound }) {
 
   const setSpeed = useCallback((value) => {
     speed.current = value;
+    saveSpeed(preferences, value);
     setAnimation((previous) => (previous ? { ...previous, speed: value } : previous));
-  }, []);
+  }, [preferences]);
   const skip = useCallback(() => { skipped.current = true; }, []);
 
   const play = useCallback(async () => {
     if (running.current) return null;
     running.current = true;
+    speed.current = loadSpeed(preferences); // le réglage du menu, ou celui changé pendant le dernier déploiement
     skipped.current = prefersReducedMotion();
     const result = game.previewDeploy();
     const { architecture } = result;
@@ -78,7 +81,7 @@ export function useDeployAnimation({ game, sound }) {
     setAnimation(null);
     running.current = false;
     return outcome.ok ? result : null;
-  }, [game, sound]);
+  }, [game, sound, preferences]);
 
   return { animation, play, setSpeed, skip };
 }

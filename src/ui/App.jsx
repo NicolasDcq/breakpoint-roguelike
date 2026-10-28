@@ -44,7 +44,7 @@ export function App() {
   const endTuto = () => { preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); setTuto(false); setOfferTuto(false); };
   const startTuto = () => { game.startTutorial(); setMarked([]); setTerminal(null); setTuto(true); setOfferTuto(false); preferences.set(TUTO_SEEN, "1"); preferences.set(RULES_SEEN, "1"); };
   const [toast, showToast] = useToast();
-  const { animation, play, setSpeed, skip } = useDeployAnimation({ game, sound });
+  const { animation, play, setSpeed, skip } = useDeployAnimation({ game, sound, preferences });
   const busy = Boolean(animation);
   const open = (name, extra = {}) => setOverlay({ name, ...extra });
   const close = () => setOverlay(null);
