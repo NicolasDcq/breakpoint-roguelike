@@ -3,6 +3,7 @@
 // à montrer au joueur) ou refusé. Il ne touche à la partie que par ses propriétés publiques.
 
 import { ok, refuse, Refusal } from "../shared/Result.js";
+import { Phase } from "./Phase.js";
 import { RULES } from "../catalog/rules.js";
 import { ARCHITECTURE_IDS } from "../catalog/architectures.js";
 
@@ -33,12 +34,21 @@ export const COMMAND_EFFECTS = {
   cp: (run, [uid]) => {
     const source = run.card(uid);
     const copy = run.parc.add(source.moduleId, RULES.terminal.copyKeepsLevel ? source.level : 1);
+    // Pendant un contrat, la copie rejoint la pioche, à une place au hasard.
+    if (run.phase === Phase.PLAY) run.round.insertInDraw(copy.uid, run.rng.int(run.round.drawPile.length + 1));
     return ok({ uid: copy.uid, moduleId: copy.moduleId, parcSize: run.parc.size });
   },
   rm: (run, uids) => {
     if (run.parc.size - uids.length < RULES.minParcSize) return refuse(Refusal.PARC_TOO_SMALL);
-    uids.forEach((uid) => run.parc.remove(uid));
+    const inContract = run.phase === Phase.PLAY;
+    // Pendant un contrat, on ne se retire pas les dernières cartes jouables.
+    if (inContract && run.round.playableCount - uids.filter((uid) => run.round.whereIs(uid) !== "used").length <= 0) return refuse(Refusal.WOULD_LOSE);
+    uids.forEach((uid) => {
+      run.parc.remove(uid);
+      if (inContract) run.round.forget(uid);
+    });
     if (uids.includes(run.wildUid)) run.wildUid = null;
+    if (inContract) run.round.drawUp(run.limits.handSize);
     return ok({ removed: uids.length, parcSize: run.parc.size });
   },
   motherlode: (run) => {

@@ -10,6 +10,7 @@ import { ModuleIcon } from "../common/ModuleIcon.jsx";
 import { fmtDec } from "../format.js";
 import { ARCHITECTURE_ACCENT, FAMILY_ACCENT, FAMILY_COLOR } from "../visuals.js";
 import { PluginCard } from "../components/PluginCard.jsx";
+import { CommandCard } from "../components/CommandCard.jsx";
 import { MOBILE_QUERY, useMediaQuery } from "../hooks/useMediaQuery.js";
 import { ReplacePluginModal } from "./ReplacePluginModal.jsx";
 import { ArchitectureDiagram, ARCHITECTURE_HINTS } from "../components/ArchitectureDiagram.jsx";
@@ -66,7 +67,7 @@ function TerminalPackArt({ scale = 1, shake = false }) {
       <div className="pk-label">
         <span className="pk-glyph">$_</span>
         <b>PACK<br />TERMINAL</b>
-        <span className="pk-count">1 COMMANDE · AU HASARD</span>
+        <span className="pk-count">{PACKS.terminal.choices} COMMANDES · 1 GARDÉE</span>
       </div>
     </div>
   );
@@ -104,7 +105,7 @@ const PACK_LOOK = {
   },
   terminal: {
     thumb: () => <TerminalPackArt scale={0.5} />,
-    effect: "1 commande tirée au hasard, sans choix : elle rejoint ton Terminal tout de suite.",
+    effect: `${PACKS.terminal.choices} commandes tirées au hasard : tu en gardes une, ou aucune (il faut un emplacement libre dans ton Terminal).`,
     sheetClass: "",
   },
   booster: {
@@ -177,6 +178,10 @@ function ModuleFace({ id, view }) {
   );
 }
 
+function CommandFace({ id }) {
+  return <CommandCard id={id} className="pc-cmd" />;
+}
+
 function PluginFace({ id }) {
   return <PluginCard id={id} className="pc-puce" />;
 }
@@ -186,6 +191,7 @@ const RARITY_ACCENT = { common: "#9aa3b8", uncommon: "#2bd96b", rare: "#3d8bff",
 const CHOICE = {
   gros: { title: "Choisis un Plugin", noun: "un Plugin", accent: (id) => RARITY_ACCENT[PLUGINS[id].rarity] ?? "#13b6e0", name: (id) => PLUGINS[id].name, Face: PluginFace },
   plugins: { title: "Choisis un Plugin", noun: "un Plugin", accent: (id) => RARITY_ACCENT[PLUGINS[id].rarity] ?? "#13b6e0", name: (id) => PLUGINS[id].name, Face: PluginFace },
+  terminal: { title: "Choisis une commande", noun: "une commande", accent: () => "#2bd96b", name: (id) => id, Face: CommandFace },
   booster: { title: "Choisis un plan", noun: "un plan", accent: (id) => ARCHITECTURE_ACCENT[id], name: (id) => ARCHITECTURE_BY_ID[id].name, Face: PlanFace },
   colis: { title: "Choisis un module", noun: "un module", accent: (id) => FAMILY_COLOR[MODULES[id].family], name: (id) => MODULES[id].name, Face: ModuleFace },
 };
@@ -207,6 +213,7 @@ export function PackOpening({ view, onPick }) {
   const [replacing, setReplacing] = useState(false);
   const desktop = !useMediaQuery(MOBILE_QUERY);
   const isPluginPack = PACKS[packId].reward === "plugin";
+  const isCardPack = isPluginPack || packId === "terminal"; // cartes à puce (même gabarit)
   const full = isPluginPack && view.pluginIds.length >= RULES.maxPlugins;
 
   useEffect(() => {
@@ -236,7 +243,7 @@ export function PackOpening({ view, onPick }) {
 
   const stageArt = packId === "colis"
     ? <span className="box-drop"><BoxArt /></span>
-    : <span className="pack-drop">{isPluginPack ? <PluginPackArt shake big={packId === "gros"} /> : <BoosterArt shake />}</span>;
+    : <span className="pack-drop">{packId === "terminal" ? <TerminalPackArt shake /> : isPluginPack ? <PluginPackArt shake big={packId === "gros"} /> : <BoosterArt shake />}</span>;
 
   return (
     <div className={`overlay pack-overlay ${packId === "colis" ? "box-overlay" : ""}`} role="dialog" aria-modal="true" aria-label={PACKS[packId].name}>
@@ -254,7 +261,7 @@ export function PackOpening({ view, onPick }) {
             {choices.map((id, index) => (
               <button
                 key={id}
-                className={`pack-card ${isPluginPack ? "plg-card" : "arch-card"} ${chosen === id ? "sel" : ""} ${taken === id ? "taken" : ""} ${taken && taken !== id ? "gone" : ""}`}
+                className={`pack-card ${isCardPack ? "plg-card" : "arch-card"} ${chosen === id ? "sel" : ""} ${taken === id ? "taken" : ""} ${taken && taken !== id ? "gone" : ""}`}
                 style={{ "--i": index, "--acc": choice.accent(id) }}
                 disabled={!ready || Boolean(taken)}
                 onClick={() => { sound.play("click"); setChosen(id); }}

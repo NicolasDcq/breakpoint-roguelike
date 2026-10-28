@@ -30,6 +30,25 @@ export class Round {
     }
   }
 
+  /** Une carte née pendant le contrat (cp) rejoint la pioche, à la place donnée. */
+  insertInDraw(uid, index) {
+    this.drawPile.splice(index, 0, uid);
+  }
+
+  /** Une carte supprimée du parc (rm) disparaît d'où qu'elle soit : pioche, main, plateau ou défausse. */
+  forget(uid) {
+    this.drawPile = this.drawPile.filter((other) => other !== uid);
+    this.hand = this.hand.filter((other) => other !== uid);
+    this.discardPile = this.discardPile.filter((other) => other !== uid);
+    const cell = this.board.cells.indexOf(uid);
+    if (cell >= 0) this.board = this.board.without(cell);
+  }
+
+  /** Les cartes qu'on peut encore jouer pendant ce contrat. */
+  get playableCount() {
+    return this.drawPile.length + this.hand.length + this.board.placedCount;
+  }
+
   /** Où est cette carte pendant le contrat : pioche, main, plateau, ou déjà utilisée. */
   whereIs(uid) {
     if (this.hand.includes(uid)) return CardPlace.HAND;

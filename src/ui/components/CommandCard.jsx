@@ -24,9 +24,13 @@ export function CommandCard({ id, className = "" }) {
 /** Carte de taille fixe pour l'ordinateur : l'écran et le nom ; l'effet est dans l'infobulle (CommandTip). */
 export function CommandChip({ id }) {
   const command = COMMANDS[id];
+  const size = command.name.length > 9 ? 12 : command.name.length > 5 ? 15 : 20;
   return (
     <span className="cmd-chip">
-      <span className="cmd-chip-die"><span className="cmd-scr" style={{ fontSize: screenSize(command.name) > 16 ? 16 : 12 }}>{command.name}</span></span>
+      <span className="cmd-chip-die">
+        <span className="cmd-chip-prompt">$</span>
+        <span className="cmd-scr" style={{ fontSize: size }}>{command.name}</span>
+      </span>
       <span className="cmd-chip-name">{command.name}</span>
     </span>
   );

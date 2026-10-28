@@ -518,25 +518,33 @@ test("Le Concierge rend les commandes de la boutique 1 $ moins chères", () => {
   assert.equal(run.money, 0);
 });
 
-test("le Pack Terminal donne une commande tirée au hasard, sans choix, moins cher qu'une commande", () => {
-  assert.ok(PACKS.terminal.price < RULES.terminal.price);
+test("le Pack Terminal propose 3 commandes : on en garde une, comme les autres boosters", () => {
+  assert.equal(PACKS.terminal.choices, 3);
   const seen = new Set();
   for (let seed = 1; seed <= 300; seed++) {
     const run = shopWith([], seed);
     run.packSlots = [{ packId: "terminal", sold: false }, { packId: "terminal", sold: false }];
-    const result = run.buyPack(0);
-    assert.ok(result.ok);
-    assert.equal(run.openPack, null, "pas d'ouverture à choisir");
-    assert.equal(run.commandIds.length, 1);
-    assert.equal(run.commandIds[0], result.value.commandId);
+    assert.ok(run.buyPack(0).ok);
     assert.equal(run.money, 50 - PACKS.terminal.price);
-    seen.add(run.commandIds[0]);
+    const { choices } = run.openPack;
+    assert.equal(new Set(choices).size, 3, "3 commandes différentes");
+    assert.deepEqual(run.commandIds, [], "rien n'est gardé avant le choix");
+    assert.equal(run.buyPack(1).reason, Refusal.PACK_PENDING, "le paquet ouvert doit être choisi d'abord");
+    assert.ok(run.pickFromPack(choices[1]).ok);
+    assert.deepEqual(run.commandIds, [choices[1]]);
+    assert.equal(run.openPack, null);
+    choices.forEach((id) => seen.add(id));
   }
   assert.equal(seen.size, COMMAND_IDS.length, "toutes les commandes peuvent sortir d'un pack");
+  const skip = shopWith([]);
+  skip.packSlots = [{ packId: "terminal", sold: false }];
+  skip.buyPack(0);
+  assert.ok(skip.pickFromPack(null).ok);
+  assert.deepEqual(skip.commandIds, [], "on peut ne rien prendre");
   const full = shopWith(["cp", "rm"]);
   full.packSlots = [{ packId: "terminal", sold: false }];
   assert.equal(full.buyPack(0).reason, Refusal.NO_COMMAND_SLOT);
-  assert.equal(full.money, 50);
+  assert.equal(full.money, 50, "refusé : l'argent ne part pas");
   assert.equal(full.packSlots[0].sold, false);
 });
 
@@ -604,6 +612,69 @@ test("cp, rm et ln -s tirent une main de modules du parc et ne visent que ces mo
   assert.deepEqual(run.commandIds, []);
   assert.equal(run.commandSession, null);
   assert.equal(run.applyCommand([source.uid]).reason, Refusal.NO_COMMAND_SESSION);
+});
+
+test("toutes les commandes se jouent pendant un contrat, sauf ping et ssh à la boutique", () => {
+  COMMAND_IDS.filter((id) => id !== "!!" && id !== "apt upgrade").forEach((id) => {
+    const run = Run.start(7);
+    run.commandIds = [id];
+    run.architecturePlays = { redondance: 1 };
+    run.architectureOrder = ["redondance"];
+    assert.ok(run.useCommand(0).ok, `${id} en contrat`);
+  });
+  const run = Run.start(7);
+  run.architecturePlays = { redondance: 2 };
+  run.architectureOrder = ["redondance"];
+  run.commandIds = ["apt upgrade"];
+  assert.ok(run.useCommand(0).ok, "apt upgrade en contrat");
+  ["ping", "ssh"].forEach((id) => assert.equal(shopWith([id]).useCommand(0).reason, Refusal.COMMAND_NOT_NOW, `${id} à la boutique`));
+  COMMAND_IDS.filter((id) => !["ping", "ssh", "!!"].includes(id)).forEach((id) => {
+    const shop = shopWith([id]);
+    shop.architecturePlays = { redondance: 1 };
+    shop.architectureOrder = ["redondance"];
+    assert.ok(shop.useCommand(0).ok, `${id} à la boutique`);
+  });
+});
+
+test("cp pendant un contrat : la copie rejoint la pioche", () => {
+  const run = Run.start(8);
+  run.commandIds = ["cp"];
+  const source = run.round.hand[0];
+  run.useCommand(0);
+  const drawBefore = run.round.drawPile.length;
+  const parcBefore = run.parc.size;
+  assert.ok(run.applyCommand([run.commandSession.hand[0]]).ok);
+  assert.equal(run.parc.size, parcBefore + 1);
+  assert.equal(run.round.drawPile.length, drawBefore + 1);
+  assert.ok(run.round.drawPile.includes(run.parc.cards.at(-1).uid));
+  assert.ok(source, "la main n'a pas bougé");
+});
+
+test("rm pendant un contrat : le module disparaît de la main, du plateau et de la pioche", () => {
+  const run = Run.start(9);
+  run.commandIds = ["rm"];
+  const inHand = run.round.hand[0];
+  const onBoard = run.round.hand[1];
+  run.place(onBoard, 0);
+  const inDraw = run.round.drawPile[0];
+  run.round.hand = run.round.hand.slice();
+  run.useCommand(0);
+  run.commandSession.hand = [inHand, onBoard];
+  assert.ok(run.applyCommand([inHand, onBoard]).ok);
+  [inHand, onBoard].forEach((uid) => {
+    assert.equal(run.card(uid), null);
+    assert.ok(!run.round.hand.includes(uid) && !run.round.board.cells.includes(uid) && !run.round.drawPile.includes(uid));
+  });
+  assert.equal(run.round.hand.length + run.round.board.placedCount, run.limits.handSize, "la main est complétée");
+  assert.ok(inDraw);
+  const last = Run.start(10);
+  last.commandIds = ["rm"];
+  last.round.drawPile = [];
+  last.round.hand = [last.round.hand[0]];
+  last.round.board = last.round.board.constructor.empty();
+  last.useCommand(0);
+  last.commandSession.hand = [last.round.hand[0]];
+  assert.equal(last.applyCommand([last.round.hand[0]]).reason, Refusal.WOULD_LOSE, "on ne se retire pas la dernière carte jouable");
 });
 
 test("renoncer à une commande ciblée ne la consomme pas", () => {
@@ -729,8 +800,10 @@ test("le service lance, applique et annule les commandes, et les sauvegarde", ()
   game.run.commandIds = ["ping", "cp"];
   assert.ok(game.useCommand(0).ok);
   assert.deepEqual(game.getView().commands, ["cp"]);
-  assert.equal(game.useCommand(0).reason, Refusal.COMMAND_NOT_NOW, "cp s'utilise entre deux contrats");
+  assert.ok(game.useCommand(0).ok, "cp aussi s'utilise depuis l'écran de jeu");
+  assert.equal(game.getView().commandSession.commandId, "cp");
   assert.ok(game.cancelCommand().ok);
+  assert.deepEqual(game.getView().commands, ["cp"], "renoncer ne consomme pas");
 });
 
 test("une partie sauvegardée se recharge à l'identique", () => {

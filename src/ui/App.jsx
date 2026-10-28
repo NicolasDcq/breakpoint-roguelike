@@ -108,6 +108,7 @@ export function App() {
   const pickFromPack = (choiceId, replacePluginId = null) => {
     if (!attempt(game.pickFromPack(choiceId, replacePluginId), choiceId ? "upgrade" : "click") || !choiceId) return;
     if (PACKS[view.openPack.packId].reward === "plugin") showToast(`${PLUGINS[choiceId].name} rejoint tes Plugins.`);
+    else if (view.openPack.packId === "terminal") showToast(`${choiceId} rejoint ton Terminal.`);
     else if (view.openPack.packId === "booster") showToast(`Plan installé : ${ARCHITECTURE_BY_ID[choiceId].name} niveau ${view.architectureLevels[choiceId] + 1}.`);
     else showToast(`${MODULES[choiceId].name} rejoint ton parc.`);
   };
@@ -128,12 +129,7 @@ export function App() {
 
   const shopActions = {
     buy: (index, replacePluginId = null) => attempt(game.buyOffer(index, replacePluginId), replacePluginId ? "sell" : "cash"),
-    buyPack: (slotIndex) => {
-      const result = game.buyPack(slotIndex);
-      if (!attempt(result, "cash")) return false;
-      if (result.value.commandId) showToast(`Pack Terminal : tu obtiens ${result.value.commandId}.`);
-      return true;
-    },
+    buyPack: (slotIndex) => attempt(game.buyPack(slotIndex), "cash"),
     useCommand,
     reroll: () => attempt(game.rerollShop(), "reroll"),
     showParc: () => open("parc"),

@@ -29,6 +29,12 @@ const PACK_REWARDS = {
   architecture: (run, architectureId) => {
     run.architectureLevels = { ...run.architectureLevels, [architectureId]: run.architectureLevels[architectureId] + 1 };
   },
+  // Le Terminal a deux emplacements : il faut en avoir un de libre (vérifié à l'achat du pack).
+  command: (run, commandId) => {
+    if (run.terminalFull) return refuse(Refusal.NO_COMMAND_SLOT);
+    run.commandIds = [...run.commandIds, commandId];
+    return null;
+  },
   // Emplacements pleins : le Plugin gardé remplace un des siens (replacePluginId), qui est revendu.
   plugin: (run, pluginId, replacePluginId) => {
     if (run.pluginIds.length < RULES.maxPlugins) {
@@ -290,12 +296,6 @@ export class Run {
     if (this.money < pack.price) return refuse(Refusal.NOT_ENOUGH_MONEY);
     this.money -= pack.price;
     this.packSlots = this.packSlots.map((other, index) => (index === slotIndex ? { ...other, sold: true } : other));
-    if (isCommand) {
-      // Le Pack Terminal ne propose pas de choix : la commande tirée rejoint le Terminal.
-      const [commandId] = drawPack(this.rng, slot.packId);
-      this.commandIds = [...this.commandIds, commandId];
-      return ok({ commandId });
-    }
     this.openPack = { packId: slot.packId, choices: drawPack(this.rng, slot.packId, this.pluginIds) };
     return ok(this.openPack);
   }

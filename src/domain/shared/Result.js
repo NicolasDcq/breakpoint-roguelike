@@ -35,4 +35,5 @@ export const Refusal = Object.freeze({
   NO_COMMAND_SESSION: "no-command-session",
   BAD_TARGETS: "bad-targets",
   NO_ARCHITECTURE_PLAYED: "no-architecture-played",
+  WOULD_LOSE: "would-lose",
 });

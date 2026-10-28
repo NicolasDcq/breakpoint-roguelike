@@ -6,7 +6,7 @@
 // - Pack de Plugins : 2 Plugins (que le joueur n'a pas, selon leur rareté) ; celui gardé rejoint ses Plugins.
 //   0,5 % de chance qu'un des deux soit légendaire (les légendaires ne se vendent pas en boutique).
 // - Gros pack de Plugins : 3 Plugins dont un rare ou mieux au moins ; 1,5 % de chance d'un légendaire.
-// - Pack Terminal : 1 commande tirée au hasard, sans choix ; elle rejoint le Terminal tout de suite.
+// - Pack Terminal : 3 commandes ; celle gardée rejoint le Terminal (il faut un emplacement libre pour l'ouvrir).
 
 import { ARCHITECTURE_IDS } from "./architectures.js";
 import { MODULE_IDS } from "./modules.js";
@@ -18,7 +18,7 @@ const DEFINITIONS = {
   colis: { name: "Colis de composants", reward: "module", price: 4, choices: 3, draw: (rng) => rng.sample(MODULE_IDS, 3) },
   booster: { name: "Booster de plans d'architecture", reward: "architecture", price: 6, choices: 3, draw: (rng) => rng.sample(ARCHITECTURE_IDS, 3) },
   plugins: { name: "Pack de Plugins", reward: "plugin", price: 5, choices: 2, draw: (rng, pluginIds) => drawPluginPack(rng, pluginIds, 2, { legendaryChance: 0.005 }) },
-  terminal: { name: "Pack Terminal", reward: "command", price: 3, choices: 1, draw: (rng) => rng.sample(COMMAND_IDS, 1) },
+  terminal: { name: "Pack Terminal", reward: "command", price: 3, choices: 3, draw: (rng) => rng.sample(COMMAND_IDS, 3) },
   gros: { name: "Gros pack de Plugins", reward: "plugin", price: 9, choices: 3, draw: (rng, pluginIds) => drawPluginPack(rng, pluginIds, 3, { guaranteeRare: true, legendaryChance: 0.015 }) },
 };
 
