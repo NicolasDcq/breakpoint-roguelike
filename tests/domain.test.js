@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { Rng } from "../src/domain/shared/Rng.js";
 import { CELL_COUNT, GRID_SIZE, neighborCells } from "../src/domain/board/grid.js";
 import { generateRun } from "../src/domain/generation/RunGenerator.js";
+import { mostPlayedArchitecture } from "../src/domain/run/commandEffects.js";
 import { STARTERS } from "../src/domain/catalog/starters.js";
 import { detectArchitecture, architectureBase } from "../src/domain/catalog/architectures.js";
 import { scoreDeployment } from "../src/domain/scoring/ScoringEngine.js";
@@ -1118,4 +1119,15 @@ test("la vitesse du jeu : ×1 par défaut, ×2 et ×3 gardés, une valeur inconn
   store.set("speed", "banane");
   assert.equal(loadSpeed(preferences), 1);
   assert.equal(loadSpeed(undefined), 1);
+});
+
+test("le compteur des architectures jouées est propre à la partie : une nouvelle partie repart à 0", () => {
+  const first = Run.start(6);
+  first.place(first.round.hand[0], 0);
+  assert.ok(first.deploy().ok);
+  assert.equal(Object.values(first.architecturePlays).reduce((a, b) => a + b, 0), 1);
+  const second = Run.start(6);
+  assert.deepEqual(second.architecturePlays, {});
+  assert.deepEqual(second.architectureOrder, []);
+  assert.equal(mostPlayedArchitecture(second), null);
 });
