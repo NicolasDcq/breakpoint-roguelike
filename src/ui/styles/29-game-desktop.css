@@ -5,7 +5,7 @@
 @media (min-width: 1181px) {
   .app.gd-app {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: clamp(300px, 15vw, 380px) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     gap: 14px;
     height: 100vh;
@@ -13,7 +13,9 @@
     padding: 12px 14px;
     box-sizing: border-box;
   }
-  .gd-hud { overflow-y: auto; min-height: 0; }
+  .gd-hud { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+  .gd-hud > .score-panel { flex: none; margin-top: auto; }
+  .gd-hud > .score-panel .term-value { font-size: clamp(28px, 2.4vw, 44px); }
   .gd-center {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
@@ -60,10 +62,10 @@
   .gd-mid {
     align-self: stretch;
     display: grid;
-    grid-template-columns: 96px minmax(0, 1fr) 320px;
+    grid-template-columns: clamp(96px, 7vw, 130px) minmax(0, 1fr) clamp(320px, 20vw, 420px);
     gap: 12px;
     min-height: 0;
-    align-items: start;
+    align-items: stretch;
     overflow: hidden;
   }
   .gd-piles { display: flex; flex-direction: column; gap: 8px; }
@@ -74,10 +76,10 @@
   .gd-pile b { font-size: 26px; color: #e8eefc; }
   .gd-pile.used b { color: #9fb0d0; }
   .gd-piles .family-bar { flex-direction: column; align-items: stretch; }
-  .gd-board { min-width: 0; display: flex; justify-content: center; min-height: 0; }
+  .gd-board { min-width: 0; min-height: 0; height: 100%; display: flex; align-items: center; justify-content: center; container-type: size; }
   .gd-board .board {
-    width: 100%;
-    max-width: min(100%, 720px, calc((100vh - 360px) * 1.25));
+    width: min(100cqw, 125cqh);
+    max-width: none;
     margin: 0;
     height: auto;
     --pad-x: 14px;
@@ -85,7 +87,10 @@
   }
   .gd-board .board .slots { height: auto; min-height: 0; aspect-ratio: 1.25 / 1; grid-template-rows: repeat(var(--grid, 4), minmax(0, 1fr)); }
   .gd-info { overflow-y: auto; max-height: 100%; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
-  .gd-info .side { display: block; }
+  .gd-info .side { display: block; flex: none; }
+  .gd-archs { flex: none; }
+  .gd-arch-rows { flex: 1 1 auto; justify-content: flex-start; gap: clamp(3px, .9vh, 12px); }
+  .gd-arch { font-size: clamp(12px, .9vw, 15px); }
   .gd-archs {
     padding: 10px 12px; border: 3px solid #05070f; border-radius: 8px;
     background: #0e1530; box-shadow: 3px 3px 0 #05070f;
@@ -93,7 +98,7 @@
   .gd-arch-cols, .gd-arch { display: grid; grid-template-columns: minmax(0, 1fr) 46px 62px; align-items: center; gap: 6px; }
   .gd-arch-cols { font-size: 10px; color: #7f90b3; text-transform: uppercase; text-align: right; margin-bottom: 4px; }
   .gd-arch-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
-  .gd-arch { padding: 2px 6px; border-radius: 5px; font-size: 12px; color: #b9c6e4; border: 2px solid transparent; }
+  .gd-arch { padding: clamp(2px, .5vh, 8px) 6px; border-radius: 5px; font-size: 12px; color: #b9c6e4; border: 2px solid transparent; }
   .gd-arch-name { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
   .gd-arch-name i { font-style: normal; font-size: 10px; color: #7f90b3; }
   .gd-arch-name em { font-style: normal; font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; background: #2bd96b; color: #05070f; }
@@ -120,7 +125,7 @@
     display: grid;
     grid-template-columns: repeat(var(--hand), minmax(0, 1fr));
     gap: 10px;
-    height: clamp(96px, 17vh, 150px);
+    height: clamp(96px, 17vh, 190px);
   }
   .gd-hand-cells .drawer-slot { height: 100%; min-height: 0; }
   .gd-hand-empty {
@@ -128,4 +133,8 @@
     font-size: 11px; color: #3b4a76; text-transform: uppercase;
   }
   .gd-hand-empty.posed { color: #5a6aa0; }
+}
+
+@media (min-width: 1181px) and (max-height: 800px) {
+  .gd-arch-note { display: none; }
 }

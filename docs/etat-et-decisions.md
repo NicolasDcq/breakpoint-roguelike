@@ -311,3 +311,4 @@ Avec un plateau fixe, chaque déploiement donnait le même résultat : pas de vr
 - Liste des architectures : base à ton niveau, nombre de parties jouées (`×N`), la formée en vert, et l'architecture que `apt upgrade` monterait en jaune (`view.nextUpgradeId`, via `mostPlayedArchitecture`).
 - Mobile inchangé. Fichiers : `App.jsx` (branche desktop), `ArchitectureList.jsx`, `TerminalTray.jsx`, `29-game-desktop.css`.
 - Reste : panneau « Détail module » avec Améliorer (pour l'instant la fiche s'ouvre au toucher).
+- 28/10 (suite) : le plateau s'adapte à la place disponible (container query, ratio 1,25) et reste centré ; colonnes latérales élastiques (`clamp`) ; le panneau de score est collé en bas de la colonne HUD, près de la main. Vérifié en 1366×768 et 2556×1306.
