@@ -11,17 +11,19 @@ export const RULES = Object.freeze({
   startData: 0,
   minParcSize: 16,
   maxPlugins: 5,
-  rerollStartPrice: 1,
+  /** Relance de la boutique (comme Balatro : 5 $, puis +1 $ à chaque relance, remise à zéro à chaque boutique). */
+  rerollStartPrice: 5,
   /**
    * La boutique : Plugins en vente directe (tirés selon leur rareté) et emplacements de paquets.
-   * Chaque emplacement tire son type de paquet au hasard, selon ces poids (1 partout : chances égales).
+   * Chaque emplacement tire son type de paquet au hasard, selon ces poids (comme Balatro : les paquets de Plugins sont rares).
+   * La première boutique de la partie a toujours un Pack de Plugins (comme le Buffoon Pack garanti de Balatro).
    */
-  shop: { plugins: 2, packSlots: 2, packWeights: { colis: 1, booster: 1, plugins: 1, gros: 1, terminal: 1 }, commandChance: 0.25 },
+  shop: { plugins: 2, packSlots: 2, packWeights: { colis: 4, booster: 4, terminal: 4, plugins: 1.5, gros: 0.3 }, commandChance: 0.25 },
   /**
    * Le Terminal : des commandes à usage unique (voir catalog/commands.js).
    * Toutes les commandes coûtent le même prix ; le Pack Terminal (paquet au hasard) coûte un peu moins.
    */
-  terminal: { slots: 2, price: 4, handSize: 8, removeMax: 2, moneyDoubleMax: 20, dataDoubleMax: 10, copyKeepsLevel: false },
+  terminal: { slots: 2, price: 3, handSize: 8, removeMax: 2, moneyDoubleMax: 20, dataDoubleMax: 10, copyKeepsLevel: false },
   /** Chance de tirer chaque rareté en boutique et dans les Plugins de paquet (le légendaire ne sort que de certains paquets). */
   rarityWeights: { common: 62, uncommon: 26, rare: 9, epic: 3, legendary: 0 },
   /** Prix d'un Plugin selon sa rareté (la revente en rend la moitié). */

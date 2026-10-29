@@ -253,13 +253,13 @@ test("tous les modules peuvent sortir d'un colis, et tous les Plugins en boutiqu
   assert.equal(seenPlugins.size, Object.keys(PLUGINS).length);
 });
 
-test("le Gros pack montre 3 Plugins dont un rare ou mieux, et coûte plus cher", () => {
+test("le Gros pack montre 4 Plugins dont un rare ou mieux, et coûte plus cher", () => {
   assert.ok(PACKS.gros.price > PACKS.plugins.price);
-  assert.equal(PACKS.gros.choices, 3);
+  assert.equal(PACKS.gros.choices, 4);
   const rank = (id) => RARITIES.indexOf(PLUGINS[id].rarity);
   for (let seed = 1; seed <= 200; seed++) {
-    const choices = drawPluginPack(new Rng(seed), [], 3, { guaranteeRare: true });
-    assert.equal(new Set(choices).size, 3);
+    const choices = drawPluginPack(new Rng(seed), [], 4, { guaranteeRare: true });
+    assert.equal(new Set(choices).size, 4);
     assert.ok(choices.some((id) => rank(id) >= RARITIES.indexOf("rare")), `graine ${seed}`);
   }
   const run = Run.start(11);
@@ -269,7 +269,7 @@ test("le Gros pack montre 3 Plugins dont un rare ou mieux, et coûte plus cher",
   run.money = 100;
   assert.ok(run.buyPack(0).ok);
   assert.equal(run.money, 100 - PACKS.gros.price);
-  assert.equal(run.openPack.choices.length, 3);
+  assert.equal(run.openPack.choices.length, 4);
 });
 
 test("le légendaire ne sort que d'un paquet, avec une petite chance", () => {
@@ -283,13 +283,14 @@ test("le légendaire ne sort que d'un paquet, avec une petite chance", () => {
   assert.ok(drops > 80 && drops < 320, `${drops} légendaires sur 4000`);
 });
 
-test("chaque boutique a 2 emplacements de paquets ; les 3 types peuvent sortir", () => {
+test("chaque boutique a 2 emplacements de paquets ; tous les types peuvent sortir, et la première boutique a un Pack de Plugins", () => {
   const seen = new Set();
-  for (let seed = 1; seed <= 40; seed++) {
+  for (let seed = 1; seed <= 300; seed++) {
     const run = Run.start(seed);
     run.phase = Phase.WON;
     run.openShop();
     assert.equal(run.packSlots.length, 2);
+    assert.ok(run.packSlots.some((slot) => slot.packId === "plugins"), `première boutique, graine ${seed}`);
     run.packSlots.forEach((slot) => seen.add(slot.packId));
   }
   assert.deepEqual([...seen].sort(), [...PACK_IDS].sort());

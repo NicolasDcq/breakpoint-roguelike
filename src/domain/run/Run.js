@@ -271,7 +271,7 @@ export class Run {
     this.commandSession = null;
     this.rerollPrice = RULES.rerollStartPrice;
     this.offers = rollOffers(this.rng, this.pluginIds);
-    this.packSlots = rollPackSlots(this.rng);
+    this.packSlots = rollPackSlots(this.rng, { firstShop: this.contractIndex === 0 });
     this.openPack = null;
     return ok();
   }

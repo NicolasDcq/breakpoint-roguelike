@@ -1,5 +1,16 @@
 # État du jeu et décisions
 
+## 29/10 · Rééquilibrage de la boutique (façon Balatro)
+
+Comparaison avec la boutique de Balatro (wiki) : la relance coûtait 1 $ (un quart d'un Plugin commun, contre environ 1 chez Balatro), les 5 paquets avaient le même poids (les paquets de Plugins sortaient 40 % du temps, contre 8,7 % pour les paquets de Jokers), et le Pack Terminal coûtait moins cher qu'une commande seule. Décisions de Nicolas : on ne lie pas la relance à un goodie ; on monte son prix de base, car le jeu offre plus de façons de gagner de l'argent que Balatro.
+- **Relance : 5 $, puis +1 $ à chaque relance** (remise à 5 $ à chaque boutique), comme Balatro (`RULES.rerollStartPrice`).
+- **Poids des paquets** : colis 4, booster 4, Terminal 4, Pack de Plugins 1,5, Gros pack 0,3 (environ 29 / 29 / 29 / 11 / 2 %).
+- **Première boutique de la partie** : un Pack de Plugins est toujours proposé (comme le Buffoon Pack garanti de Balatro).
+- **Prix** : booster de plans 6 → 4 $, Pack Terminal 3 → 4 $, commande seule 4 → 3 $ (comme le Tarot). Gros pack de Plugins : 9 → 6 $ et **4 Plugins au choix** (au lieu de 3), toujours un rare ou mieux.
+- Inchangés : 75 % de Plugins et 25 % de commandes dans les offres, raretés 62 / 26 / 9 / 3, prix des Plugins, revente à moitié prix.
+- Tests mis à jour, golden régénéré. Bot (80 parties) : toujours 0 % (il ne choisit pas ses Plugins et n'utilise pas le Terminal : il ne valide pas cet équilibrage).
+- **À faire** : vérifier sur téléphone et ordinateur l'ouverture du Gros pack avec 4 cartes (captures non faites : `npm install` bloqué dans la session) ; piste en attente : intérêts (1 $ par 5 $ gardés, 5 $ au plus) ; relance liée à un goodie abandonnée.
+
 ## 28/10 · Menu principal centré sur ordinateur, avec un onglet Paramètres
 
 - Sur ordinateur, le menu est **centré** (titre, onglets, boutons), les cartes à puce flottent de chaque côté. Deux onglets : **Jouer** (nouvelle partie / reprendre, tutoriel) et **Paramètres**.

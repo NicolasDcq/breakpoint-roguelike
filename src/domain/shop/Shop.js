@@ -22,9 +22,12 @@ export function rollOffers(rng, ownedPluginIds) {
 }
 
 /** Les emplacements de paquets de l'arrivage : chacun tire son type au hasard (un type peut sortir deux fois). */
-export function rollPackSlots(rng) {
-  return Array.from({ length: RULES.shop.packSlots }, () => ({
+export function rollPackSlots(rng, { firstShop = false } = {}) {
+  const slots = Array.from({ length: RULES.shop.packSlots }, () => ({
     packId: rng.weightedSample(PACK_IDS, (id) => RULES.shop.packWeights[id], 1)[0],
     sold: false,
   }));
+  // Première boutique : un Pack de Plugins garanti (le tirage est fait quand même, pour ne pas décaler le hasard).
+  if (firstShop && !slots.some((slot) => slot.packId === "plugins")) slots[0] = { ...slots[0], packId: "plugins" };
+  return slots;
 }
