@@ -27,6 +27,8 @@ export function presentRun(run, { started = true } = {}) {
     money: run.money,
     data: run.data,
     pluginIds: run.pluginIds,
+    /** Le Plugin coupé par le boss en ce moment (il change à chaque déploiement), ou null. */
+    cutPluginId: run.cutPluginId,
     pluginValues: run.pluginValues,
     architectureLevels: run.architectureLevels,
     architecturePlays: run.architecturePlays,

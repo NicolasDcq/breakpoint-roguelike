@@ -138,7 +138,30 @@ test("les boss changent les limites : main réduite, pas de défausse, Plugins c
   assert.equal(run.round.discardsLeft, 0);
   run.contracts = run.contracts.map((contract, index) => (index === 0 ? { ...contract, boss: "noPlugins" } : contract));
   run.pluginIds = ["intern"];
-  assert.deepEqual(run.activePluginIds, []);
+  assert.deepEqual(run.activePluginIds, [], "un seul Plugin : il est coupé");
+});
+
+test("boss Audit de sécurité : un Plugin est coupé, le suivant à chaque déploiement (de gauche à droite)", () => {
+  const run = Run.start(3);
+  run.contracts = run.contracts.map((contract, index) => (index === 0 ? { ...contract, boss: "noPlugins" } : contract));
+  run.startRound();
+  run.pluginIds = ["intern", "doublon", "failover"];
+  assert.equal(run.cutPluginId, "intern");
+  assert.deepEqual(run.activePluginIds, ["doublon", "failover"]);
+  const placeAndDeploy = () => {
+    const [uid] = run.round.hand;
+    run.place(uid, 0);
+    assert.ok(run.deploy().ok);
+  };
+  placeAndDeploy();
+  assert.equal(run.cutPluginId, "doublon", "2e déploiement : le 2e Plugin");
+  assert.deepEqual(run.activePluginIds, ["intern", "failover"]);
+  placeAndDeploy();
+  assert.equal(run.cutPluginId, "failover");
+  // Hors boss : rien n'est coupé ; à la boutique non plus.
+  run.contracts = run.contracts.map((contract) => ({ ...contract, boss: null }));
+  assert.equal(run.cutPluginId, null);
+  assert.deepEqual(run.activePluginIds, run.pluginIds);
 });
 
 test("une nouvelle partie pioche 7 cartes sans remélange", () => {

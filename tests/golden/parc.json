@@ -3,8 +3,8 @@
     {
       "seed": 1,
       "phase": "lost",
-      "contractIndex": 5,
-      "chain": "c2b2ed98c7edaf1c"
+      "contractIndex": 17,
+      "chain": "fc57d6060c19d8ae"
     },
     {
       "seed": 2,
@@ -27,8 +27,8 @@
     {
       "seed": 5,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "f2029076d840be50"
+      "contractIndex": 12,
+      "chain": "610e6a14d3fbb461"
     },
     {
       "seed": 6,
@@ -40,7 +40,7 @@
       "seed": 7,
       "phase": "lost",
       "contractIndex": 13,
-      "chain": "4e8b6a28ba6016ba"
+      "chain": "c5c0bdb28e70bd53"
     },
     {
       "seed": 8,
@@ -58,19 +58,19 @@
       "seed": 10,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "131e4ee86e5dc343"
+      "chain": "46faba7dd8b708c4"
     },
     {
       "seed": 11,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "ad08c67afb07862b"
+      "contractIndex": 14,
+      "chain": "400d37e03edfaf36"
     },
     {
       "seed": 12,
       "phase": "lost",
-      "contractIndex": 8,
-      "chain": "fe0382939e726b93"
+      "contractIndex": 11,
+      "chain": "61823f3809a723e5"
     }
   ]
 }

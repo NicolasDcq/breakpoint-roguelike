@@ -122,9 +122,19 @@ export class Run {
     return { ...base, deploys: base.deploys + this.contractBonus.deploys, maxPlaced: base.maxPlaced + this.contractBonus.maxPlaced };
   }
 
-  /** Les Plugins qui agissent en ce moment (un boss peut les couper). */
+  /**
+   * Le Plugin coupé en ce moment, ou null. Le boss « Audit de sécurité » coupe un Plugin à la fois :
+   * le premier (à gauche) au 1er déploiement, le deuxième au 2e, etc. (on boucle). L'ordre des Plugins compte donc.
+   */
+  get cutPluginId() {
+    if (this.phase !== Phase.PLAY || !this.round || !BOSSES[this.contract.boss]?.cutsPlugin || !this.pluginIds.length) return null;
+    return this.pluginIds[this.deployCounts.deploysThisContract % this.pluginIds.length];
+  }
+
+  /** Les Plugins qui agissent en ce moment (un boss peut en couper un). */
   get activePluginIds() {
-    return this.limits.pluginsActive ? this.pluginIds : [];
+    const cut = this.cutPluginId;
+    return cut ? this.pluginIds.filter((id) => id !== cut) : this.pluginIds;
   }
 
   card(uid) {

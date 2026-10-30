@@ -548,3 +548,7 @@ button:focus-visible .puce-slot.big .puce-mini { transform: translateY(-3px); bo
 .puce-rail.compact .puce-mini-name { max-width: 62px; font-size: 10px; }
 .puce-rail.compact .puce-rail-btn { touch-action: none; }
 .puce-rail-desk .puce-rail-btn { touch-action: none; }
+
+/* Boss « Audit de sécurité » : le Plugin coupé ce déploiement est grisé et barré d'une étiquette. */
+.puce-rail-btn.cut { position: relative; filter: grayscale(1) brightness(.6); opacity: .75; }
+.puce-rail-btn.cut::after { content: "COUPÉ"; position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) rotate(-12deg); padding: 1px 6px; border: 2px solid #ff3b5c; border-radius: 4px; background: #05070f; color: #ff3b5c; font: 800 10px/14px "JetBrains Mono", monospace; letter-spacing: .06em; filter: none; pointer-events: none; }

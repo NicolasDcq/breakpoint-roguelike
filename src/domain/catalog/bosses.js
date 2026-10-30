@@ -2,7 +2,7 @@
 // Une contrainte peut :
 // - changer le nombre de déploiements, de défausses, de cartes en main ou de modules posés ;
 // - empêcher une case, un module ou une famille de s'activer (avec un mot pour l'expliquer) ;
-// - couper les Plugins.
+// - couper un Plugin à la fois (celui d'à côté à chaque déploiement : l'ordre des Plugins compte).
 // targetFactor ajuste l'objectif : une contrainte plus dure demande un peu moins de Performance.
 
 const DEFINITIONS = {
@@ -13,7 +13,7 @@ const DEFINITIONS = {
   noNetwork: { name: "Réseau saturé", rule: "les modules Réseau ne produisent rien.", blockedFamily: "reseau", blockedLabel: "Saturé", targetFactor: 1 },
   smallHand: { name: "Équipe réduite", rule: "5 cartes en main au lieu de 7.", handSize: 5, targetFactor: 1 },
   noDiscard: { name: "Gel des changements", rule: "aucune défausse.", discards: 0, targetFactor: 1 },
-  noPlugins: { name: "Audit de sécurité", rule: "les Plugins sont coupés.", disablesPlugins: true, targetFactor: 0.95 },
+  noPlugins: { name: "Audit de sécurité", rule: "un Plugin est coupé, et ça change à chaque déploiement (de gauche à droite).", cutsPlugin: true, targetFactor: 1 },
 };
 
 export const BOSSES = Object.freeze(Object.fromEntries(Object.entries(DEFINITIONS).map(([id, boss]) => [id, Object.freeze({ id, ...boss, text: `${boss.name} : ${boss.rule}` })])));
@@ -27,7 +27,6 @@ export function bossLimits(bossId, defaults) {
     maxPlaced: boss?.maxPlaced ?? defaults.maxPlaced,
     handSize: boss?.handSize ?? defaults.handSize,
     discards: boss?.discards ?? defaults.discards,
-    pluginsActive: !boss?.disablesPlugins,
   };
 }
 

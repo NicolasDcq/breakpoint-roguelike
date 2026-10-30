@@ -1,5 +1,12 @@
 # État du jeu et décisions
 
+## 30/10 · Boss « Audit de sécurité » : un Plugin coupé à la fois, au lieu de tous
+
+- **Avant** : tous les Plugins étaient coupés pendant le contrat (objectif ×0,95) : quasi infaisable, les Plugins faisant l'essentiel du score.
+- **Maintenant** : **un seul Plugin est coupé, et ça change à chaque déploiement** : le premier (à gauche) au 1er déploiement, le deuxième au 2e, etc., en bouclant (`Run.cutPluginId`). L'ordre des Plugins compte donc : on peut placer le moins utile là où il sera coupé. Objectif ×1 (le boss est moins dur).
+- Interface : la puce coupée est grisée avec une étiquette « COUPÉ » (rail des Plugins, téléphone et ordinateur) ; la règle s'affiche dans le panneau du contrat. La prévision du score exclut le Plugin coupé.
+- Tests : un nouveau test (rotation, hors boss, boutique), golden régénéré, captures vérifiées. Pas de changement de sauvegarde (la rotation se calcule depuis le nombre de déploiements).
+
 ## 30/10 · Correctif : `rm` à la boutique figeait le jeu sur une page noire
 
 - **Cause** : à la boutique, le contrat fini est gardé en mémoire (sa main, son plateau). `rm` retirait la carte du parc mais pas de ce contrat fini : la vue contenait une carte fantôme (`null`) et la main de l'écran plantait (`Cannot read properties of null (reading 'uid')`), donc page noire. Pendant un contrat, tout allait bien.
