@@ -1,8 +1,8 @@
 // Règles chiffrées d'une partie. Un seul endroit pour les régler.
 
 export const RULES = Object.freeze({
-  /** Graine de la partie du tutoriel : une main avec deux paires (Server et Lambda), donc une vraie Redondance. */
-  tutorialSeed: 18,
+  /** Graine de la partie du tutoriel : une main avec deux paires de Calcul (Serveur et API), donc une vraie Redondance. */
+  tutorialSeed: 28,
   handSize: 7,
   maxPlaced: 5,
   deploysPerContract: 4,
@@ -31,8 +31,8 @@ export const RULES = Object.freeze({
   /** Coût en ◆ pour passer du niveau N au niveau N+1. */
   cardUpgradeCost: { 1: 3, 2: 6 },
   maxCardLevel: 3,
-  /** Taille du parc de départ (voir les profils dans starters.js). */
-  startParcSize: 40,
+  /** Taille du parc de départ (le parc standard de starters.js, le même à chaque partie). */
+  startParcSize: 37,
   /** Paiement d'un contrat livré, selon sa lettre. */
   contractPay: { A: 4, B: 5, C: 7 },
 });

@@ -1,5 +1,15 @@
 # État du jeu et décisions
 
+## 30/10 · Un seul parc de départ, le même à chaque partie
+
+Pourquoi : avec les 6 profils tirés au hasard (40 modules, 8 Serveurs ou 12 Microservices), les architectures du haut sortaient presque à chaque contrat (simulation, 3 défausses : Haute dispo 36 %, Ferme 28 %, Cinq neufs 17 % ; avec le profil Microservices, Datacenter 40 %). Ce n'est pas Balatro, où les mains du haut se construisent. Et il faut le même parc à chaque partie pour comparer les statistiques d'équilibrage. Les variantes viendront plus tard des **entreprises** et des **difficultés** (comme les decks et les mises de Balatro).
+- **Parc standard** (`catalog/starters.js`, `DEFAULT_STARTER_ID`) : **37 modules**, chaque module en 2 exemplaires, sauf Serveur, Microservice et API en 3. 13 Calcul. `RULES.startParcSize` passe à 37.
+- Les 5 anciens profils sont supprimés du code (ils restent dans l'historique git) ; `generateRun` ne tire plus de profil (un tirage de hasard en moins : les graines donnent d'autres parties).
+- Simulation (4 000 mains, 3 défausses) : Double redondance 43 %, Redondance 23 %, Stack 10 %, Full-stack 8 %, Haute dispo 6 %, Cinq neufs 4 %, Cluster 4 %, Ferme et Datacenter 0 %. Pour les obtenir il faut ajouter des exemplaires (colis de composants, commande `cp`).
+- **Tutoriel** : graine 28 (main : 2 Serveurs, 2 API, CDN, File, Serveur de pub : deux paires de Calcul).
+- Tests mis à jour, golden régénéré. **Bot (80 parties) : 3 % de victoires (2 sur 80)** ; fins de partie surtout aux contrats 9, 12, 14 et 15. C'est la nouvelle référence (parc identique, les chiffres sont comparables d'une version à l'autre). Les objectifs n'ont pas été retouchés.
+- **À faire** : maquette et code du choix de l'entreprise (modifie le parc standard) puis des difficultés ; rééquilibrer les objectifs avec le bot ; vérifier à l'écran que le badge « Parc standard » s'affiche bien.
+
 ## 29/10 · Rééquilibrage de la boutique (façon Balatro)
 
 Comparaison avec la boutique de Balatro (wiki) : la relance coûtait 1 $ (un quart d'un Plugin commun, contre environ 1 chez Balatro), les 5 paquets avaient le même poids (les paquets de Plugins sortaient 40 % du temps, contre 8,7 % pour les paquets de Jokers), et le Pack Terminal coûtait moins cher qu'une commande seule. Décisions de Nicolas : on ne lie pas la relance à un goodie ; on monte son prix de base, car le jeu offre plus de façons de gagner de l'argent que Balatro.

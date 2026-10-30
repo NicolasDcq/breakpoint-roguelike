@@ -1,11 +1,11 @@
 // Génération procédurale d'une partie, à partir de sa graine.
 // Tout ce qui rend une partie différente est tiré ici :
-// - le profil de départ (le parc des 20 premiers modules) ;
+// - le parc de départ ne change pas (toujours le parc standard : parties comparables) ;
 // - les contrats : noms des clients, objectifs (± un peu) et boss des contrats C.
 
 import { BASE_TARGETS, CLIENT_NAMES, LETTERS, TARGET_SPREAD, VERSIONS } from "../catalog/contracts.js";
 import { BOSSES, BOSS_IDS } from "../catalog/bosses.js";
-import { STARTERS, STARTER_IDS } from "../catalog/starters.js";
+import { DEFAULT_STARTER_ID, STARTERS } from "../catalog/starters.js";
 
 const roundTo10 = (value) => Math.round(value / 10) * 10;
 
@@ -25,7 +25,7 @@ function drawContracts(rng) {
 
 /** La recette d'une partie : à graine égale, recette égale. */
 export function generateRun(rng) {
-  const starterId = rng.sample(STARTER_IDS, 1)[0];
+  const starterId = DEFAULT_STARTER_ID;
   return {
     starterId,
     startParc: STARTERS[starterId].parc,

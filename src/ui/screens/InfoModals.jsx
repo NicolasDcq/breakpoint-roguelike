@@ -13,7 +13,7 @@ export function RulesModal({ onClose }) {
     <Modal className="rules-modal" onClose={onClose}>
       <h2 className="modal-title">Comment jouer</h2>
       <ol className="rules">
-        <li><b>Ton parc est ton paquet de cartes</b> ({RULES.startParcSize} modules au départ, selon le profil tiré). À chaque contrat, tu pioches une main de {RULES.handSize} modules.</li>
+        <li><b>Ton parc est ton paquet de cartes</b> ({RULES.startParcSize} modules au départ, les mêmes à chaque partie). À chaque contrat, tu pioches une main de {RULES.handSize} modules.</li>
         <li><b>Pose jusqu’à {RULES.maxPlaced} modules</b> sur le plateau {GRID_SIZE}×{GRID_SIZE}, puis déploie. Ils s’activent dans l’ordre des numéros (1 → {CELL_COUNT}) ; l’ordre et les voisins comptent.</li>
         <li><b>Performance = Compute ⚡ × Scale.</b> L’architecture formée par les modules posés donne la base, puis chaque module l’améliore. Les déploiements s’additionnent jusqu’à l’objectif.</li>
         <li><b>Architectures</b>, comme les mains au poker : 2 identiques font une Redondance, 3 un Cluster, 3 + 2 une Haute dispo, les 5 familles un Full-stack…</li>

@@ -102,17 +102,21 @@ test("un Plugin de fin agit après le plateau", () => {
 
 const service = (seed = 11) => new GameService({ repository: new MemoryRunRepository(), seeds: fixedSeedSource(seed) });
 
-test("chaque profil de départ a 20 modules, dont 7 Calcul au moins", () => {
-  for (const starter of Object.values(STARTERS)) {
-    assert.equal(starter.parc.length, RULES.startParcSize, starter.id);
-    assert.ok(starter.parc.filter((id) => familyOf(id) === "calcul").length >= 7, starter.id);
-  }
+test("le parc de départ est le parc standard : 37 modules, 13 Calcul, chaque module en 2 exemplaires (3 pour Serveur, Microservice et API)", () => {
+  assert.deepEqual(Object.keys(STARTERS), ["standard"]);
+  const { parc } = STARTERS.standard;
+  assert.equal(parc.length, RULES.startParcSize);
+  assert.equal(parc.filter((id) => familyOf(id) === "calcul").length, 13);
+  const copies = (id) => parc.filter((other) => other === id).length;
+  for (const id of new Set(parc)) assert.equal(copies(id), ["server", "micro", "api"].includes(id) ? 3 : 2, id);
+  assert.equal(new Set(parc).size, 17, "les 17 modules sont là");
 });
 
 test("une partie est générée par sa graine : même graine, même partie", () => {
   assert.deepEqual(generateRun(new Rng(42)), generateRun(new Rng(42)));
   const recipes = [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => generateRun(new Rng(seed)));
-  assert.ok(new Set(recipes.map((recipe) => recipe.starterId)).size > 1, "les profils changent");
+  assert.equal(new Set(recipes.map((recipe) => recipe.starterId)).size, 1, "le parc de départ est toujours le même");
+  recipes.forEach((recipe) => assert.deepEqual(recipe.startParc, STARTERS.standard.parc));
   assert.ok(new Set(recipes.map((recipe) => recipe.contracts[2].boss)).size > 1, "les boss changent");
 });
 
