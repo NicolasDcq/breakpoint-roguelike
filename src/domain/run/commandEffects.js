@@ -43,9 +43,10 @@ export const COMMAND_EFFECTS = {
     const inContract = run.phase === Phase.PLAY;
     // Pendant un contrat, on ne se retire pas les dernières cartes jouables.
     if (inContract && run.round.playableCount - uids.filter((uid) => run.round.whereIs(uid) !== "used").length <= 0) return refuse(Refusal.WOULD_LOSE);
+    // À la boutique, le contrat fini est encore gardé en mémoire (main, plateau) : on y oublie aussi la carte supprimée.
     uids.forEach((uid) => {
       run.parc.remove(uid);
-      if (inContract) run.round.forget(uid);
+      run.round?.forget(uid);
     });
     if (uids.includes(run.wildUid)) run.wildUid = null;
     if (inContract) run.round.drawUp(run.limits.handSize);

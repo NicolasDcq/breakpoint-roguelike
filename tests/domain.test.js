@@ -1229,3 +1229,19 @@ test("Vague 5 : chaque Plugin a un dessin, une rareté et une valeur affichable"
     assert.equal(typeof PLUGIN_VALUES[id], "function", id);
   }
 });
+
+test("rm à la boutique : la carte supprimée disparaît aussi du contrat fini (la vue n'a plus de carte fantôme)", () => {
+  const run = Run.start(5);
+  run.phase = Phase.WON;
+  run.openShop();
+  run.commandIds = ["rm"];
+  const [, hand] = [null, run.round.hand.slice()];
+  const target = hand[0];
+  assert.ok(run.useCommand(0).ok);
+  run.commandSession = { ...run.commandSession, hand: [target] };
+  assert.ok(run.applyCommand([target]).ok);
+  assert.ok(!run.round.hand.includes(target), "la main du contrat fini ne garde pas la carte");
+  const view = presentRun(run, { started: true });
+  assert.ok(view.hand.every(Boolean), "aucune carte vide dans la vue");
+  assert.equal(view.parc.length, run.parc.size);
+});

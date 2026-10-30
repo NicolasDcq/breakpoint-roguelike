@@ -37,7 +37,7 @@ export function presentRun(run, { started = true } = {}) {
     discardsLeft: round.discardsLeft,
     drawCount: round.drawPile.length,
     playedCount: round.discardPile.length,
-    hand: round.hand.map(toCard),
+    hand: round.hand.map(toCard).filter(Boolean),
     board: run.cardsOn(),
     placedCount: round.board.placedCount,
     preview: run.preview(),

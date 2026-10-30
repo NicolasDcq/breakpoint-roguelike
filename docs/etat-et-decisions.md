@@ -1,5 +1,10 @@
 # État du jeu et décisions
 
+## 30/10 · Correctif : `rm` à la boutique figeait le jeu sur une page noire
+
+- **Cause** : à la boutique, le contrat fini est gardé en mémoire (sa main, son plateau). `rm` retirait la carte du parc mais pas de ce contrat fini : la vue contenait une carte fantôme (`null`) et la main de l'écran plantait (`Cannot read properties of null (reading 'uid')`), donc page noire. Pendant un contrat, tout allait bien.
+- **Correction** : `rm` oublie la carte dans le contrat en cours **et** dans le contrat fini (`commandEffects.js`) ; la vue ignore en plus toute carte vide (`RunPresenter`). Test ajouté (rm à la boutique). Reproduit et vérifié dans un navigateur (téléphone et ordinateur).
+
 ## 30/10 · Vague 5 : 22 Plugins pour gagner avec de petites mains (73 Plugins)
 
 Pourquoi : un seul Plugin sur 51 dépendait de l'architecture (La Certification). Dans Balatro, une quinzaine de Jokers récompensent la paire, le brelan, la suite ou la couleur. Avec le parc standard (30/10), les architectures du haut ne sortent plus d'emblée : il faut des Plugins qui récompensent les petites mains. Maquettes : page « PARC · Plugins vague 5 » du canvas de référence (dessins en objets, pas en personnages).
