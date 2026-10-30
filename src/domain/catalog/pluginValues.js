@@ -10,7 +10,7 @@
 
 import { familyOf } from "./modules.js";
 import { GRID_SIZE, neighborCells } from "../board/grid.js";
-import { RARITY_OF } from "./plugins.js";
+import { HANDS, RARITY_OF, calculCount } from "./plugins.js";
 import { detectArchitecture } from "./architectures.js";
 
 const count = (cards, family) => cards.filter((card) => familyOf(card.moduleId) === family).length;
@@ -52,6 +52,30 @@ export const PLUGIN_VALUES = Object.freeze({
   rachat: (ctx) => times("scale", 1 + 0.5 * ctx.pluginIds.filter((id) => ["epic", "legendary"].includes(RARITY_OF(id))).length),
   pivot: (ctx) => times("scale", 1 + 0.25 * new Set(ctx.placed.map((card) => familyOf(card.moduleId))).size),
   monorepo: (ctx) => times("scale", ctx.placed.length >= 3 && new Set(ctx.placed.map((card) => card.moduleId)).size === ctx.placed.length ? 2.5 : 1),
+
+  // Vague 5 : Plugins d'architecture et de petite main (la valeur est 0 ou 1 quand la main visée n'est pas posée).
+  doublon: (ctx) => add("scale", HANDS.pair(ctx.placed) ? 4 : 0),
+  failover: (ctx) => add("compute", HANDS.pair(ctx.placed) ? 50 : 0),
+  duo: (ctx) => times("scale", HANDS.pair(ctx.placed) ? 2 : 1),
+  binome: (ctx) => add("scale", HANDS.twoPairs(ctx.placed) ? 6 : 0),
+  planreprise: (ctx) => add("compute", HANDS.twoPairs(ctx.placed) ? 70 : 0),
+  quatuor: (ctx) => times("scale", HANDS.twoPairs(ctx.placed) ? 2.5 : 1),
+  triplet: (ctx) => add("scale", HANDS.triple(ctx.placed) ? 8 : 0),
+  testcharge: (ctx) => add("compute", HANDS.triple(ctx.placed) ? 90 : 0),
+  trio: (ctx) => times("scale", HANDS.triple(ctx.placed) ? 3 : 1),
+  pilecomplete: (ctx) => add("scale", HANDS.allFamilies(ctx.placed) ? 8 : 0),
+  devfullstack: (ctx) => add("compute", HANDS.allFamilies(ctx.placed) ? 90 : 0),
+  ordre: (ctx) => times("scale", HANDS.allFamilies(ctx.placed) ? 3 : 1),
+  specialiste: (ctx) => add("scale", HANDS.sameFamily(ctx.placed) ? 6 : 0),
+  monotechno: (ctx) => add("compute", HANDS.sameFamily(ctx.placed) ? 70 : 0),
+  tribu: (ctx) => times("scale", HANDS.sameFamily(ctx.placed) ? 2 : 1),
+  dettetech: (ctx) => add("scale", HANDS.monolith(ctx.placed) ? 6 : 0),
+  monolitheassume: (ctx) => times("scale", HANDS.monolith(ctx.placed) ? 3 : 1),
+  modedegrade: (ctx) => times("scale", HANDS.smallHand(ctx.placed) ? 1.5 : 1),
+  monometier: (ctx) => times("mult", HANDS.oneFamily(ctx.placed) ? 2 : 1),
+  refactoring: (ctx) => times("mult", calculCount(ctx.placed) <= 3 ? 1.5 : 1),
+  sobriete: (ctx) => times("mult", calculCount(ctx.placed) <= 2 ? 2 : 1),
+  zerodep: (ctx) => times("mult", calculCount(ctx.placed) === 1 ? 4 : 1),
   // Multiplicateurs purs de production : le chiffre ne change pas, mais il se voit.
   cloudarch: () => times("mult", 1.5),
   codereview: () => times("mult", 1.3),

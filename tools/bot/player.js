@@ -77,9 +77,13 @@ function shop(service, random) {
   const plays = (id) => run.architecturePlays[id] ?? 0;
   const copies = (id) => run.parc.cards.filter((card) => card.moduleId === id).length;
   const rank = Object.fromEntries(RARITIES.map((name, index) => [name, index]));
+  // Un Plugin d'architecture vaut plus s'il vise la main que le bot joue le plus.
+  const HAND_OF = { redondance: "pair", double: "twoPairs", cluster: "triple", fullstack: "allFamilies", stack: "sameFamily", monolithe: "monolith" };
+  const favorite = Object.keys(HAND_OF).sort((a, b) => plays(b) - plays(a))[0];
+  const worth = (id) => rank[PLUGINS[id].rarity] + (PLUGINS[id].hand && PLUGINS[id].hand === HAND_OF[favorite] ? 10 : 0);
   const choose = { booster: (ids) => [...ids].sort((a, b) => plays(b) - plays(a)).find((id) => plays(id)) ?? null,
     colis: (ids) => [...ids].sort((a, b) => copies(b) - copies(a))[0],
-    plugins: (ids) => [...ids].sort((a, b) => rank[PLUGINS[b].rarity] - rank[PLUGINS[a].rarity])[0] };
+    plugins: (ids) => [...ids].sort((a, b) => worth(b) - worth(a))[0] };
   choose.gros = choose.plugins;
   run.packSlots.forEach((slot, index) => {
     if (slot.sold || run.money < PACKS[slot.packId].price + 2) return;
@@ -89,7 +93,7 @@ function shop(service, random) {
     service.buyPack(index);
     service.pickFromPack(choose[slot.packId](run.openPack.choices));
   });
-  run.offers.forEach((offer, index) => { if (offer.kind === OfferKind.PLUGIN) service.buyOffer(index); });
+  run.offers.map((offer, index) => ({ offer, index })).filter(({ offer }) => offer.kind === OfferKind.PLUGIN).sort((a, b) => worth(b.offer.id) - worth(a.offer.id)).forEach(({ index }) => service.buyOffer(index));
   orderPlugins(run);
   service.nextContract();
 }

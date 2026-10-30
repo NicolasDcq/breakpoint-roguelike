@@ -1,5 +1,21 @@
 # État du jeu et décisions
 
+## 30/10 · Vague 5 : 22 Plugins pour gagner avec de petites mains (73 Plugins)
+
+Pourquoi : un seul Plugin sur 51 dépendait de l'architecture (La Certification). Dans Balatro, une quinzaine de Jokers récompensent la paire, le brelan, la suite ou la couleur. Avec le parc standard (30/10), les architectures du haut ne sortent plus d'emblée : il faut des Plugins qui récompensent les petites mains. Maquettes : page « PARC · Plugins vague 5 » du canvas de référence (dessins en objets, pas en personnages).
+- **15 Plugins d'architecture** : ils se déclenchent quand la main visée est **contenue** dans les modules posés (une Haute dispo contient une Redondance et un Cluster). Par architecture : un commun +Scale, un commun +Compute, un rare ×Scale.
+  - Redondance (2 identiques ou plus) : Le Doublon +4 Scale, Le Failover +50 Compute, Le Duo de prod ×2.
+  - Double redondance (2 paires) : Le Binôme +6, Le Plan de reprise +70, Le Quatuor ×2,5.
+  - Cluster (3 identiques ou plus) : Le Triplet +8, Le Test de charge +90, Le Trio ×3.
+  - Full-stack (5 familles) : La Pile complète +8, Le Dev full-stack +90, L'Ordre ×3.
+  - Stack (5 modules d'une famille) : La Spécialiste +6, La Mono-techno +70, La Tribu ×2.
+- **4 Plugins de petite main** : La Dette technique (Monolithe : +6 Scale, +40 Compute), Le Monolithe assumé (Monolithe : Scale ×3, peu commun), Le Mode dégradé (3 modules posés ou moins : Scale ×1,5, peu commun), Le Mono-métier (une seule famille posée : Compute ×2, rare).
+- **3 Plugins « moins de producteurs, plus de production »** : seuls les modules Calcul produisent du Compute ; moins on en pose, plus chacun produit. Le Refactoring (3 Calcul ou moins : ×1,5, peu commun), La Sobriété (2 ou moins : ×2, rare), Le Zéro dépendance (un seul Calcul : ×4, épique). Les trois se cumulent : ×12 sur un module seul, avant L'Architecte Cloud.
+- Code : `HANDS` et `calculCount` dans `catalog/plugins.js` (les mêmes tests servent au moteur et aux badges de `pluginValues.js`) ; sprites 16×16 dans `ui/plugins/sprites.js` (objets : pièces, serveurs, disquette, jauge, balai, boîte vide…) ; palette étendue.
+- Le bot achète en priorité les Plugins qui visent l'architecture qu'il joue le plus (`PLUGINS[id].hand`).
+- Tests : 5 tests ajoutés (déclenchement, ×Scale, petites mains, producteurs, dessins), golden régénéré.
+- **Mesure (bot, 160 parties, parc standard)** : contrat moyen atteint **11,9** (12,5 avant les 22 Plugins), 0 victoire (3 avant). Les parties qui possèdent des Plugins d'architecture ne vont pas plus loin que les autres : leurs gains (+4 à +8 Scale, ×2 à ×3) ne suivent pas la courbe des objectifs, qui passe de 150 à 50 000. **Le goulot est la courbe des objectifs et la croissance du score, pas le nombre de Plugins** : prochaine étape, les recaler avec le bot (puissance atteinte à chaque contrat), puis revérifier ces Plugins.
+
 ## 30/10 · Un seul parc de départ, le même à chaque partie
 
 Pourquoi : avec les 6 profils tirés au hasard (40 modules, 8 Serveurs ou 12 Microservices), les architectures du haut sortaient presque à chaque contrat (simulation, 3 défausses : Haute dispo 36 %, Ferme 28 %, Cinq neufs 17 % ; avec le profil Microservices, Datacenter 40 %). Ce n'est pas Balatro, où les mains du haut se construisent. Et il faut le même parc à chaque partie pour comparer les statistiques d'équilibrage. Les variantes viendront plus tard des **entreprises** et des **difficultés** (comme les decks et les mises de Balatro).

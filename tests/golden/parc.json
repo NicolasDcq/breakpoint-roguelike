@@ -3,74 +3,74 @@
     {
       "seed": 1,
       "phase": "lost",
-      "contractIndex": 17,
-      "chain": "3945e3627533d02c"
+      "contractIndex": 5,
+      "chain": "c2b2ed98c7edaf1c"
     },
     {
       "seed": 2,
       "phase": "lost",
-      "contractIndex": 11,
-      "chain": "c7793ed6215edecd"
+      "contractIndex": 19,
+      "chain": "d6026f3f5769d948"
     },
     {
       "seed": 3,
       "phase": "lost",
-      "contractIndex": 14,
-      "chain": "aa225c60294b0867"
+      "contractIndex": 5,
+      "chain": "9517b2fb62575993"
     },
     {
       "seed": 4,
       "phase": "lost",
-      "contractIndex": 13,
-      "chain": "dd87b307fec39fa6"
+      "contractIndex": 9,
+      "chain": "8e63c9a92ed7c2b9"
     },
     {
       "seed": 5,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "86c02c61dc0bbc58"
+      "chain": "f2029076d840be50"
     },
     {
       "seed": 6,
       "phase": "lost",
-      "contractIndex": 14,
-      "chain": "e9bdbfb889743a35"
+      "contractIndex": 13,
+      "chain": "e017fb9ff8a5a328"
     },
     {
       "seed": 7,
       "phase": "lost",
-      "contractIndex": 20,
-      "chain": "fac86276d467f576"
+      "contractIndex": 13,
+      "chain": "4e8b6a28ba6016ba"
     },
     {
       "seed": 8,
       "phase": "lost",
-      "contractIndex": 16,
-      "chain": "836218d5aa0bdfeb"
+      "contractIndex": 11,
+      "chain": "5af5e38ce59c24ae"
     },
     {
       "seed": 9,
       "phase": "lost",
-      "contractIndex": 14,
-      "chain": "5e684917d2e1a833"
+      "contractIndex": 8,
+      "chain": "a7f115fe64a4b567"
     },
     {
       "seed": 10,
       "phase": "lost",
-      "contractIndex": 17,
-      "chain": "967bd9ff0cd98f39"
+      "contractIndex": 11,
+      "chain": "131e4ee86e5dc343"
     },
     {
       "seed": 11,
       "phase": "lost",
       "contractIndex": 11,
-      "chain": "9df239de585cbbab"
+      "chain": "ad08c67afb07862b"
     },
     {
       "seed": 12,
       "phase": "lost",
       "contractIndex": 8,
-      "chain": "7222d1120e7a64bc"
+      "chain": "fe0382939e726b93"
     }
   ]
 }

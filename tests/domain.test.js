@@ -1136,3 +1136,96 @@ test("le compteur des architectures jouées est propre à la partie : une nouvel
   assert.deepEqual(second.architectureOrder, []);
   assert.equal(mostPlayedArchitecture(second), null);
 });
+
+// ---------- Vague 5 : Plugins d'architecture, de petite main et de cœur de jeu ----------
+
+const pluginGain = (cells, pluginId) => {
+  const sans = score(cells);
+  const avec = score(cells, { pluginIds: [pluginId] });
+  return { compute: avec.compute - sans.compute, scale: round2(avec.scale - sans.scale), fired: avec.fired.includes(pluginId), sans, avec };
+};
+
+test("Plugins d'architecture : ils se déclenchent quand la main visée est posée, et seulement alors", () => {
+  const cases = [
+    // [Plugin, plateau qui déclenche, plateau qui ne déclenche pas, effet]
+    ["doublon", board("server", "server"), board("server", "micro"), { scale: 4 }],
+    ["failover", board("server", "server"), board("server", "micro"), { compute: 50 }],
+    ["binome", board("server", "server", "micro", "micro"), board("server", "server", "micro"), { scale: 6 }],
+    ["planreprise", board("server", "server", "micro", "micro"), board("server", "server", "micro"), { compute: 70 }],
+    ["triplet", board("server", "server", "server"), board("server", "server", "micro"), { scale: 8 }],
+    ["testcharge", board("server", "server", "server"), board("server", "server", "micro"), { compute: 90 }],
+    ["pilecomplete", board("server", "database", "cdn", "saas", "cache"), board("server", "database", "cdn", "saas"), { scale: 8 }],
+    ["devfullstack", board("server", "database", "cdn", "saas", "cache"), board("server", "database", "cdn", "saas"), { compute: 90 }],
+    ["specialiste", board("server", "micro", "api", "gpu", "lambda"), board("server", "micro", "api", "gpu", "database"), { scale: 6 }],
+    ["monotechno", board("server", "micro", "api", "gpu", "lambda"), board("server", "micro", "api", "gpu", "database"), { compute: 70 }],
+  ];
+  for (const [id, yes, no, effect] of cases) {
+    const hit = pluginGain(yes, id);
+    assert.ok(hit.fired, `${id} se déclenche`);
+    assert.equal(hit.compute, effect.compute ?? 0, `${id} : Compute`);
+    assert.equal(hit.scale, effect.scale ?? 0, `${id} : Scale`);
+    assert.ok(!pluginGain(no, id).fired, `${id} ne se déclenche pas sans la main`);
+  }
+});
+
+test("Plugins d'architecture : les ×Scale multiplient Scale (la Haute dispo contient une Redondance)", () => {
+  const pair = pluginGain(board("server", "server"), "duo");
+  assert.equal(round2(pair.avec.scale), round2(pair.sans.scale * 2));
+  const fullHouse = pluginGain(board("server", "server", "server", "micro", "micro"), "duo");
+  assert.ok(fullHouse.fired, "une Haute dispo contient une Redondance");
+  assert.equal(round2(pluginGain(board("server", "server", "micro", "micro"), "quatuor").avec.scale), round2(pluginGain(board("server", "server", "micro", "micro"), "quatuor").sans.scale * 2.5));
+  assert.equal(round2(pluginGain(board("server", "server", "server"), "trio").avec.scale), round2(pluginGain(board("server", "server", "server"), "trio").sans.scale * 3));
+  assert.ok(!pluginGain(board("server", "micro"), "duo").fired);
+  assert.ok(pluginGain(board("server", "database", "cdn", "saas", "cache"), "ordre").fired);
+  assert.ok(pluginGain(board("server", "micro", "api", "gpu", "lambda"), "tribu").fired);
+});
+
+test("Plugins de petite main : Monolithe, 3 modules ou moins, une seule famille", () => {
+  const mono = pluginGain(board("server", "database"), "dettetech");
+  assert.ok(mono.fired);
+  assert.equal(mono.compute, 40);
+  assert.equal(mono.scale, 6);
+  assert.ok(!pluginGain(board("server", "server"), "dettetech").fired, "une Redondance n'est pas un Monolithe");
+  const assume = pluginGain(board("server", "database"), "monolitheassume");
+  assert.equal(round2(assume.avec.scale), round2(assume.sans.scale * 3));
+  assert.ok(!pluginGain(board("server", "server"), "monolitheassume").fired);
+  const degrade = pluginGain(board("server", "database", "cdn"), "modedegrade");
+  assert.equal(round2(degrade.avec.scale), round2(degrade.sans.scale * 1.5));
+  assert.ok(!pluginGain(board("server", "database", "cdn", "saas"), "modedegrade").fired, "4 modules : trop");
+  const mono1 = pluginGain(board("server", "micro"), "monometier");
+  assert.equal(mono1.avec.compute, mono1.sans.compute * 2);
+  assert.ok(!pluginGain(board("server", "database"), "monometier").fired, "deux familles : rien");
+});
+
+test("Moins de modules producteurs, plus de production : Refactoring, Sobriété, Zéro dépendance", () => {
+  // Le facteur appliqué à chaque module Calcul posé (les cases dans l'ordre), selon les Plugins.
+  const factors = (cells, ...pluginIds) => score(cells, { pluginIds }).events.filter((event) => event.output).slice(0, cells.filter((card) => card && familyOf(card.moduleId) === "calcul").length).map((event) => event.multiplier);
+  const one = board("server", "database");
+  const two = board("server", "micro", "database");
+  const three = board("server", "micro", "lambda", "database");
+  const four = board("server", "micro", "lambda", "server");
+  assert.deepEqual(factors(one, "zerodep"), [4], "un seul Calcul : ×4");
+  assert.deepEqual(factors(two, "zerodep"), [1, 1], "deux Calcul : rien");
+  assert.deepEqual(factors(two, "sobriete"), [2, 2], "deux Calcul : ×2 pour chacun");
+  assert.deepEqual(factors(three, "sobriete"), [1, 1, 1], "trois Calcul : rien");
+  assert.deepEqual(factors(three, "refactoring"), [1.5, 1.5, 1.5]);
+  assert.deepEqual(factors(four, "refactoring"), [1, 1, 1, 1], "quatre Calcul : rien");
+  assert.deepEqual(factors(one, "zerodep", "sobriete", "refactoring"), [12], "les trois se cumulent : ×12");
+  const sans = score(one).compute, avec = score(one, { pluginIds: ["zerodep"] }).compute;
+  assert.equal(avec - sans, 8 * 3, "le Serveur (8) produit ×4 : +24");
+  assert.ok(!score(board("database", "cdn"), { pluginIds: ["zerodep"] }).fired.includes("zerodep"), "sans module Calcul, rien ne produit");
+});
+
+test("Vague 5 : chaque Plugin a un dessin, une rareté et une valeur affichable", async () => {
+  const { SPRITES, PUCE_LOOK } = await import("../src/ui/plugins/sprites.js");
+  const { PLUGIN_VALUES } = await import("../src/domain/catalog/pluginValues.js");
+  const news = "doublon failover duo binome planreprise quatuor triplet testcharge trio pilecomplete devfullstack ordre specialiste monotechno tribu dettetech monolitheassume modedegrade monometier refactoring sobriete zerodep".split(" ");
+  assert.equal(news.length, 22);
+  for (const id of news) {
+    assert.ok(PLUGINS[id], id);
+    assert.equal(SPRITES[id].length, 16, `${id} : 16 lignes`);
+    assert.ok(SPRITES[id].every((row) => row.length === 16), `${id} : 16 colonnes`);
+    assert.ok(PUCE_LOOK[id]?.code, id);
+    assert.equal(typeof PLUGIN_VALUES[id], "function", id);
+  }
+});

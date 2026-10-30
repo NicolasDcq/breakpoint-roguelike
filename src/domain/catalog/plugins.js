@@ -14,6 +14,7 @@
 import { familyOf } from "./modules.js";
 import { GRID_SIZE, neighborCells } from "../board/grid.js";
 import { RULES } from "./rules.js";
+import { detectArchitecture } from "./architectures.js";
 
 const countFamily = (cards, family) => cards.filter((card) => familyOf(card.moduleId) === family).length;
 const familiesOf = (cards) => new Set(cards.map((card) => familyOf(card.moduleId)));
@@ -31,6 +32,40 @@ const countModule = (cards) => {
 const hasNeighbor = (cards, cell) => neighborCells(cell).some((other) => cards[other]);
 const epicCount = (pluginIds) => pluginIds.filter((id) => ["epic", "legendary"].includes(PLUGIN_RARITY[id])).length;
 const onDiagonal = (cell) => rowOf(cell) === columnOf(cell) || rowOf(cell) + columnOf(cell) === GRID_SIZE - 1;
+
+/**
+ * Les « mains » que les Plugins d'architecture reconnaissent (comme les Jokers de Balatro pour la paire ou le brelan).
+ * Elles regardent les modules posés : une Haute dispo contient donc un Cluster et une Redondance.
+ */
+const identicalSizes = (cards) => [...countModule(cards).values()].sort((a, b) => b - a);
+const largestFamily = (cards) => Math.max(0, ...["calcul", "stockage", "reseau", "business", "ops"].map((family) => countFamily(cards, family)));
+export const HANDS = Object.freeze({
+  pair: (cards) => identicalSizes(cards)[0] >= 2,
+  twoPairs: (cards) => identicalSizes(cards)[0] >= 2 && identicalSizes(cards)[1] >= 2,
+  triple: (cards) => identicalSizes(cards)[0] >= 3,
+  allFamilies: (cards) => familiesOf(cards).size >= 5,
+  sameFamily: (cards) => largestFamily(cards) >= 5,
+  monolith: (cards) => cards.length > 0 && detectArchitecture(cards, familyOf).id === "monolithe",
+  smallHand: (cards) => cards.length >= 1 && cards.length <= 3,
+  oneFamily: (cards) => cards.length >= 1 && familiesOf(cards).size === 1,
+});
+/** Plugins « petite main » : combien de modules Calcul (les seuls producteurs de Compute) sont posés. */
+export const calculCount = (cards) => countFamily(cards, "calcul");
+/** Un Plugin d'architecture : ajoute Scale ou Compute, ou multiplie Scale, quand la main visée est posée. */
+const whenHand = (hand, effect) => {
+  const atEnd = (result) => {
+    if (!HANDS[hand](result.placed)) return false;
+    effect(result);
+    return true;
+  };
+  atEnd.hand = hand; // la main visée (le bot s'en sert pour choisir ses Plugins)
+  return atEnd;
+};
+const scaleBonus = (hand, amount) => whenHand(hand, (result) => { result.scale += amount; });
+const computeBonus = (hand, amount) => whenHand(hand, (result) => { result.compute += amount; });
+const scaleFactor = (hand, factor) => whenHand(hand, (result) => { result.scale *= factor; });
+/** Plugin « moins de producteurs, plus de production » : les modules Calcul produisent ×factor si `max` Calcul ou moins sont posés. */
+const fewProducers = (max, factor) => (card, ctx) => (familyOf(card.moduleId) === "calcul" && calculCount(ctx.placedCards()) <= max ? factor : 1);
 
 const DEFINITIONS = {
   intern: {
@@ -334,10 +369,36 @@ const DEFINITIONS = {
       return true;
     },
   },
+
+  // Vague 5 : Plugins d'architecture (comme les Jokers de paire, double paire, brelan, suite et couleur de Balatro).
+  doublon: { name: "Le Doublon", rarity: "common", text: "+4 Scale si 2 modules identiques ou plus sont posés.", atEnd: scaleBonus("pair", 4) },
+  failover: { name: "Le Failover", rarity: "common", text: "+50 Compute si 2 modules identiques ou plus sont posés.", atEnd: computeBonus("pair", 50) },
+  duo: { name: "Le Duo de prod", rarity: "rare", scaleTimes: true, text: "Scale ×2 si 2 modules identiques ou plus sont posés.", atEnd: scaleFactor("pair", 2) },
+  binome: { name: "Le Binôme", rarity: "common", text: "+6 Scale avec 2 paires de modules identiques.", atEnd: scaleBonus("twoPairs", 6) },
+  planreprise: { name: "Le Plan de reprise", rarity: "common", text: "+70 Compute avec 2 paires de modules identiques.", atEnd: computeBonus("twoPairs", 70) },
+  quatuor: { name: "Le Quatuor", rarity: "rare", scaleTimes: true, text: "Scale ×2,5 avec 2 paires de modules identiques.", atEnd: scaleFactor("twoPairs", 2.5) },
+  triplet: { name: "Le Triplet", rarity: "common", text: "+8 Scale si 3 modules identiques ou plus sont posés.", atEnd: scaleBonus("triple", 8) },
+  testcharge: { name: "Le Test de charge", rarity: "common", text: "+90 Compute si 3 modules identiques ou plus sont posés.", atEnd: computeBonus("triple", 90) },
+  trio: { name: "Le Trio", rarity: "rare", scaleTimes: true, text: "Scale ×3 si 3 modules identiques ou plus sont posés.", atEnd: scaleFactor("triple", 3) },
+  pilecomplete: { name: "La Pile complète", rarity: "common", text: "+8 Scale si les 5 familles sont posées.", atEnd: scaleBonus("allFamilies", 8) },
+  devfullstack: { name: "Le Dev full-stack", rarity: "common", text: "+90 Compute si les 5 familles sont posées.", atEnd: computeBonus("allFamilies", 90) },
+  ordre: { name: "L'Ordre", rarity: "rare", scaleTimes: true, text: "Scale ×3 si les 5 familles sont posées.", atEnd: scaleFactor("allFamilies", 3) },
+  specialiste: { name: "La Spécialiste", rarity: "common", text: "+6 Scale si 5 modules de la même famille sont posés.", atEnd: scaleBonus("sameFamily", 6) },
+  monotechno: { name: "La Mono-techno", rarity: "common", text: "+70 Compute si 5 modules de la même famille sont posés.", atEnd: computeBonus("sameFamily", 70) },
+  tribu: { name: "La Tribu", rarity: "rare", scaleTimes: true, text: "Scale ×2 si 5 modules de la même famille sont posés.", atEnd: scaleFactor("sameFamily", 2) },
+  // Vague 5 : petites mains (Monolithe, peu de modules, une seule famille).
+  dettetech: { name: "La Dette technique", rarity: "common", text: "Monolithe : +6 Scale et +40 Compute.", atEnd: whenHand("monolith", (result) => { result.scale += 6; result.compute += 40; }) },
+  monolitheassume: { name: "Le Monolithe assumé", rarity: "uncommon", scaleTimes: true, text: "Monolithe : Scale ×3.", atEnd: scaleFactor("monolith", 3) },
+  modedegrade: { name: "Le Mode dégradé", rarity: "uncommon", scaleTimes: true, text: "3 modules posés ou moins : Scale ×1,5.", atEnd: scaleFactor("smallHand", 1.5) },
+  monometier: { name: "Le Mono-métier", rarity: "rare", text: "Une seule famille posée : Compute ×2.", atEnd: whenHand("oneFamily", (result) => { result.compute *= 2; }) },
+  // Vague 5 : moins de modules producteurs (Calcul), plus de production pour chacun.
+  refactoring: { name: "Le Refactoring", rarity: "uncommon", text: "3 modules Calcul posés ou moins : ils produisent ×1,5.", multiplier: fewProducers(3, 1.5) },
+  sobriete: { name: "La Sobriété", rarity: "rare", text: "2 modules Calcul posés ou moins : ils produisent ×2.", multiplier: fewProducers(2, 2) },
+  zerodep: { name: "Le Zéro dépendance", rarity: "epic", text: "Un seul module Calcul posé : il produit ×4.", multiplier: fewProducers(1, 4) },
 };
 
 export const PLUGINS = Object.freeze(
-  Object.fromEntries(Object.entries(DEFINITIONS).map(([id, def]) => [id, Object.freeze({ id, ...def, price: RULES.pluginPrice[def.rarity] })])),
+  Object.fromEntries(Object.entries(DEFINITIONS).map(([id, def]) => [id, Object.freeze({ id, ...def, price: RULES.pluginPrice[def.rarity], hand: def.atEnd?.hand ?? null })])),
 );
 /** Les raretés, de la plus courante à la plus rare. */
 export const RARITIES = Object.freeze(["common", "uncommon", "rare", "epic", "legendary"]);
